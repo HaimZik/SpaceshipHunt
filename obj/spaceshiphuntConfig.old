@@ -30,15 +30,15 @@
     </define>
     <verbose-stacktraces>true</verbose-stacktraces>
     <source-path append="true">
-      <path-element>E:\files\programing\AS3\spaceshiphutnBackups\spaceship hunt\dependencies</path-element>
-      <path-element>e:\Program Files (x86)\FlashDevelop\Library\AS3\classes</path-element>
+      <path-element>E:\files\programing\AS3\SpaceshipHunt\dependencies</path-element>
+      <path-element>E:\Program Files (x86)\FlashDevelop\Library\AS3\classes</path-element>
     </source-path>
     <library-path append="true">
-      <path-element>E:\files\programing\AS3\spaceshiphutnBackups\spaceship hunt\dependencies\nape\nape-dev.swc</path-element>
+      <path-element>E:\files\programing\AS3\SpaceshipHunt\dependencies\nape\nape-dev.swc</path-element>
     </library-path>
   </compiler>
   <file-specs>
-    <path-element>E:\files\programing\AS3\spaceshiphutnBackups\spaceship hunt\src\Main.as</path-element>
+    <path-element>E:\files\programing\AS3\SpaceshipHunt\src\Main.as</path-element>
   </file-specs>
   <default-background-color>#000000</default-background-color>
   <default-frame-rate>60</default-frame-rate>
