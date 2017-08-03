@@ -45,22 +45,19 @@ package
 		private var player:Player;
 		
 		//keyboardSetup
-		protected var alternativeFireKey:uint = Keyboard.SPACE;
-		CONFIG::release
-		{
-			protected var fireKey:uint = Keyboard.Z;
-			protected var upKey:uint = Keyboard.UP;
-			protected var downKey:uint = Keyboard.DOWN;
-			protected var rightKey:uint = Keyboard.RIGHT;
-			protected var leftKey:uint = Keyboard.LEFT;
-		}
+		protected static var alternativeFireKey:uint = Keyboard.SPACE;
+		protected static var fireKey:uint = Keyboard.Z;
+		protected static var upKey:uint = Keyboard.UP;
+		protected static var downKey:uint = Keyboard.DOWN;
+		protected static var rightKey:uint = Keyboard.RIGHT;
+		protected static var leftKey:uint = Keyboard.LEFT;
 		CONFIG::debug
 		{
-			protected var fireKey:uint = Keyboard.NUMPAD_ADD;
-			protected var upKey:uint = Keyboard.W;
-			protected var downKey:uint = Keyboard.S;
-			protected var rightKey:uint = Keyboard.D;
-			protected var leftKey:uint = Keyboard.A;
+			fireKey = Keyboard.NUMPAD_ADD;
+			upKey = Keyboard.W;
+			downKey = Keyboard.S;
+			rightKey = Keyboard.D;
+			leftKey = Keyboard.A;
 		}
 		
 		public function Game()
@@ -339,10 +336,12 @@ package
 			yAxis = Math.min(1, analogStick.y / 160);
 			if (Math.abs(xAxis) + Math.abs(yAxis) == 0 && xboxController)
 			{
-				if (Math.abs(xAxis) + Math.abs(yAxis) > 0.1)
+				xAxis = xboxController.leftStick.x;
+				yAxis = -xboxController.leftStick.y;
+				if (Math.abs(xAxis) + Math.abs(yAxis) < 0.1)
 				{
-					xAxis = xboxController.leftStick.x;
-					yAxis = -xboxController.leftStick.y;
+					xAxis = 0;
+					yAxis = 0;
 				}
 				if (xboxController.rt.held)
 				{

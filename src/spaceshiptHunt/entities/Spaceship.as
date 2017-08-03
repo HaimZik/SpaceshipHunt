@@ -114,15 +114,15 @@ package spaceshiptHunt.entities
 		protected function shootParticle():void
 		{
 			var position:Vec2 = Vec2.get(weaponRight.x + weaponLeft.width / 2, weaponRight.y - 5);
-			var impulse:Vec2 = Vec2.get(0, 200 + Math.random() * 200);
-			impulse.angle = body.rotation - Math.PI / 2 + Math.random() * 0.1 + 0.05;
-			PhysicsParticle.spawn(fireType, position.copy(true).rotate(body.rotation).addeq(body.position), impulse);
+			var recoilImpulse:Vec2 = Vec2.get(0, (40 + Math.random() * 40)*body.mass);
+			recoilImpulse.angle = body.rotation - Math.PI / 2 + Math.random() * 0.1 + 0.05;
+			PhysicsParticle.spawn(fireType, position.copy(true).rotate(body.rotation).addeq(body.position), recoilImpulse);
 			position.x = weaponLeft.x + weaponLeft.width / 2;
-			impulse.angle = body.rotation - Math.PI / 2 + Math.random() * 0.1 - 0.05;
-			PhysicsParticle.spawn(fireType, position.rotate(body.rotation).addeq(body.position), impulse);
-			body.applyImpulse(impulse.mul(-0.3));
+			recoilImpulse.angle = body.rotation - Math.PI / 2 + Math.random() * 0.1 - 0.05;
+			PhysicsParticle.spawn(fireType, position.rotate(body.rotation).addeq(body.position), recoilImpulse);
+			body.applyImpulse(recoilImpulse.mul(-0.3));
 			position.dispose();
-			impulse.dispose();
+			recoilImpulse.dispose();
 		}
 	
 		//public function jetParticlePositioning(particles:Vector.<PDParticle>, numActive:int):void

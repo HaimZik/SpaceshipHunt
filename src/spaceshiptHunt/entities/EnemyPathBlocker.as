@@ -1,6 +1,7 @@
 package spaceshiptHunt.entities
 {
 	import nape.geom.Vec2;
+	import nape.phys.Body;
 	import spaceshiptHunt.entities.Enemy;
 	
 	/**
@@ -9,18 +10,21 @@ package spaceshiptHunt.entities
 	 */
 	public class EnemyPathBlocker extends Enemy
 	{
-		protected var attackRange:Number = 300.0;
+		protected var attackRange:Number;
+		protected var attackTriggerRange:Number;
 		
 		public function EnemyPathBlocker(position:Vec2)
 		{
 			super(position);
-			weaponsPlacement["fireCannon"] = Vec2.get(16, -37);
+			weaponsPlacement["fireCannon"] = Vec2.get(8, -37);
 		}
 		
 		override public function init(bodyDescription:Object):void
 		{
 			super.init(bodyDescription);
 			this.gunType = "fireCannon";
+			attackRange = 400.0;
+			attackTriggerRange = attackRange * 2;
 		}
 		
 		override protected function decideNextAction():void
@@ -34,26 +38,45 @@ package spaceshiptHunt.entities
 		
 		protected function attackPlayer():void
 		{
-			if (canViewPlayer && Vec2.dsq(Player.current.body.position, body.position) < attackRange * attackRange)
+			if (isPlayerInRange(attackRange))
 			{
-				startShooting();
+				if (Math.abs(rotationDiffrenceToPoint(Player.current.body.position)) < Math.PI / 8.0)
+				{
+					startShooting();
+				}
+				else
+				{
+					currentAction = aimToPlayer;
+				}
 			}
 			else
 			{
 				stopShooting();
-				currentAction = decideNextAction;
+				if (isPlayerInRange(attackTriggerRange))
+				{
+					goToEntity(Player.current.pathfindingAgent);
+				}
+				else
+				{
+					currentAction = decideNextAction;
+				}
 			}
 		
 		}
 		
 		protected function aimToPlayer():void
 		{
-			currentAction = attackPlayer;
+			var rotaDiff:Number = rotationDiffrenceToPoint(Player.current.body.position);
+			body.applyAngularImpulse(body.mass * 300 * rotaDiff);
+			if (Math.abs(rotaDiff) < Math.PI / 8.0)
+			{
+				currentAction = attackPlayer;
+			}
 		}
 		
 		protected function goToPlayerPath():void
 		{
-			if (canViewPlayer && Vec2.dsq(Player.current.body.position, body.position) < attackRange * attackRange)
+			if (isPlayerInRange(attackRange))
 			{
 				currentAction = aimToPlayer;
 			}
@@ -72,6 +95,26 @@ package spaceshiptHunt.entities
 						currentAction = decideNextAction;
 					}
 					closestPoint.dispose();
+				}
+			}
+		}
+		
+		override protected function followPath():void
+		{
+			if (!chasingTarget && isPlayerInRange(attackTriggerRange))
+			{
+				goToEntity(Player.current.pathfindingAgent);
+			}
+			else
+			{
+				if (isPlayerInRange(attackRange))
+				{
+					currentAction = aimToPlayer;
+					chasingTarget = null;
+				}
+				else
+				{
+					super.followPath();
 				}
 			}
 		}
@@ -162,6 +205,24 @@ package spaceshiptHunt.entities
 			line.dispose();
 			startToCircle.dispose();
 			return closestPoint;
+		}
+		
+		protected function rotationDiffrenceToPoint(pos:Vec2):Number
+		{
+			var directionVector:Vec2 = pos.sub(body.position);
+			var rotaDiff:Number = directionVector.angle + Math.PI / 2 - body.rotation;
+			directionVector.dispose();
+			if (Math.abs(rotaDiff) > Math.PI / 2)
+			{
+				//in order for the ship to rotate in the shorter angle
+				rotaDiff -= (Math.abs(rotaDiff) / rotaDiff) * Math.PI * 2;
+			}
+			return rotaDiff;
+		}
+		
+		protected function isPlayerInRange(range:Number):Boolean
+		{
+			return canViewPlayer && Vec2.dsq(Player.current.body.position, body.position) < range * range;
 		}
 	
 	}

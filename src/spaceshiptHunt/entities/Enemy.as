@@ -1,5 +1,6 @@
 package spaceshiptHunt.entities
 {
+	import DDLS.ai.DDLSEntityAI;
 	import spaceshiptHunt.level.Environment;
 	import spaceshiptHunt.entities.Spaceship;
 	import spaceshiptHunt.entities.Player;
@@ -20,7 +21,7 @@ package spaceshiptHunt.entities
 	{
 		
 		public var path:Vector.<Number>;
-		public var nextPoint:int = -1;
+		protected var _nextPoint:int = -1;
 		public static var lastSeenPlayerPos:Vec2;
 		protected static var enemiesSeePlayerCounter:uint = 0;
 		protected var _canViewPlayer:Boolean = false;
@@ -30,6 +31,7 @@ package spaceshiptHunt.entities
 		protected var pathCheckTime:int;
 		protected var pointingArrow:Image;
 		protected var currentAction:Function;
+		protected var chasingTarget:DDLSEntityAI;
 		
 		public function Enemy(position:Vec2)
 		{
@@ -45,6 +47,52 @@ package spaceshiptHunt.entities
 			//{
 			//trace(a.shouldCollide(b));
 			//}
+		}
+		
+		override public function init(bodyDescription:Object):void
+		{
+			super.init(bodyDescription);
+			for (var i:int = 0; i < body.shapes.length; i++)
+			{
+				body.shapes.at(i).filter.collisionMask = ~2;
+				body.shapes.at(i).filter.collisionGroup = 8;
+			}
+			rayPool = Ray.fromSegment(this.body.position, Player.current.body.position);
+			pointingArrow = new Image(Environment.current.assetsLoader.getTexture("arrow"));
+			var mainDisplay:Sprite = Environment.current.mainDisplay;
+			mainDisplay.addChildAt(pointingArrow, 0);
+		}
+		
+		public function get canViewPlayer():Boolean
+		{
+			return _canViewPlayer;
+		}
+		
+		public function set canViewPlayer(value:Boolean):void
+		{
+			if (_canViewPlayer != value)
+			{
+				enemiesSeePlayerCounter += value ? 1 : -1;
+			}
+			_canViewPlayer = value;
+			if (_canViewPlayer)
+			{
+				lastSeenPlayerPos.set(Player.current.body.position);
+			}
+		}
+		
+		public function get nextPoint():int 
+		{
+			return _nextPoint;
+		}
+		
+		public function set nextPoint(value:int):void 
+		{
+			_nextPoint = value;
+			if (_nextPoint ==-1)
+			{
+				chasingTarget = null;
+			}
 		}
 		
 		override public function update():void
@@ -84,47 +132,14 @@ package spaceshiptHunt.entities
 		public function goTo(x:Number, y:Number):void
 		{
 			findPathTo(x, y, path);
-			if (path.length > 0)
-			{
-				nextPoint = 1;
-				if (isPathBlocked())
-				{
-					nextPoint = -1;
-					currentAction = decideNextAction;
-					if (body.space.timeStamp - pathCheckTime > pathUpdateInterval)
-					{
-						Environment.current.meshNeedsUpdate = true;
-						pathCheckTime = body.space.timeStamp;
-					}
-				}
-				else
-				{
-					currentAction = followPath;
-				}
-				if (body.isSleeping)
-				{
-					body.velocity.x += 0.001;
-				}
-			}
-			else
-			{
-				nextPoint = -1;
-				currentAction = decideNextAction;
-			}
+			startFollowingPath();
 		}
 		
-		override public function init(bodyDescription:Object):void
+		public function goToEntity(entity:DDLSEntityAI):void
 		{
-			super.init(bodyDescription);
-			for (var i:int = 0; i < body.shapes.length; i++)
-			{
-				body.shapes.at(i).filter.collisionMask = ~2;
-				body.shapes.at(i).filter.collisionGroup = 8;
-			}
-			rayPool = Ray.fromSegment(this.body.position, Player.current.body.position);
-			pointingArrow = new Image(Environment.current.assetsLoader.getTexture("arrow"));
-			var mainDisplay:Sprite = Environment.current.mainDisplay;
-			mainDisplay.addChildAt(pointingArrow, 0);
+			chasingTarget = entity;
+			findPathToEntity(entity, path);
+			startFollowingPath();
 		}
 		
 		protected function checkPlayerVisible():void
@@ -189,7 +204,7 @@ package spaceshiptHunt.entities
 				var distance:Number = Vec2.distance(body.position, Player.current.body.position);
 				if (distance < pathfindingAgent.radius + pathfindingAgent.radius + 20)
 				{
-						body.applyImpulse(body.position.sub(Player.current.body.position, true).muleq(22000 / (distance * distance)).rotate(Math.PI / 4));
+					body.applyImpulse(body.position.sub(Player.current.body.position, true).muleq(22000 / (distance * distance)).rotate(Math.PI / 4));
 				}
 				var nextPointPos:Vec2 = Vec2.get(path[nextPoint * 2], path[nextPoint * 2 + 1]);
 				while (Vec2.distance(body.position, nextPointPos) < 40 && ++nextPoint < path.length / 2)
@@ -250,6 +265,17 @@ package spaceshiptHunt.entities
 			}
 		}
 		
+		protected function rotateTowards(angle:Number):void
+		{
+			var rotaDiff:Number = angle + Math.PI / 2 - body.rotation;
+			if (Math.abs(rotaDiff) > Math.PI / 2)
+			{
+				//in order for the ship to rotate in the shorter angle
+				rotaDiff -= (Math.abs(rotaDiff) / rotaDiff) * Math.PI * 2;
+			}
+			body.applyAngularImpulse(body.mass * 300 * rotaDiff);
+		}
+		
 		protected function reFindPath():void
 		{
 			pathCheckTime = body.space.timeStamp;
@@ -264,21 +290,34 @@ package spaceshiptHunt.entities
 			}
 		}
 		
-		public function get canViewPlayer():Boolean
+		protected function startFollowingPath():void
 		{
-			return _canViewPlayer;
-		}
-		
-		public function set canViewPlayer(value:Boolean):void
-		{
-			if (_canViewPlayer != value)
+			if (path.length > 0)
 			{
-				enemiesSeePlayerCounter += value ? 1 : -1;
+				nextPoint = 1;
+				if (isPathBlocked())
+				{
+					nextPoint = -1;
+					currentAction = decideNextAction;
+					if (body.space.timeStamp - pathCheckTime > pathUpdateInterval)
+					{
+						Environment.current.meshNeedsUpdate = true;
+						pathCheckTime = body.space.timeStamp;
+					}
+				}
+				else
+				{
+					currentAction = followPath;
+				}
+				if (body.isSleeping)
+				{
+					body.velocity.x += 0.001;
+				}
 			}
-			_canViewPlayer = value;
-			if (_canViewPlayer)
+			else
 			{
-				lastSeenPlayerPos.set(Player.current.body.position);
+				nextPoint = -1;
+				currentAction = decideNextAction;
 			}
 		}
 		
