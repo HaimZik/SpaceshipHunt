@@ -14,7 +14,6 @@ package starling.rendering
 
     import starling.display.Mesh;
     import starling.display.MeshBatch;
-    import starling.utils.MathUtil;
     import starling.utils.MeshSubset;
 
     /** This class manages a list of mesh batches of different types;
@@ -49,6 +48,7 @@ package starling.rendering
             _batches.length = 0;
             _batchPool.purge();
             _currentBatch = null;
+            _onBatchComplete = null;
         }
 
         /** Adds a mesh to the current batch, or to a new one if the current one does not support
@@ -144,25 +144,6 @@ package starling.rendering
             _batchPool.purge();
         }
 
-        public function rewindTo(token:BatchToken):void
-        {
-            if (token.batchID > _cacheToken.batchID)
-                throw new RangeError("Token outside available range");
-
-            for (var i:int = _cacheToken.batchID; i > token.batchID; --i)
-                _batchPool.put(_batches.pop());
-
-            if (_batches.length > token.batchID)
-            {
-                var batch:MeshBatch = _batches[token.batchID];
-                batch.numIndices  = MathUtil.min(batch.numIndices,  token.indexID);
-                batch.numVertices = MathUtil.min(batch.numVertices, token.vertexID);
-            }
-
-            _currentBatch = null;
-            _cacheToken.copyFrom(token);
-        }
-
         /** Sets all properties of the given token so that it describes the current position
          *  within this instance. */
         public function fillToken(token:BatchToken):BatchToken
@@ -199,7 +180,7 @@ class BatchPool
 
     public function purge():void
     {
-        for each (var batchList:Vector.<MeshBatch> in _batchLists)
+        for each (var batchList:Array in _batchLists)
         {
             for (var i:int=0; i<batchList.length; ++i)
                 batchList[i].dispose();
@@ -210,10 +191,10 @@ class BatchPool
 
     public function get(styleType:Class):MeshBatch
     {
-        var batchList:Vector.<MeshBatch> = _batchLists[styleType];
+        var batchList:Array = _batchLists[styleType];
         if (batchList == null)
         {
-            batchList = new <MeshBatch>[];
+            batchList = [];
             _batchLists[styleType] = batchList;
         }
 
@@ -224,10 +205,10 @@ class BatchPool
     public function put(meshBatch:MeshBatch):void
     {
         var styleType:Class = meshBatch.style.type;
-        var batchList:Vector.<MeshBatch> = _batchLists[styleType];
+        var batchList:Array = _batchLists[styleType];
         if (batchList == null)
         {
-            batchList = new <MeshBatch>[];
+            batchList = [];
             _batchLists[styleType] = batchList;
         }
 

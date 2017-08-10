@@ -3,6 +3,7 @@ package spaceshiptHunt.entities
 	import nape.callbacks.*;
 	import nape.geom.*;
 	import nape.shape.*;
+	import nape.phys.BodyType;
 	import spaceshiptHunt.level.*;
 	import starling.core.*;
 	import starling.display.*;
@@ -28,6 +29,7 @@ package spaceshiptHunt.entities
 		{
 			super(position);
 			body.isBullet = true;
+			body.type = BodyType.KINEMATIC;
 			graphics = new MovieClip(particleTexture);
 			graphics.pivotX = graphics.width / 2;
 			graphics.pivotY = graphics.height / 2;
@@ -58,8 +60,8 @@ package spaceshiptHunt.entities
 			}
 			var particle:PhysicsParticle=particlePool.pop();
 			particle.body.position.set(position);
-			particle.body.applyImpulse(impulse);
 			particle.body.rotation = impulse.angle;
+            particle.body.velocity = impulse;
 			particle.body.space = Environment.current.physicsSpace;
 			var otherBodyGrp:DisplayObject = BodyInfo.list[0].graphics;
 			otherBodyGrp.parent.addChildAt(particle.graphics,otherBodyGrp.parent.getChildIndex(otherBodyGrp));

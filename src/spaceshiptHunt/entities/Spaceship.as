@@ -17,14 +17,15 @@ package spaceshiptHunt.entities
 	public class Spaceship extends Entity
 	{
 		public var maxAcceleration:Number;
-		public var maxTurningAcceleration:Number;
+		public var maxAngularAcceleration:Number;
 		public var engineLocation:Vec2;
 		protected var _gunType:String;
 		protected var fireType:String = "fireball";
 		protected var weaponsPlacement:Dictionary;
 		protected var weaponRight:Image;
 		protected var weaponLeft:Image;
-		protected const firingRate:Number = 0.1;
+		protected var firingRate:Number = 0.1;
+		protected var bulletSpeed:Number=80.0;
 		private var shootingCallId:uint;
 		
 		public function Spaceship(position:Vec2)
@@ -38,7 +39,7 @@ package spaceshiptHunt.entities
 			super.init(bodyDescription);
 			engineLocation = Vec2.get(bodyDescription.engineLocation.x, bodyDescription.engineLocation.y);
 			maxAcceleration = body.mass * 8;
-			maxTurningAcceleration = body.mass * 5;
+			maxAngularAcceleration = body.mass * 180;
 		}
 		
 		public function set gunType(gunType:String):void
@@ -114,7 +115,7 @@ package spaceshiptHunt.entities
 		protected function shootParticle():void
 		{
 			var position:Vec2 = Vec2.get(weaponRight.x + weaponLeft.width / 2, weaponRight.y - 5);
-			var recoilImpulse:Vec2 = Vec2.get(0, (40 + Math.random() * 40)*body.mass);
+			var recoilImpulse:Vec2 = Vec2.get(0, (bulletSpeed + Math.random() * bulletSpeed)*body.mass);
 			recoilImpulse.angle = body.rotation - Math.PI / 2 + Math.random() * 0.1 + 0.05;
 			PhysicsParticle.spawn(fireType, position.copy(true).rotate(body.rotation).addeq(body.position), recoilImpulse);
 			position.x = weaponLeft.x + weaponLeft.width / 2;

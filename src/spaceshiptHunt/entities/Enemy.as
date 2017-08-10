@@ -215,14 +215,8 @@ package spaceshiptHunt.entities
 				if (nextPoint < path.length / 2)
 				{
 					var prePath:Vec2 = nextPointPos.sub(Vec2.weak(path[nextPoint * 2 - 2], path[nextPoint * 2 - 1]), true);
-					var rotaDiff:Number = prePath.angle + Math.PI / 2 - body.rotation;
+					rotateTowards(prePath.angle);
 					prePath.dispose();
-					if (Math.abs(rotaDiff) > Math.PI / 2)
-					{
-						//in order for the ship to rotate in the shorter angle
-						rotaDiff -= (Math.abs(rotaDiff) / rotaDiff) * Math.PI * 2;
-					}
-					body.applyAngularImpulse(body.mass * 300 * rotaDiff);
 					nextPointPos.subeq(body.position);
 					var maxSpeed:Number = 250;
 					if (nextPoint == path.length / 2 - 1 && body.velocity.length > nextPointPos.length * 2)
@@ -273,7 +267,7 @@ package spaceshiptHunt.entities
 				//in order for the ship to rotate in the shorter angle
 				rotaDiff -= (Math.abs(rotaDiff) / rotaDiff) * Math.PI * 2;
 			}
-			body.applyAngularImpulse(body.mass * 300 * rotaDiff);
+			body.applyAngularImpulse(maxAngularAcceleration * rotaDiff);
 		}
 		
 		protected function reFindPath():void

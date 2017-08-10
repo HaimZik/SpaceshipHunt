@@ -96,7 +96,7 @@ package starling.filters
         /** Adjusts the alpha value with which the layer is drawn. */
         public function setAlphaAt(layerID:int, alpha:Number):void
         {
-            compositeEffect.getLayerAt(layerID).alpha = MathUtil.clamp(alpha, 0, 1);
+            compositeEffect.getLayerAt(layerID).alpha = alpha;
         }
 
         private function get compositeEffect():CompositeEffect
@@ -173,7 +173,7 @@ class CompositeEffect extends FilterEffect
                 );
 
             var fragmentShader:Array = [
-                "seq ft5, v0, v0" // ft5 -> 1, 1, 1, 1
+                "sge ft5, v0, v0" // ft5 -> 1, 1, 1, 1
             ];
 
             for (i=0; i<numLayers; ++i)
@@ -191,6 +191,7 @@ class CompositeEffect extends FilterEffect
                 if (layer.replaceColor)
                     fragmentShader.push(
                         "mul " + fti + ".w,   " + fti + ".w,   " + fci + ".w",
+                        "sat " + fti + ".w,   " + fti + ".w    ", // make sure alpha <= 1.0
                         "mul " + fti + ".xyz, " + fci + ".xyz, " + fti + ".www"
                     );
                 else

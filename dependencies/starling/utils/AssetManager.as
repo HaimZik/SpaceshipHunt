@@ -566,15 +566,20 @@ package starling.utils
         public function enqueueWithName(asset:Object, name:String=null,
                                         options:TextureOptions=null):String
         {
+            var filename:String = null;
+
             if (getQualifiedClassName(asset) == "flash.filesystem::File")
+            {
+                filename = asset["name"];
                 asset = decodeURI(asset["url"]);
-            
+            }
+
             if (name == null)    name = getName(asset);
             if (options == null) options = _defaultTextureOptions.clone();
             else                 options = options.clone();
-            
-            log("Enqueuing '" + name + "'");
-            
+
+            log("Enqueuing '" + (filename || name) + "'");
+
             _queue.push({
                 name: name,
                 asset: asset,
@@ -727,7 +732,7 @@ package starling.utils
                     if (texture)
                     {
                         log("Adding bitmap font '" + name + "'");
-                        TextField.registerBitmapFont(new BitmapFont(texture, xml), name);
+                        TextField.registerCompositor(new BitmapFont(texture, xml), name);
                         removeTexture(name, false);
 
                         if (_keepFontXmls) addXml(name, xml);
@@ -818,6 +823,12 @@ package starling.utils
                 }
                 else if (asset is Bitmap)
                 {
+                    options.onReady = prependCallback(options.onReady, function():void
+                    {
+                        addTexture(name, texture);
+                        onComplete();
+                    });
+
                     texture = Texture.fromData(asset, options);
                     texture.root.onRestore = function():void
                     {
@@ -842,10 +853,6 @@ package starling.utils
                                 dispatchEventWith(Event.TEXTURES_RESTORED);
                         });
                     };
-
-                    asset.bitmapData.dispose();
-                    addTexture(name, texture);
-                    onComplete();
                 }
                 else if (asset is ByteArray)
                 {

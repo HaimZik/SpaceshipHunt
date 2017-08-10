@@ -19,6 +19,7 @@ package starling.styles
     import starling.events.Event;
     import starling.events.EventDispatcher;
     import starling.rendering.*;
+    import starling.textures.ConcreteTexture;
     import starling.textures.Texture;
     import starling.textures.TextureSmoothing;
 
@@ -86,8 +87,8 @@ package starling.styles
      *  Directly before rendering begins, Starling will then call <code>updateEffect</code>
      *  to set it up.</p>
      *
-     *  @see MeshEffect
-     *  @see VertexDataFormat
+     *  @see starling.rendering.MeshEffect
+     *  @see starling.rendering.VertexDataFormat
      *  @see starling.display.Mesh
      */
     public class MeshStyle extends EventDispatcher
@@ -98,11 +99,11 @@ package starling.styles
         private var _type:Class;
         private var _target:Mesh;
         private var _texture:Texture;
-        private var _textureBase:TextureBase;
         private var _textureSmoothing:String;
         private var _textureRepeat:Boolean;
-        private var _vertexData:VertexData;   // just a reference to the target's vertex data
-        private var _indexData:IndexData;     // just a reference to the target's index data
+        private var _textureRoot:ConcreteTexture; // just a reference to _texture.root
+        private var _vertexData:VertexData;       // just a reference to the target's vertex data
+        private var _indexData:IndexData;         // just a reference to the target's index data
 
         // helper objects
         private static var sPoint:Point = new Point();
@@ -121,7 +122,7 @@ package starling.styles
         public function copyFrom(meshStyle:MeshStyle):void
         {
             _texture = meshStyle._texture;
-            _textureBase = meshStyle._textureBase;
+            _textureRoot = meshStyle._textureRoot;
             _textureRepeat = meshStyle._textureRepeat;
             _textureSmoothing = meshStyle._textureSmoothing;
         }
@@ -166,13 +167,16 @@ package starling.styles
          */
         public function canBatchWith(meshStyle:MeshStyle):Boolean
         {
+            // I'm comparing the 'root' texture, not the 'base' texture, because the former
+            // reference stays the same even when 'base' is recreated after a context loss.
+
             if (_type == meshStyle._type)
             {
                 var newTexture:Texture = meshStyle._texture;
 
                 if (_texture == null && newTexture == null) return true;
                 else if (_texture && newTexture)
-                    return _textureBase == meshStyle._textureBase &&
+                    return _textureRoot == meshStyle._textureRoot &&
                            _textureSmoothing == meshStyle._textureSmoothing &&
                            _textureRepeat == meshStyle._textureRepeat;
                 else return false;
@@ -209,10 +213,24 @@ package starling.styles
         }
 
         /** Call this method if the target needs to be redrawn.
-         *  The call is simply forwarded to the mesh. */
+         *  The call is simply forwarded to the target mesh. */
         protected function setRequiresRedraw():void
         {
             if (_target) _target.setRequiresRedraw();
+        }
+
+        /** Call this method when the vertex data changed.
+         *  The call is simply forwarded to the target mesh. */
+        protected function setVertexDataChanged():void
+        {
+            if (_target) _target.setVertexDataChanged();
+        }
+
+        /** Call this method when the index data changed.
+         *  The call is simply forwarded to the target mesh. */
+        protected function setIndexDataChanged():void
+        {
+            if (_target) _target.setIndexDataChanged();
         }
 
         /** Called when assigning a target mesh. Override to plug in class-specific logic. */
@@ -286,7 +304,7 @@ package starling.styles
         public function setVertexPosition(vertexID:int, x:Number, y:Number):void
         {
             _vertexData.setPoint(vertexID, "position", x, y);
-            setRequiresRedraw();
+            setVertexDataChanged();
         }
 
         /** Returns the alpha value of the vertex at the specified index. */
@@ -299,7 +317,7 @@ package starling.styles
         public function setVertexAlpha(vertexID:int, alpha:Number):void
         {
             _vertexData.setAlpha(vertexID, "color", alpha);
-            setRequiresRedraw();
+            setVertexDataChanged();
         }
 
         /** Returns the RGB color of the vertex at the specified index. */
@@ -312,7 +330,7 @@ package starling.styles
         public function setVertexColor(vertexID:int, color:uint):void
         {
             _vertexData.setColor(vertexID, "color", color);
-            setRequiresRedraw();
+            setVertexDataChanged();
         }
 
         /** Returns the texture coordinates of the vertex at the specified index. */
@@ -328,7 +346,7 @@ package starling.styles
             if (_texture) _texture.setTexCoords(_vertexData, vertexID, "texCoords", u, v);
             else _vertexData.setPoint(vertexID, "texCoords", u, v);
 
-            setRequiresRedraw();
+            setVertexDataChanged();
         }
 
         // properties
@@ -365,7 +383,7 @@ package starling.styles
             if (value == 0xffffff && _vertexData.tinted)
                 _vertexData.updateTinted();
 
-            setRequiresRedraw();
+            setVertexDataChanged();
         }
 
         /** The format used to store the vertices. */
@@ -390,11 +408,13 @@ package starling.styles
                         getTexCoords(i, sPoint);
                         value.setTexCoords(_vertexData, i, "texCoords", sPoint.x, sPoint.y);
                     }
+
+                    setVertexDataChanged();
                 }
+                else setRequiresRedraw();
 
                 _texture = value;
-                _textureBase = value ? value.base : null;
-                setRequiresRedraw();
+                _textureRoot = value ? value.root : null;
             }
         }
 

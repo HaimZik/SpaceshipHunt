@@ -20,6 +20,7 @@ package starling.textures
     import flash.utils.getQualifiedClassName;
 
     import starling.core.Starling;
+    import starling.core.starling_internal;
     import starling.errors.AbstractClassError;
     import starling.errors.AbstractMethodError;
     import starling.errors.NotSupportedError;
@@ -96,16 +97,34 @@ package starling.textures
         
         /** Uploads a bitmap to the texture. The existing contents will be replaced.
          *  If the size of the bitmap does not match the size of the texture, the bitmap will be
-         *  cropped or filled up with transparent pixels */
-        public function uploadBitmap(bitmap:Bitmap):void
+         *  cropped or filled up with transparent pixels.
+         *
+         *  <p>Pass a callback function or <code>true</code> to attempt asynchronous texture upload.
+         *  If the current platform or runtime version does not support asynchronous texture loading,
+         *  the callback will still be executed.</p>
+         *
+         *  <p>This is the expected function definition:
+         *  <code>function(texture:Texture, error:ErrorEvent):void;</code>
+         *  The second parameter is optional and typically <code>null</code>.</p>
+         */
+        public function uploadBitmap(bitmap:Bitmap, async:*=null):void
         {
-            uploadBitmapData(bitmap.bitmapData);
+            uploadBitmapData(bitmap.bitmapData, async);
         }
         
         /** Uploads bitmap data to the texture. The existing contents will be replaced.
          *  If the size of the bitmap does not match the size of the texture, the bitmap will be
-         *  cropped or filled up with transparent pixels */
-        public function uploadBitmapData(data:BitmapData):void
+         *  cropped or filled up with transparent pixels.
+         *
+         *  <p>Pass a callback function or <code>true</code> to attempt asynchronous texture upload.
+         *  If the current platform or runtime version does not support asynchronous texture loading,
+         *  the callback will still be executed.</p>
+         *
+         *  <p>This is the expected function definition:
+         *  <code>function(texture:Texture, error:ErrorEvent):void;</code>
+         *  The second parameter is optional and typically <code>null</code>.</p>
+         */
+        public function uploadBitmapData(data:BitmapData, async:*=null):void
         {
             throw new NotSupportedError();
         }
@@ -162,6 +181,13 @@ package starling.textures
         protected function createBase():TextureBase
         {
             throw new AbstractMethodError();
+        }
+
+        /** Recreates the underlying Stage3D texture. May be used to manually restore a texture.
+         *  Beware that new data needs to be uploaded to the texture before it can be used. */
+        starling_internal function recreateBase():void
+        {
+            _base = createBase();
         }
         
         /** Clears the texture with a certain color and alpha value. The previous contents of the

@@ -41,6 +41,8 @@ package starling.textures
         {
             var clone:TextureOptions = new TextureOptions(_scale, _mipMapping, _format);
             clone._optimizeForRenderToTexture = _optimizeForRenderToTexture;
+            clone._premultipliedAlpha = _premultipliedAlpha;
+            clone._forcePotTexture = _forcePotTexture;
             clone._onReady = _onReady;
             return clone;
         }
@@ -69,16 +71,13 @@ package starling.textures
 
         /** Indicates if the underlying Stage3D texture should be created as the power-of-two based
          *  <code>Texture</code> class instead of the more memory efficient <code>RectangleTexture</code>.
-         *  That might be useful when you need render the texture with wrap mode <code>repeat</code>.
+         *  That might be useful when you need to render the texture with wrap mode <code>repeat</code>.
          *  @default false */
         public function get forcePotTexture():Boolean { return _forcePotTexture; }
         public function set forcePotTexture(value:Boolean):void { _forcePotTexture = value; }
 
-        /** A callback that is used only for ATF textures; if it is set, the ATF data will be
-         *  decoded asynchronously. The texture can only be used when the callback has been
-         *  executed. This property is ignored for all other texture types (they are ready
-         *  immediately when the 'Texture.from...' method returns, anyway), and it's only used
-         *  by the <code>Texture.fromData</code> factory method.
+        /** If this value is set, the texture will be loaded asynchronously (if possible).
+         *  The texture can only be used when the callback has been executed.
          *  
          *  <p>This is the expected function definition: 
          *  <code>function(texture:Texture):void;</code></p>

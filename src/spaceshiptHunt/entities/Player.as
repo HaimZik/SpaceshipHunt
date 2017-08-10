@@ -11,6 +11,7 @@ package spaceshiptHunt.entities
 	{
 		public var leftImpulse:Vec2;
 		public var rightImpulse:Vec2;
+		public var maxTurningAcceleration:Number;
 		private static var _current:Player=new Player(new Vec2());
 		
 		public function Player(position:Vec2)
@@ -36,6 +37,7 @@ package spaceshiptHunt.entities
 				body.shapes.at(i).filter.collisionGroup = 8;
 			}
 			this.gunType = "fireCannon";
+			maxTurningAcceleration = body.mass * 5;
 			//Environment.current.navMesh.insertObject(pathfindingAgent.approximateObject);
 		}
 		

@@ -15,21 +15,35 @@ package starling.filters
 
     /** The GlowFilter class lets you apply a glow effect to display objects.
      *  It is similar to the drop shadow filter with the distance and angle properties set to 0.
+     *
+     *  <p>This filter can also be used to create outlines around objects. The trick is to
+     *  assign an alpha value that's (much) greater than <code>1.0</code>, and full resolution.
+     *  For example, the following code will yield a nice black outline:</p>
+     *
+     *  <listing>object.filter = new GlowFilter(0x0, 30, 1, 1.0);</listing>
      */
     public class GlowFilter extends FragmentFilter
     {
         private var _blurFilter:BlurFilter;
         private var _compositeFilter:CompositeFilter;
 
-        /** Initializes a new GlowFilter instance with the specified parameters. */
+        /** Initializes a new GlowFilter instance with the specified parameters.
+         *
+         * @param color      the color of the glow
+         * @param alpha      the alpha value of the glow. Values between 0 and 1 modify the
+         *                   opacity; values > 1 will make it stronger, i.e. produce a harder edge.
+         * @param blur       the amount of blur used to create the glow. Note that high
+         *                   values will cause the number of render passes to grow.
+         * @param resolution the resolution of the filter texture. '1' means full resolution,
+         *                   '0.5' half resolution, etc.
+         */
         public function GlowFilter(color:uint=0xffff00, alpha:Number=1.0, blur:Number=1.0,
                                    resolution:Number=0.5)
         {
-            _compositeFilter = new CompositeFilter();
             _blurFilter = new BlurFilter(blur, blur, resolution);
-
-            this.color = color;
-            this.alpha = alpha;
+            _compositeFilter = new CompositeFilter();
+            _compositeFilter.setColorAt(0, color, true);
+            _compositeFilter.setAlphaAt(0, alpha);
 
             updatePadding();
         }
@@ -76,7 +90,8 @@ package starling.filters
             }
         }
 
-        /** The alpha transparency value for the color. @default 1.0 */
+        /** The alpha value of the glow. Values between 0 and 1 modify the opacity;
+         *  values > 1 will make it stronger, i.e. produce a harder edge. @default 1.0 */
         public function get alpha():Number { return _compositeFilter.getAlphaAt(0); }
         public function set alpha(value:Number):void
         {
@@ -96,6 +111,7 @@ package starling.filters
             if (blur != value)
             {
                 _blurFilter.blurX = _blurFilter.blurY = value;
+                setRequiresRedraw();
                 updatePadding();
             }
         }
@@ -107,6 +123,7 @@ package starling.filters
             if (resolution != value)
             {
                 _blurFilter.resolution = value;
+                setRequiresRedraw();
                 updatePadding();
             }
         }

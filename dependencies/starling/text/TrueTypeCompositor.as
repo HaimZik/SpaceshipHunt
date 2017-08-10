@@ -12,32 +12,36 @@ package starling.text
 {
     import flash.geom.Matrix;
     import flash.text.AntiAliasType;
-    import flash.text.Font;
-    import flash.text.FontStyle;
     import flash.text.TextField;
 
     import starling.display.MeshBatch;
     import starling.display.Quad;
     import starling.textures.Texture;
     import starling.utils.Align;
+    import starling.utils.MathUtil;
+    import starling.utils.SystemUtil;
 
-    /** @private
+    /** This text compositor uses a Flash TextField to render system- or embedded fonts into
+     *  a texture.
      *
-     *  <p>This text compositor uses a Flash TextField to render system- or embedded fonts into
-     *  a texture.</p>
+     *  <p>You typically don't have to instantiate this class. It will be used internally by
+     *  Starling's text fields.</p>
      */
-    internal class TrueTypeCompositor implements ITextCompositor
+    public class TrueTypeCompositor implements ITextCompositor
     {
         // helpers
         private static var sHelperMatrix:Matrix = new Matrix();
         private static var sHelperQuad:Quad = new Quad(100, 100);
         private static var sNativeTextField:flash.text.TextField = new flash.text.TextField();
         private static var sNativeFormat:flash.text.TextFormat = new flash.text.TextFormat();
-        private static var sEmbeddedFonts:Array = null;
 
         /** Creates a new TrueTypeCompositor instance. */
         public function TrueTypeCompositor()
-        { }
+        {}
+
+        /** @inheritDoc */
+        public function dispose():void
+        {}
 
         /** @inheritDoc */
         public function fillMeshBatch(meshBatch:MeshBatch, width:Number, height:Number, text:String,
@@ -81,21 +85,28 @@ package starling.text
         public function clearMeshBatch(meshBatch:MeshBatch):void
         {
             meshBatch.clear();
-            if (meshBatch.texture) meshBatch.texture.dispose();
+            if (meshBatch.texture)
+            {
+                meshBatch.texture.dispose();
+                meshBatch.texture = null;
+            }
         }
 
         private function renderText(width:Number, height:Number, text:String,
                                     format:TextFormat, options:TextOptions):BitmapDataEx
         {
-            var scaledWidth:Number  = width  * options.textureScale;
-            var scaledHeight:Number = height * options.textureScale;
+            var scale:Number = options.textureScale;
+            var scaledWidth:Number  = width  * scale;
+            var scaledHeight:Number = height * scale;
             var hAlign:String = format.horizontalAlign;
 
             format.toNativeFormat(sNativeFormat);
 
-            sNativeFormat.size = Number(sNativeFormat.size) * options.textureScale;
-            sNativeTextField.embedFonts = isEmbeddedFont(format);
+            sNativeFormat.size = Number(sNativeFormat.size) * scale;
+            sNativeTextField.embedFonts = SystemUtil.isEmbeddedFont(format.font, format.bold, format.italic);
+            sNativeTextField.styleSheet = null; // only to make sure 'defaultTextFormat' is assignable
             sNativeTextField.defaultTextFormat = sNativeFormat;
+            sNativeTextField.styleSheet = options.styleSheet;
             sNativeTextField.width  = scaledWidth;
             sNativeTextField.height = scaledHeight;
             sNativeTextField.antiAliasType = AntiAliasType.ADVANCED;
@@ -109,13 +120,26 @@ package starling.text
             if (options.autoScale)
                 autoScaleNativeTextField(sNativeTextField, text, options.isHtmlText);
 
-            var textWidth:Number  = sNativeTextField.textWidth;
-            var textHeight:Number = sNativeTextField.textHeight;
-            var bitmapWidth:int   = Math.ceil(textWidth)  + 4;
-            var bitmapHeight:int  = Math.ceil(textHeight) + 4;
-            var maxTextureSize:int = Texture.maxSize;
             var minTextureSize:int = 1;
-            var offsetX:Number = 0.0;
+            var maxTextureSize:int = Texture.maxSize;
+            var paddingX:Number = options.padding * scale;
+            var paddingY:Number = options.padding * scale;
+            var textWidth:Number  = sNativeTextField.textWidth  + 4;
+            var textHeight:Number = sNativeTextField.textHeight + 4;
+            var bitmapWidth:int   = Math.ceil(textWidth)  + 2 * paddingX;
+            var bitmapHeight:int  = Math.ceil(textHeight) + 2 * paddingY;
+
+            // if text + padding doesn't fit into the bitmap, reduce padding & cap bitmap size.
+            if (bitmapWidth > scaledWidth)
+            {
+                paddingX = MathUtil.max(0, (scaledWidth - textWidth) / 2);
+                bitmapWidth = Math.ceil(scaledWidth);
+            }
+            if (bitmapHeight > scaledHeight)
+            {
+                paddingY = MathUtil.max(0, (scaledHeight - textHeight) / 2);
+                bitmapHeight = Math.ceil(scaledHeight);
+            }
 
             // HTML text may have its own alignment -> use the complete width
             if (options.isHtmlText) textWidth = bitmapWidth = scaledWidth;
@@ -130,17 +154,20 @@ package starling.text
             }
             else
             {
+                var offsetX:Number = -paddingX;
+                var offsetY:Number = -paddingY;
+
                 if (!options.isHtmlText)
                 {
-                    if      (hAlign == Align.RIGHT)  offsetX =  scaledWidth - textWidth - 4;
-                    else if (hAlign == Align.CENTER) offsetX = (scaledWidth - textWidth - 4) / 2.0;
+                    if      (hAlign == Align.RIGHT)  offsetX =  scaledWidth - textWidth - paddingX;
+                    else if (hAlign == Align.CENTER) offsetX = (scaledWidth - textWidth) / 2.0 - paddingX;
                 }
 
                 // finally: draw TextField to bitmap data
                 var bitmapData:BitmapDataEx = new BitmapDataEx(bitmapWidth, bitmapHeight);
-                sHelperMatrix.setTo(1, 0, 0, 1, -offsetX, 0);
+                sHelperMatrix.setTo(1, 0, 0, 1, -offsetX, -offsetY);
                 bitmapData.draw(sNativeTextField, sHelperMatrix);
-                bitmapData.scale = options.textureScale;
+                bitmapData.scale = scale;
                 sNativeTextField.text = "";
                 return bitmapData;
             }
@@ -164,30 +191,6 @@ package starling.text
                 if (isHtmlText) textField.htmlText = text;
                 else            textField.text     = text;
             }
-        }
-
-        /** Updates the list of embedded fonts. To be called when a font is loaded at runtime. */
-        public static function updateEmbeddedFonts():void
-        {
-            sEmbeddedFonts = null; // will be updated in 'isEmbeddedFont()'
-        }
-
-        private static function isEmbeddedFont(format:TextFormat):Boolean
-        {
-            if (sEmbeddedFonts == null)
-                sEmbeddedFonts = Font.enumerateFonts(false);
-
-            for each (var font:Font in sEmbeddedFonts)
-            {
-                var style:String = font.fontStyle;
-                var isBold:Boolean = style == FontStyle.BOLD || style == FontStyle.BOLD_ITALIC;
-                var isItalic:Boolean = style == FontStyle.ITALIC || style == FontStyle.BOLD_ITALIC;
-
-                if (format.font == font.fontName && format.italic == isItalic && format.bold == isBold)
-                    return true;
-            }
-
-            return false;
         }
     }
 }

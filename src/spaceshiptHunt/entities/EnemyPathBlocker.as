@@ -10,7 +10,8 @@ package spaceshiptHunt.entities
 	 */
 	public class EnemyPathBlocker extends Enemy
 	{
-		protected var attackRange:Number;
+		protected var minAttackRange:Number;
+		protected var maxAttackRange:Number;
 		protected var attackTriggerRange:Number;
 		
 		public function EnemyPathBlocker(position:Vec2)
@@ -23,8 +24,10 @@ package spaceshiptHunt.entities
 		{
 			super.init(bodyDescription);
 			this.gunType = "fireCannon";
-			attackRange = 400.0;
-			attackTriggerRange = attackRange * 2;
+			minAttackRange = 400.0;
+			maxAttackRange = minAttackRange * 1.5;
+			attackTriggerRange = minAttackRange * 3;
+			firingRate = 0.9;
 		}
 		
 		override protected function decideNextAction():void
@@ -38,7 +41,7 @@ package spaceshiptHunt.entities
 		
 		protected function attackPlayer():void
 		{
-			if (isPlayerInRange(attackRange))
+			if (isPlayerInRange(maxAttackRange))
 			{
 				if (Math.abs(rotationDiffrenceToPoint(Player.current.body.position)) < Math.PI / 8.0)
 				{
@@ -67,7 +70,7 @@ package spaceshiptHunt.entities
 		protected function aimToPlayer():void
 		{
 			var rotaDiff:Number = rotationDiffrenceToPoint(Player.current.body.position);
-			body.applyAngularImpulse(body.mass * 300 * rotaDiff);
+			body.applyAngularImpulse(maxAngularAcceleration * rotaDiff);
 			if (Math.abs(rotaDiff) < Math.PI / 8.0)
 			{
 				currentAction = attackPlayer;
@@ -76,7 +79,7 @@ package spaceshiptHunt.entities
 		
 		protected function goToPlayerPath():void
 		{
-			if (isPlayerInRange(attackRange))
+			if (isPlayerInRange(minAttackRange))
 			{
 				currentAction = aimToPlayer;
 			}
@@ -107,7 +110,7 @@ package spaceshiptHunt.entities
 			}
 			else
 			{
-				if (isPlayerInRange(attackRange))
+				if (isPlayerInRange(minAttackRange))
 				{
 					currentAction = aimToPlayer;
 					chasingTarget = null;
