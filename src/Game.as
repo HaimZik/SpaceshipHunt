@@ -3,12 +3,10 @@ package
 	import flash.geom.Point;
 	import flash.media.SoundChannel;
 	import flash.media.SoundTransform;
-	import flash.ui.Keyboard;
-	import flash.utils.getTimer;
 	import input.Key;
 	import io.arkeus.ouya.ControllerInput;
-	import io.arkeus.ouya.controller.Xbox360Controller;
 	import nape.geom.Vec2;
+	import spaceshiptHunt.controls.PlayerController;
 	import spaceshiptHunt.entities.Player;
 	import spaceshiptHunt.level.Environment;
 	import starling.core.Starling;
@@ -20,6 +18,7 @@ package
 	import starling.rendering.VertexData;
 	import starling.utils.Color;
 	import starling.utils.Pool;
+	
 	CONFIG::debug
 	{
 		import spaceshiptHuntDevelopment.level.LevelEditor;
@@ -36,29 +35,13 @@ package
 		private var analogStick:Mesh;
 		private var shootButton:Image;
 		private var joystickPosition:Point;
-		private var xboxController:Xbox360Controller;
 		private var touches:Vector.<Touch> = new Vector.<Touch>();
 		private var backgroundMusic:SoundChannel;
 		private var volume:Number = 0.08;
 		private var gameEnvironment:Environment;
 		private var background:Image;
 		private var player:Player;
-		
-		//keyboardSetup
-		protected static var alternativeFireKey:uint = Keyboard.SPACE;
-		protected static var fireKey:uint = Keyboard.Z;
-		protected static var upKey:uint = Keyboard.UP;
-		protected static var downKey:uint = Keyboard.DOWN;
-		protected static var rightKey:uint = Keyboard.RIGHT;
-		protected static var leftKey:uint = Keyboard.LEFT;
-		CONFIG::debug
-		{
-			fireKey = Keyboard.NUMPAD_ADD;
-			upKey = Keyboard.W;
-			downKey = Keyboard.S;
-			rightKey = Keyboard.D;
-			leftKey = Keyboard.A;
-		}
+		private var playerController:PlayerController;
 		
 		public function Game()
 		{
@@ -108,7 +91,7 @@ package
 			Key.init(stage);
 			ControllerInput.initialize(Starling.current.nativeStage);
 			player = Player.current;
-			stage.addEventListener(KeyboardEvent.KEY_UP, keyUp);
+			playerController = new PlayerController(Player.current,analogStick);
 			addEventListener(Event.ENTER_FRAME, enterFrame);
 			addEventListener(TouchEvent.TOUCH, onTouch);
 			Starling.current.stage.addEventListener(Event.RESIZE, stage_resize);
@@ -124,24 +107,6 @@ package
 			addChild(Environment.current.light);
 			this.setChildIndex(joystick, this.numChildren);
 			//	PhysicsParticle.fill.cache();
-		}
-		
-		private function keyUp(e:KeyboardEvent, keyCode:int):void
-		{
-			if (keyCode == fireKey || keyCode == alternativeFireKey)
-			{
-				player.stopShooting();
-			}
-			CONFIG::debug
-			{
-				CONFIG::air
-				{
-					if (keyCode == Keyboard.F1)
-					{
-						(gameEnvironment as LevelEditor).saveLevel();
-					}
-				}
-			}
 		}
 		
 		private function drawJoystick():void
@@ -236,12 +201,8 @@ package
 			if (event.passedTime > 0.010)
 			{
 				gameEnvironment.updatePhysics(passedTime);
-				if (CONFIG::mobile == false)
-				{
-					handleKeyboardInput();
-				}
+				playerController.update();
 				moveCam();
-				handleJoystickInput();
 			}
 		}
 		
@@ -275,98 +236,6 @@ package
 			shootButton.x = position.x;
 			shootButton.y = position.y;
 			Pool.putPoint(position);
-		}
-		
-		private function handleKeyboardInput():void
-		{
-			if (Key.isDown(fireKey) || Key.isDown(alternativeFireKey))
-			{
-				player.startShooting();
-			}
-			if (Key.isDown(upKey))
-			{
-				player.leftImpulse.y = player.rightImpulse.y = -player.maxAcceleration;
-				if (Key.isDown(leftKey))
-				{
-					player.leftImpulse.y -= player.maxAcceleration;
-					player.rightImpulse.y += player.maxTurningAcceleration / 3;
-				}
-				else if (Key.isDown(rightKey))
-				{
-					player.leftImpulse.y += player.maxTurningAcceleration / 3;
-					player.rightImpulse.y -= player.maxAcceleration;
-				}
-			}
-			else if (Key.isDown(downKey))
-			{
-				player.leftImpulse.y = player.rightImpulse.y = player.maxAcceleration;
-				if (Key.isDown(leftKey))
-				{
-					player.leftImpulse.y -= player.maxAcceleration;
-					player.rightImpulse.y += player.maxTurningAcceleration / 3;
-				}
-				else if (Key.isDown(rightKey))
-				{
-					player.leftImpulse.y += player.maxTurningAcceleration / 3;
-					player.rightImpulse.y -= player.maxAcceleration;
-				}
-			}
-			else if (Key.isDown(leftKey))
-			{
-				player.leftImpulse.y -= player.maxAcceleration;
-				player.rightImpulse.y += player.maxTurningAcceleration;
-			}
-			else if (Key.isDown(rightKey))
-			{
-				player.leftImpulse.y += player.maxTurningAcceleration;
-				player.rightImpulse.y -= player.maxAcceleration;
-			}
-		}
-		
-		private function handleJoystickInput():void
-		{
-			if (ControllerInput.hasRemovedController() && ControllerInput.getRemovedController() == xboxController)
-			{
-				xboxController = null;
-			}
-			var xAxis:Number;
-			var yAxis:Number;
-			var turningSpeed:Number;
-			xAxis = Math.min(1, analogStick.x / 160);
-			yAxis = Math.min(1, analogStick.y / 160);
-			if (Math.abs(xAxis) + Math.abs(yAxis) == 0 && xboxController)
-			{
-				xAxis = xboxController.leftStick.x;
-				yAxis = -xboxController.leftStick.y;
-				if (Math.abs(xAxis) + Math.abs(yAxis) < 0.1)
-				{
-					xAxis = 0;
-					yAxis = 0;
-				}
-				if (xboxController.rt.held)
-				{
-					player.startShooting();
-				}
-				else if (xboxController.rt.released)
-				{
-					player.stopShooting();
-				}
-			}
-			else if (ControllerInput.hasReadyController())
-			{
-				xboxController = ControllerInput.getReadyController() as Xbox360Controller;
-			}
-			if (Math.abs(xAxis) + Math.abs(yAxis) > 0)
-			{
-				if (xAxis != 0)
-				{
-					var easeOutAmount:Number = 0.9;
-					xAxis = xAxis / Math.abs(xAxis) * Math.pow(Math.abs(xAxis), easeOutAmount);
-				}
-				turningSpeed = player.maxTurningAcceleration * xAxis;
-				player.leftImpulse.y = player.maxAcceleration * yAxis + turningSpeed;
-				player.rightImpulse.y = player.maxAcceleration * yAxis - turningSpeed;
-			}
 		}
 	
 	}
