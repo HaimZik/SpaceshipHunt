@@ -259,17 +259,6 @@ package spaceshiptHunt.entities
 			}
 		}
 		
-		protected function rotateTowards(angle:Number):void
-		{
-			var rotaDiff:Number = angle + Math.PI / 2 - body.rotation;
-			if (Math.abs(rotaDiff) > Math.PI / 2)
-			{
-				//in order for the ship to rotate in the shorter angle
-				rotaDiff -= (Math.abs(rotaDiff) / rotaDiff) * Math.PI * 2;
-			}
-			body.applyAngularImpulse(maxAngularAcceleration * rotaDiff);
-		}
-		
 		protected function reFindPath():void
 		{
 			pathCheckTime = body.space.timeStamp;

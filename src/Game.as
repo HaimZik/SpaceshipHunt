@@ -30,6 +30,7 @@ package
 	 */
 	public class Game extends Sprite
 	{
+		private var crossTarget:Image;
 		private var joystickRadios:Number;
 		private var joystick:Sprite;
 		private var analogStick:Mesh;
@@ -80,6 +81,7 @@ package
 		
 		private function onFinishLoading():void
 		{
+			player = Player.current;
 			shootButton = new Image(Environment.current.assetsLoader.getTexture("shootButton"));
 			addChild(shootButton);
 			shootButton.alignPivot();
@@ -88,10 +90,14 @@ package
 			addChildAt(background, 0);
 			var backgroundRatio:Number = Math.ceil(Math.sqrt(stage.stageHeight * stage.stageHeight + stage.stageWidth * stage.stageWidth) / 512) * 2;
 			background.scale = backgroundRatio * 2;
+			addChild(Environment.current.light);
+			this.setChildIndex(joystick, this.numChildren);
+			crossTarget = new Image(Environment.current.assetsLoader.getTexture("crossTarget"));
+			addChild(crossTarget);
+			
 			Key.init(stage);
 			ControllerInput.initialize(Starling.current.nativeStage);
-			player = Player.current;
-			playerController = new PlayerController(Player.current,analogStick);
+			playerController = new PlayerController(Player.current, analogStick,crossTarget);
 			addEventListener(Event.ENTER_FRAME, enterFrame);
 			addEventListener(TouchEvent.TOUCH, onTouch);
 			Starling.current.stage.addEventListener(Event.RESIZE, stage_resize);
@@ -104,8 +110,6 @@ package
 					backgroundMusic.soundTransform = new SoundTransform(volume);
 				}
 			})
-			addChild(Environment.current.light);
-			this.setChildIndex(joystick, this.numChildren);
 			//	PhysicsParticle.fill.cache();
 		}
 		

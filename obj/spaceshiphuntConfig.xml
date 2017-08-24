@@ -14,7 +14,7 @@
     </define>
     <define append="true">
       <name>CONFIG::timeStamp</name>
-      <value>'15/08/2017'</value>
+      <value>'25/08/2017'</value>
     </define>
     <define append="true">
       <name>CONFIG::air</name>
@@ -31,7 +31,7 @@
     <verbose-stacktraces>true</verbose-stacktraces>
     <source-path append="true">
       <path-element>E:\files\programing\AS3\SpaceshipHunt\dependencies</path-element>
-      <path-element>C:\Program Files (x86)\FlashDevelop\Library\AS3\classes</path-element>
+      <path-element>E:\Program Files (x86)\FlashDevelop\Library\AS3\classes</path-element>
     </source-path>
     <library-path append="true">
       <path-element>E:\files\programing\AS3\SpaceshipHunt\dependencies\nape\nape-dev.swc</path-element>

@@ -61,7 +61,7 @@ package spaceshiptHuntDevelopment.level
 		private var napeDebug:ShapeDebug;
 		private var navMeshDebugView:DDLSSimpleView;
 		private var lastViewCenter:Point = new Point(0, 0);
-		private var displayNavMesh:Boolean = true;
+		private var displayNavMesh:Boolean = false;
 		CONFIG::air
 		{
 			private var dragEx:DragAndDropArea;
@@ -80,13 +80,13 @@ package spaceshiptHuntDevelopment.level
 			navMeshDebugView = new DDLSSimpleView();
 			navMeshDebugView.surface.mouseEnabled = false;
 			Starling.current.nativeOverlay.addChild(navMeshDebugView.surface);
-			Key.addKeyUpListener(Keyboard.N, disableNavMeshView);
+			Key.addKeyUpCallback(Keyboard.N, switchNavMeshView);
 			//Starling.current.nativeOverlay.addChild(napeDebug.display);
 			CONFIG::air
 			{
 				dragEx = new DragAndDropArea(0, 0, stage.stageWidth, stage.stageHeight, onFileDrop);
 				Starling.current.nativeStage.addChild(dragEx);
-				Key.addKeyUpListener(Keyboard.F1, saveLevel);
+				Key.addKeyUpCallback(Keyboard.F1, saveLevel);
 			}
 		}
 		
@@ -150,7 +150,7 @@ package spaceshiptHuntDevelopment.level
 			}
 		}
 		
-		protected function disableNavMeshView():void
+		protected function switchNavMeshView():void
 		{
 			if (displayNavMesh)
 			{
@@ -372,13 +372,16 @@ package spaceshiptHuntDevelopment.level
 		
 		protected function drawNavMesh():void
 		{
-			var viewRadius:Number = Math.max(Starling.current.viewPort.width, Starling.current.viewPort.height) / 2;
-			var viewCenter:Point = Pool.getPoint(viewRadius, viewRadius);
-			viewCenter = (navMeshDebugView.surface.globalToLocal(viewCenter));
-			navMeshDebugView.drawMesh(Environment.current.navMesh, true, viewCenter.x, viewCenter.y, viewRadius);
-			lastViewCenter.x = viewCenter.x;
-			lastViewCenter.y = viewCenter.y;
-			Pool.putPoint(viewCenter);
+			if (displayNavMesh)
+			{
+				var viewRadius:Number = Math.max(Starling.current.viewPort.width, Starling.current.viewPort.height) / 2;
+				var viewCenter:Point = Pool.getPoint(viewRadius, viewRadius);
+				viewCenter = (navMeshDebugView.surface.globalToLocal(viewCenter));
+				navMeshDebugView.drawMesh(Environment.current.navMesh, true, viewCenter.x, viewCenter.y, viewRadius);
+				lastViewCenter.x = viewCenter.x;
+				lastViewCenter.y = viewCenter.y;
+				Pool.putPoint(viewCenter);
+			}
 		}
 		
 		private function getDevMesh():Vector.<Vector.<Number>>

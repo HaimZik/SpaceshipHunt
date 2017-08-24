@@ -21,16 +21,16 @@
 			return keys[keyCode];
 		}
 		
-		public static function addKeyUpListener(keyCode:int, listener:Function):void
+		public static function addKeyUpCallback(keyCode:int, callback:Function):void
 		{
 			if (keyUpEvents[keyCode])
 			{
-				keyUpEvents[keyCode].push(listener);
+				keyUpEvents[keyCode].push(callback);
 			}
 			else
 			{
 				keyUpEvents[keyCode] = new Vector.<Function>(1);
-				keyUpEvents[keyCode][0] = listener;
+				keyUpEvents[keyCode][0] = callback;
 			}
 		}
 		

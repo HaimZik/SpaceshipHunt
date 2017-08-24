@@ -11,11 +11,6 @@ package spaceshiptHunt.level
 	import DDLS.data.DDLSObject;
 	import DDLS.data.HitTestable;
 	import DDLS.factories.DDLSRectMeshFactory;
-	import nape.dynamics.InteractionFilter;
-	import nape.geom.GeomPoly;
-	import nape.geom.Ray;
-	import nape.geom.RayResult;
-	import spaceshiptHunt.entities.*;
 	import flash.geom.Point;
 	import flash.system.Capabilities;
 	import flash.system.TouchscreenType;
@@ -24,12 +19,16 @@ package spaceshiptHunt.level
 	import nape.callbacks.InteractionCallback;
 	import nape.callbacks.InteractionListener;
 	import nape.callbacks.InteractionType;
+	import nape.dynamics.InteractionFilter;
+	import nape.geom.Ray;
+	import nape.geom.RayResult;
 	import nape.geom.Vec2;
 	import nape.geom.Vec2List;
 	import nape.phys.Body;
 	import nape.phys.BodyType;
 	import nape.shape.Polygon;
 	import nape.space.Space;
+	import spaceshiptHunt.entities.*;
 	import starling.core.Starling;
 	import starling.display.DisplayObjectContainer;
 	import starling.display.Mesh;

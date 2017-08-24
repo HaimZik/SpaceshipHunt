@@ -7,9 +7,12 @@ package spaceshiptHunt.controls
 	import flash.ui.Keyboard;
 	import input.Key;
 	import io.arkeus.ouya.ControllerInput;
+	import nape.geom.Vec2;
 	import spaceshiptHunt.entities.Player;
 	import io.arkeus.ouya.controller.Xbox360Controller;
+	import starling.display.Image;
 	import starling.display.Mesh;
+	import starling.utils.MathUtil;
 	
 	public class PlayerController
 	{
@@ -22,9 +25,12 @@ package spaceshiptHunt.controls
 		protected static var rightKey:uint = Keyboard.RIGHT;
 		protected static var leftKey:uint = Keyboard.LEFT;
 		
+		protected var analogStick:Mesh;
+		protected var crossTarget:Image;
+		protected var minCrossTargetDistance:Number;
 		private var _player:Player;
 		private var xboxController:Xbox360Controller;
-		protected var analogStick:Mesh;
+		
 		CONFIG::debug
 		{
 			fireKey = Keyboard.NUMPAD_ADD;
@@ -34,12 +40,20 @@ package spaceshiptHunt.controls
 			leftKey = Keyboard.A;
 		}
 		
-		public function PlayerController(player:Player, analogStick:Mesh)
+		public function PlayerController(playerToControl:Player, analogStick:Mesh, crossTarget:Image)
 		{
+			this.crossTarget = crossTarget;
 			this.analogStick = analogStick;
-			_player = player;
-			Key.addKeyUpListener(fireKey, player.stopShooting);
-			Key.addKeyUpListener(alternativeFireKey, player.stopShooting);
+			player = playerToControl;
+			crossTarget.alignPivot();
+			minCrossTargetDistance = 200;
+			var crossTargetOffset:Vec2 = Vec2.get(0, -minCrossTargetDistance);
+			var crossTargetPos:Vec2 = crossTargetOffset.add(player.body.position, true);
+			crossTarget.x = crossTargetPos.x;
+			crossTarget.y = crossTargetPos.y;
+			crossTargetPos.dispose();
+			Key.addKeyUpCallback(fireKey, player.stopShooting);
+			Key.addKeyUpCallback(alternativeFireKey, player.stopShooting);
 		}
 		
 		public function update():void
@@ -49,6 +63,18 @@ package spaceshiptHunt.controls
 				handleKeyboardInput();
 			}
 			handleJoystickInput();
+			var aimVector:Vec2 = Vec2.weak(crossTarget.x, crossTarget.y).subeq(player.body.position);
+			if (aimVector.lsq() < minCrossTargetDistance*minCrossTargetDistance)
+			{
+				var crossTargetOffset:Vec2 = Vec2.get(crossTarget.x, crossTarget.y).subeq(player.body.position);
+				crossTargetOffset.length = minCrossTargetDistance;
+				var crossTargetPos:Vec2 = crossTargetOffset.add(player.body.position, true);
+				crossTarget.x = crossTargetPos.x;
+				crossTarget.y = crossTargetPos.y;
+				crossTargetOffset.dispose();
+				crossTargetPos.dispose();
+			}
+			player.rotateTowards(MathUtil.normalizeAngle(aimVector.angle));
 		}
 		
 		public function get player():Player
@@ -118,22 +144,38 @@ package spaceshiptHunt.controls
 			var turningSpeed:Number;
 			xAxis = Math.min(1, analogStick.x / 160);
 			yAxis = Math.min(1, analogStick.y / 160);
-			if (Math.abs(xAxis) + Math.abs(yAxis) == 0 && xboxController)
+			if (xboxController)
 			{
-				xAxis = xboxController.leftStick.x;
-				yAxis = -xboxController.leftStick.y;
-				if (Math.abs(xAxis) + Math.abs(yAxis) < 0.1)
+				if (Math.abs(xAxis) + Math.abs(yAxis) == 0)
 				{
-					xAxis = 0;
-					yAxis = 0;
+					xAxis = xboxController.leftStick.x;
+					yAxis = -xboxController.leftStick.y;
+					if (Math.abs(xAxis) + Math.abs(yAxis) < 0.1)
+					{
+						xAxis = 0;
+						yAxis = 0;
+					}
+					if (xboxController.rt.held)
+					{
+						player.startShooting();
+					}
+					else if (xboxController.rt.released)
+					{
+						player.stopShooting();
+					}
 				}
-				if (xboxController.rt.held)
+				if (Math.abs(xboxController.rightStick.x) + Math.abs(xboxController.rightStick.y) > 0.1)
 				{
-					player.startShooting();
-				}
-				else if (xboxController.rt.released)
-				{
-					player.stopShooting();
+					var aimAngleSpeed:Number = 0.05;
+					var aimDistanceSpeed:Number = 20.0;
+					var crossTargetOffset:Vec2 = Vec2.get(crossTarget.x, crossTarget.y).subeq(player.body.position);
+					crossTargetOffset.length += xboxController.rightStick.y * aimDistanceSpeed;
+					crossTargetOffset.angle += xboxController.rightStick.x * aimAngleSpeed;
+					var crossTargetPos:Vec2 = crossTargetOffset.add(player.body.position, true);
+					crossTarget.x = crossTargetPos.x;
+					crossTarget.y = crossTargetPos.y;
+					crossTargetOffset.dispose();
+					crossTargetPos.dispose();
 				}
 			}
 			else if (ControllerInput.hasReadyController())
@@ -147,10 +189,12 @@ package spaceshiptHunt.controls
 					var easeOutAmount:Number = 0.9;
 					xAxis = xAxis / Math.abs(xAxis) * Math.pow(Math.abs(xAxis), easeOutAmount);
 				}
-				turningSpeed = player.maxTurningAcceleration * xAxis;
-				player.leftImpulse.y = player.maxAcceleration * yAxis + turningSpeed;
-				player.rightImpulse.y = player.maxAcceleration * yAxis - turningSpeed;
+					//turningSpeed = player.maxTurningAcceleration * xAxis;
+					//player.leftImpulse.y = player.maxAcceleration * yAxis + turningSpeed;
+					//player.rightImpulse.y = player.maxAcceleration * yAxis - turningSpeed;
 			}
+			player.impulse.x = xAxis;
+			player.impulse.y = yAxis;
 		}
 	
 	}

@@ -25,7 +25,7 @@ package spaceshiptHunt.entities
 		protected var weaponRight:Image;
 		protected var weaponLeft:Image;
 		protected var firingRate:Number = 0.1;
-		protected var bulletSpeed:Number=80.0;
+		protected var bulletSpeed:Number = 80.0;
 		private var shootingCallId:uint;
 		
 		public function Spaceship(position:Vec2)
@@ -85,6 +85,18 @@ package spaceshiptHunt.entities
 			Starling.juggler.removeByID(shootingCallId);
 		}
 		
+		public function rotateTowards(angle:Number):void
+		{
+			var rotaDiff:Number = angle + Math.PI / 2 - (body.rotation);
+			if (Math.abs(rotaDiff) > Math.PI / 2)
+			{
+				//in order for the ship to rotate in the shorter angle
+				rotaDiff -= (Math.abs(rotaDiff) / rotaDiff) * Math.PI * 2;
+			}
+			//			trace(angle +" player " + body.rotation+" diff "+rotaDiff);
+			body.applyAngularImpulse(maxAngularAcceleration * rotaDiff);
+		}
+		
 		public function findPathTo(x:Number, y:Number, outPath:Vector.<Number>):void
 		{
 			Environment.current.findPath(pathfindingAgent, x, y, outPath);
@@ -115,7 +127,7 @@ package spaceshiptHunt.entities
 		protected function shootParticle():void
 		{
 			var position:Vec2 = Vec2.get(weaponRight.x + weaponLeft.width / 2, weaponRight.y - 5);
-			var recoilImpulse:Vec2 = Vec2.get(0, (bulletSpeed + Math.random() * bulletSpeed)*body.mass);
+			var recoilImpulse:Vec2 = Vec2.get(0, (bulletSpeed + Math.random() * bulletSpeed) * body.mass);
 			recoilImpulse.angle = body.rotation - Math.PI / 2 + Math.random() * 0.1 + 0.05;
 			PhysicsParticle.spawn(fireType, position.copy(true).rotate(body.rotation).addeq(body.position), recoilImpulse);
 			position.x = weaponLeft.x + weaponLeft.width / 2;

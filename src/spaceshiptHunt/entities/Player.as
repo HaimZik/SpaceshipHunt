@@ -9,10 +9,13 @@ package spaceshiptHunt.entities
 	 */
 	public class Player extends Spaceship
 	{
+
 		public var leftImpulse:Vec2;
 		public var rightImpulse:Vec2;
+		public var impulse:Vec2;
 		public var maxTurningAcceleration:Number;
-		private static var _current:Player=new Player(new Vec2());
+		protected var skewSpeed:Number;
+		private static var _current:Player = new Player(new Vec2());
 		
 		public function Player(position:Vec2)
 		{
@@ -20,6 +23,7 @@ package spaceshiptHunt.entities
 			super(position);
 			rightImpulse = Vec2.get(0, 0);
 			leftImpulse = Vec2.get(0, 0);
+			impulse = Vec2.get(0, 0);
 			weaponsPlacement["fireCannon"] = Vec2.get(16, -37);
 		}
 		
@@ -38,6 +42,8 @@ package spaceshiptHunt.entities
 			}
 			this.gunType = "fireCannon";
 			maxTurningAcceleration = body.mass * 5;
+			maxAngularAcceleration = body.mass * 220;
+			maxAcceleration = body.mass * 15.0;
 			//Environment.current.navMesh.insertObject(pathfindingAgent.approximateObject);
 		}
 		
@@ -58,10 +64,17 @@ package spaceshiptHunt.entities
 				body.applyImpulse(rightImpulse.rotate(body.rotation), enginePositionR);
 				rightImpulse.setxy(0, 0);
 			}
+			skewSpeed = 0.2;
+			graphics.skewY = graphics.skewY*(1.0-skewSpeed) + (impulse.x * 0.4)*skewSpeed;
+			if (impulse.length != 0)
+			{
+				body.applyImpulse(impulse.mul(maxAcceleration,true).rotate(body.rotation));
+				impulse.setxy(0.0, 0.0);
+			}
 			//if (body.velocity.length > 500)
 			//{
-				//body.velocity.length = 500;
-			//}
+			//body.velocity.length = 500;
+			//}			
 		}
 	
 	}
