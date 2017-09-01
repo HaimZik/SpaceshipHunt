@@ -43,7 +43,7 @@ package spaceshiptHunt.entities
 			this.gunType = "fireCannon";
 			maxTurningAcceleration = body.mass * 5;
 			maxAngularAcceleration = body.mass * 220;
-			maxAcceleration = body.mass * 15.0;
+			maxAcceleration = body.mass * 18.0;
 			//Environment.current.navMesh.insertObject(pathfindingAgent.approximateObject);
 		}
 		

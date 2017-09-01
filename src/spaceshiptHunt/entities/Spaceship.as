@@ -9,6 +9,7 @@ package spaceshiptHunt.entities
 	import starling.display.DisplayObjectContainer;
 	import starling.display.Image;
 	import starling.textures.Texture;
+	import starling.utils.MathUtil;
 	
 	/**
 	 * ...
@@ -87,14 +88,16 @@ package spaceshiptHunt.entities
 		
 		public function rotateTowards(angle:Number):void
 		{
-			var rotaDiff:Number = angle + Math.PI / 2 - (body.rotation);
+			angle = MathUtil.normalizeAngle(angle);
+			var bodyRotation:Number = MathUtil.normalizeAngle(body.rotation);
+			var rotaDiff:Number = angle + Math.PI / 2 - bodyRotation;
 			if (Math.abs(rotaDiff) > Math.PI / 2)
 			{
 				//in order for the ship to rotate in the shorter angle
 				rotaDiff -= (Math.abs(rotaDiff) / rotaDiff) * Math.PI * 2;
 			}
 			//			trace(angle +" player " + body.rotation+" diff "+rotaDiff);
-			body.applyAngularImpulse(maxAngularAcceleration * rotaDiff);
+			body.applyAngularImpulse(maxAngularAcceleration * MathUtil.normalizeAngle(rotaDiff));
 		}
 		
 		public function findPathTo(x:Number, y:Number, outPath:Vector.<Number>):void

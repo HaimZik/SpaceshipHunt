@@ -64,7 +64,7 @@ package spaceshiptHunt.controls
 			}
 			handleJoystickInput();
 			var aimVector:Vec2 = Vec2.weak(crossTarget.x, crossTarget.y).subeq(player.body.position);
-			if (aimVector.lsq() < minCrossTargetDistance*minCrossTargetDistance)
+			if (aimVector.lsq() < minCrossTargetDistance * minCrossTargetDistance)
 			{
 				var crossTargetOffset:Vec2 = Vec2.get(crossTarget.x, crossTarget.y).subeq(player.body.position);
 				crossTargetOffset.length = minCrossTargetDistance;
@@ -74,7 +74,7 @@ package spaceshiptHunt.controls
 				crossTargetOffset.dispose();
 				crossTargetPos.dispose();
 			}
-			player.rotateTowards(MathUtil.normalizeAngle(aimVector.angle));
+			player.rotateTowards(aimVector.angle);
 		}
 		
 		public function get player():Player
@@ -144,25 +144,22 @@ package spaceshiptHunt.controls
 			var turningSpeed:Number;
 			xAxis = Math.min(1, analogStick.x / 160);
 			yAxis = Math.min(1, analogStick.y / 160);
-			if (xboxController)
+			if (xboxController && Math.abs(xAxis) + Math.abs(yAxis) == 0)
 			{
-				if (Math.abs(xAxis) + Math.abs(yAxis) == 0)
+				xAxis = xboxController.leftStick.x;
+				yAxis = -xboxController.leftStick.y;
+				if (Math.abs(xAxis) + Math.abs(yAxis) < 0.1)
 				{
-					xAxis = xboxController.leftStick.x;
-					yAxis = -xboxController.leftStick.y;
-					if (Math.abs(xAxis) + Math.abs(yAxis) < 0.1)
-					{
-						xAxis = 0;
-						yAxis = 0;
-					}
-					if (xboxController.rt.held)
-					{
-						player.startShooting();
-					}
-					else if (xboxController.rt.released)
-					{
-						player.stopShooting();
-					}
+					xAxis = 0;
+					yAxis = 0;
+				}
+				if (xboxController.rt.held)
+				{
+					player.startShooting();
+				}
+				else if (xboxController.rt.released)
+				{
+					player.stopShooting();
 				}
 				if (Math.abs(xboxController.rightStick.x) + Math.abs(xboxController.rightStick.y) > 0.1)
 				{
@@ -182,16 +179,10 @@ package spaceshiptHunt.controls
 			{
 				xboxController = ControllerInput.getReadyController() as Xbox360Controller;
 			}
-			if (Math.abs(xAxis) + Math.abs(yAxis) > 0)
+			if (xAxis != 0)
 			{
-				if (xAxis != 0)
-				{
-					var easeOutAmount:Number = 0.9;
-					xAxis = xAxis / Math.abs(xAxis) * Math.pow(Math.abs(xAxis), easeOutAmount);
-				}
-					//turningSpeed = player.maxTurningAcceleration * xAxis;
-					//player.leftImpulse.y = player.maxAcceleration * yAxis + turningSpeed;
-					//player.rightImpulse.y = player.maxAcceleration * yAxis - turningSpeed;
+				var easeOutAmount:Number = 2.0;
+				xAxis = xAxis / Math.abs(xAxis) * Math.pow(Math.abs(xAxis), easeOutAmount);
 			}
 			player.impulse.x = xAxis;
 			player.impulse.y = yAxis;
