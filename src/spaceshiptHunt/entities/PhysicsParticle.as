@@ -19,7 +19,8 @@ package spaceshiptHunt.entities
 		internal static var particlePool:Vector.<PhysicsParticle> = new Vector.<PhysicsParticle>();
 		protected static const poolGrowth:int = 10;
 		protected var currentCallId:uint;
-		public static const INTERACTION_TYPE:CbType= new CbType(); 
+		public static const INTERACTION_TYPE:CbType = new CbType(); 
+		public static var impactForce:Number = 100.0;
 		
 		//	protected var 
 		
@@ -49,7 +50,8 @@ package spaceshiptHunt.entities
 			var particleTexture:Vector.<Texture> = Environment.current.assetsLoader.getTextures(particleType)
 			if (particlePool.length == 0)
 			{
-				var circleShape:Circle = new Circle(particleTexture[0].width/2);
+				var circleShape:Circle = new Circle(particleTexture[0].width / 2);
+				circleShape.sensorEnabled = true;
 				for (var i:int = 0; i < poolGrowth; i++)
 				{
 					particlePool.push(new PhysicsParticle(particleTexture));

@@ -85,7 +85,7 @@ package spaceshiptHunt.level
 			navMesh.insertObject(navBody);
 			pathfinder = new DDLSPathFinder(this);
 			pathfinder.mesh = navMesh;
-			var bulletCollisionListener:InteractionListener = new InteractionListener(CbEvent.BEGIN, InteractionType.COLLISION, CbType.ANY_BODY, PhysicsParticle.INTERACTION_TYPE, onBulletHit);
+			var bulletCollisionListener:InteractionListener = new InteractionListener(CbEvent.BEGIN, InteractionType.SENSOR, CbType.ANY_BODY, PhysicsParticle.INTERACTION_TYPE, onBulletHit);
 			physicsSpace.listeners.add(bulletCollisionListener);
 			light = new LightSource();
 			light.z = -800;
@@ -327,12 +327,17 @@ package spaceshiptHunt.level
 		
 		private function onBulletHit(event:InteractionCallback):void
 		{
+			var bulletBody:Body;
 			if (event.int1.userData.info is PhysicsParticle)
 			{
+				bulletBody = event.int1.castBody;
+				event.int2.castBody.applyImpulse(bulletBody.velocity.normalise().muleq(PhysicsParticle.impactForce), bulletBody.position);
 				(event.int1.userData.info as PhysicsParticle).despawn();
 			}
 			if (event.int2.userData.info is PhysicsParticle)
 			{
+				bulletBody = event.int2.castBody;
+				event.int1.castBody.applyImpulse(bulletBody.velocity.normalise().muleq(PhysicsParticle.impactForce), bulletBody.position);
 				(event.int2.userData.info as PhysicsParticle).despawn();
 			}
 		}

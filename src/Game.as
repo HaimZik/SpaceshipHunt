@@ -77,6 +77,7 @@ package
 		public function onFocusReturn():void
 		{
 			Key.reset();
+			playerController.onFocusReturn();
 		}
 		
 		private function onFinishLoading():void

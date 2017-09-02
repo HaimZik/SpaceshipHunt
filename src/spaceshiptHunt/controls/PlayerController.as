@@ -28,6 +28,7 @@ package spaceshiptHunt.controls
 		protected var analogStick:Mesh;
 		protected var crossTarget:Image;
 		protected var minCrossTargetDistance:Number;
+		protected var maxCrossTargetDistance:Number;
 		private var _player:Player;
 		private var xboxController:Xbox360Controller;
 		
@@ -46,12 +47,10 @@ package spaceshiptHunt.controls
 			this.analogStick = analogStick;
 			player = playerToControl;
 			crossTarget.alignPivot();
-			minCrossTargetDistance = 200;
-			var crossTargetOffset:Vec2 = Vec2.get(0, -minCrossTargetDistance);
-			var crossTargetPos:Vec2 = crossTargetOffset.add(player.body.position, true);
-			crossTarget.x = crossTargetPos.x;
-			crossTarget.y = crossTargetPos.y;
-			crossTargetPos.dispose();
+			minCrossTargetDistance = 200.0;
+			maxCrossTargetDistance = 400.0;
+			crossTarget.x = player.body.position.x;
+			crossTarget.y = player.body.position.y - minCrossTargetDistance;
 			Key.addKeyUpCallback(fireKey, player.stopShooting);
 			Key.addKeyUpCallback(alternativeFireKey, player.stopShooting);
 		}
@@ -63,18 +62,37 @@ package spaceshiptHunt.controls
 				handleKeyboardInput();
 			}
 			handleJoystickInput();
-			var aimVector:Vec2 = Vec2.weak(crossTarget.x, crossTarget.y).subeq(player.body.position);
+			var aimVector:Vec2 = Vec2.get(crossTarget.x, crossTarget.y).subeq(player.body.position);
+			var crossTargetOffset:Vec2;
 			if (aimVector.lsq() < minCrossTargetDistance * minCrossTargetDistance)
 			{
-				var crossTargetOffset:Vec2 = Vec2.get(crossTarget.x, crossTarget.y).subeq(player.body.position);
+				crossTargetOffset = Vec2.get(crossTarget.x, crossTarget.y).subeq(player.body.position);
 				crossTargetOffset.length = minCrossTargetDistance;
-				var crossTargetPos:Vec2 = crossTargetOffset.add(player.body.position, true);
-				crossTarget.x = crossTargetPos.x;
-				crossTarget.y = crossTargetPos.y;
+				crossTarget.x = crossTargetOffset.x + player.body.position.x;
+				crossTarget.y = crossTargetOffset.y + player.body.position.y;
 				crossTargetOffset.dispose();
-				crossTargetPos.dispose();
+			}
+			else if (aimVector.lsq() > maxCrossTargetDistance * maxCrossTargetDistance)
+			{
+				crossTargetOffset = Vec2.get(crossTarget.x, crossTarget.y).subeq(player.body.position);
+				crossTargetOffset.length = maxCrossTargetDistance;
+				crossTarget.x = crossTargetOffset.x + player.body.position.x;
+				crossTarget.y = crossTargetOffset.y + player.body.position.y;
+				crossTargetOffset.dispose();
 			}
 			player.rotateTowards(aimVector.angle);
+			aimVector.dispose();
+		}
+		
+		public function onFocusReturn():void
+		{
+			if (xboxController)
+			{
+				if (!xboxController.rt.held)
+				{
+					player.stopShooting();
+				}
+			}
 		}
 		
 		public function get player():Player
