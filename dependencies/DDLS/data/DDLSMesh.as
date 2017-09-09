@@ -10,7 +10,7 @@ package DDLS.data
 	
 	public class DDLSMesh
 	{
-		protected var vertexToDelete:Vector.<DDLSVertex>=new Vector.<DDLSVertex>();
+		protected var vertexToDelete:Vector.<DDLSVertex> = new Vector.<DDLSVertex>();
 		
 		private static var INC:int = 0;
 		private var _id:int;
@@ -534,7 +534,7 @@ package DDLS.data
 					//trace("case vertex");
 					if (currVertex.edge == null)
 					{
-					trace("currVertex.edge was null");	
+						trace("currVertex.edge was null");
 						return null;
 					}
 					iterVertexToOutEdges.fromVertex = currVertex;
@@ -802,7 +802,7 @@ package DDLS.data
 			var edge:DDLSEdge;
 			var vertex:DDLSVertex;
 			var segmentEdgesLength:int = segment.edges.length;
-			vertexToDelete.length = segmentEdgesLength+1;
+			vertexToDelete.length = segmentEdgesLength + 1;
 			for (i = 0; i < segmentEdgesLength; i++)
 			{
 				edge = segment.edges[i];
@@ -816,16 +816,16 @@ package DDLS.data
 				
 				vertex = edge.originVertex;
 				vertex.removeFromConstraintSegment(segment);
-				vertexToDelete[i]=vertex;
+				vertexToDelete[i] = vertex;
 			}
 			vertex = edge.destinationVertex;
 			vertex.removeFromConstraintSegment(segment);
-			vertexToDelete[segmentEdgesLength]=vertex;			
+			vertexToDelete[segmentEdgesLength] = vertex;
 			//trace("clean the useless vertices");
 			for (i = 0; i < vertexToDelete.length; i++)
 			{
 				deleteVertex(vertexToDelete[i]);
-				vertexToDelete[i] = null;//should be returned to pool here..
+				vertexToDelete[i] = null; //should be returned to pool here..
 			}
 			//trace("clean done");
 			

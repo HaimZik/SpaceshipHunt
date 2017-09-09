@@ -9,9 +9,7 @@ package spaceshiptHunt.entities
 	 */
 	public class Player extends Spaceship
 	{
-
-		public var leftImpulse:Vec2;
-		public var rightImpulse:Vec2;
+		
 		public var impulse:Vec2;
 		public var maxTurningAcceleration:Number;
 		protected var skewSpeed:Number;
@@ -21,8 +19,6 @@ package spaceshiptHunt.entities
 		{
 			//normally should be called by Player.current
 			super(position);
-			rightImpulse = Vec2.get(0, 0);
-			leftImpulse = Vec2.get(0, 0);
 			impulse = Vec2.get(0, 0);
 			weaponsPlacement["fireCannon"] = Vec2.get(16, -37);
 		}
@@ -44,37 +40,32 @@ package spaceshiptHunt.entities
 			maxTurningAcceleration = body.mass * 5;
 			maxAngularAcceleration = body.mass * 220;
 			maxAcceleration = body.mass * 18.0;
-			//Environment.current.navMesh.insertObject(pathfindingAgent.approximateObject);
+			life = 1500.0;
 		}
 		
 		override public function update():void
 		{
 			super.update();
-			if (leftImpulse.length != 0)
-			{
-				var enginePositionL:Vec2 = engineLocation.copy(true).rotate(body.rotation).addeq(body.position);
-				body.applyImpulse(leftImpulse.rotate(body.rotation), enginePositionL);
-				leftImpulse.setxy(0, 0);
-			}
-			if (rightImpulse.length != 0)
-			{
-				var enginePositionR:Vec2 = engineLocation.copy(true);
-				enginePositionR.x = -enginePositionR.x;
-				enginePositionR.rotate(body.rotation).addeq(body.position);
-				body.applyImpulse(rightImpulse.rotate(body.rotation), enginePositionR);
-				rightImpulse.setxy(0, 0);
-			}
 			skewSpeed = 0.2;
-			graphics.skewY = graphics.skewY*(1.0-skewSpeed) + (impulse.x * 0.4)*skewSpeed;
+			graphics.skewY = graphics.skewY * (1.0 - skewSpeed) + (impulse.x * 0.4) * skewSpeed;
 			if (impulse.length != 0)
 			{
-				body.applyImpulse(impulse.mul(maxAcceleration,true).rotate(body.rotation));
+				body.applyImpulse(impulse.mul(maxAcceleration, true).rotate(body.rotation));
 				impulse.setxy(0.0, 0.0);
 			}
 			//if (body.velocity.length > 500)
 			//{
 			//body.velocity.length = 500;
 			//}			
+		}
+		
+		override protected function onDeath():void
+		{
+			super.onDeath();
+			if (this == _current)
+			{
+				_current = null;
+			}
 		}
 	
 	}

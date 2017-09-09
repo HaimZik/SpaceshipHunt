@@ -107,17 +107,19 @@ package spaceshiptHunt.level
 		
 		public function updatePhysics(passedTime:Number):void
 		{
-			light.x = Player.current.graphics.x;
-			light.y = Player.current.graphics.y + 400;
 			if (passedTime > 0) //some strange bug or maybe I optimize faster than the speed of light
 			{
 				physicsSpace.step(passedTime);
 			}
-			var length:int = BodyInfo.list.length;
-			for (var j:int = 0; j < length; j++)
+			if (Player.current)
 			{
-				var bodyInfo:BodyInfo = BodyInfo.list[j];
-				bodyInfo.update();
+				light.x = Player.current.graphics.x;
+				light.y = Player.current.graphics.y + 400;
+				var length:int = BodyInfo.list.length;
+				for (var i:int = 0; i < length; i++)
+				{
+					BodyInfo.list[i].update();
+				}
 			}
 			if (meshNeedsUpdate && Starling.juggler.elapsedTime - lastNavMeshUpdate > 1.0)
 			{
@@ -328,17 +330,26 @@ package spaceshiptHunt.level
 		private function onBulletHit(event:InteractionCallback):void
 		{
 			var bulletBody:Body;
-			if (event.int1.userData.info is PhysicsParticle)
+			var collidedBody:Body;
+			var interactor1Entity:BodyInfo = event.int1.userData.info;
+			var interactor2Entity:BodyInfo = event.int2.userData.info;
+			if (interactor1Entity is PhysicsParticle)
 			{
 				bulletBody = event.int1.castBody;
-				event.int2.castBody.applyImpulse(bulletBody.velocity.normalise().muleq(PhysicsParticle.impactForce), bulletBody.position);
-				(event.int1.userData.info as PhysicsParticle).despawn();
+				collidedBody = event.int2.castBody
+				collidedBody.applyImpulse(bulletBody.velocity.normalise().muleq(PhysicsParticle.impactForce), bulletBody.position);
+				(interactor1Entity as PhysicsParticle).despawn();
 			}
-			if (event.int2.userData.info is PhysicsParticle)
+			if (interactor2Entity is PhysicsParticle)
 			{
 				bulletBody = event.int2.castBody;
-				event.int1.castBody.applyImpulse(bulletBody.velocity.normalise().muleq(PhysicsParticle.impactForce), bulletBody.position);
-				(event.int2.userData.info as PhysicsParticle).despawn();
+				collidedBody = event.int1.castBody;
+				collidedBody.applyImpulse(bulletBody.velocity.normalise().muleq(PhysicsParticle.impactForce), bulletBody.position);
+				(interactor2Entity as PhysicsParticle).despawn();
+			}
+			if (collidedBody.userData.info is Spaceship)
+			{
+				(collidedBody.userData.info as Spaceship).onBulletHit(PhysicsParticle.impactForce);
 			}
 		}
 		

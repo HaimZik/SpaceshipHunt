@@ -98,7 +98,7 @@ package
 			
 			Key.init(stage);
 			ControllerInput.initialize(Starling.current.nativeStage);
-			playerController = new PlayerController(Player.current, analogStick,crossTarget);
+			playerController = new PlayerController(Player.current, analogStick, crossTarget);
 			addEventListener(Event.ENTER_FRAME, enterFrame);
 			addEventListener(TouchEvent.TOUCH, onTouch);
 			Starling.current.stage.addEventListener(Event.RESIZE, stage_resize);
@@ -206,8 +206,11 @@ package
 			if (event.passedTime > 0.010)
 			{
 				gameEnvironment.updatePhysics(passedTime);
-				playerController.update();
-				moveCam();
+				if (Player.current)
+				{
+					playerController.update();
+					moveCam();
+				}
 			}
 		}
 		

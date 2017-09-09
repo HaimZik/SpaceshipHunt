@@ -10,9 +10,11 @@ package spaceshiptHunt.controls
 	import nape.geom.Vec2;
 	import spaceshiptHunt.entities.Player;
 	import io.arkeus.ouya.controller.Xbox360Controller;
+	import spaceshiptHunt.utils.MathUtilities;
 	import starling.display.Image;
 	import starling.display.Mesh;
-	import starling.utils.MathUtil;
+	import starling.events.Event;
+	import starling.display.DisplayObject;
 	
 	public class PlayerController
 	{
@@ -61,12 +63,22 @@ package spaceshiptHunt.controls
 			{
 				handleKeyboardInput();
 			}
-			handleJoystickInput();
+			if (player.impulse.lsq() == 0)
+			{
+				handleJoystickInput();
+			}
 			var aimVector:Vec2 = Vec2.get(crossTarget.x, crossTarget.y).subeq(player.body.position);
-			var crossTargetOffset:Vec2;
+			var crossTargetOffset:Vec2 = Vec2.get(crossTarget.x, crossTarget.y).subeq(player.body.position);
+			if (MathUtilities.angleDifferenceAbs(player.body.velocity.angle - Math.PI / 2, player.body.rotation) < 0.1)
+			{
+				if (Math.abs(angleDiff) < 0.2)
+				{
+					crossTargetOffset.rotate(angleDiff);
+				}
+			//	trace(angleDiff);
+			}
 			if (aimVector.lsq() < minCrossTargetDistance * minCrossTargetDistance)
 			{
-				crossTargetOffset = Vec2.get(crossTarget.x, crossTarget.y).subeq(player.body.position);
 				crossTargetOffset.length = minCrossTargetDistance;
 				crossTarget.x = crossTargetOffset.x + player.body.position.x;
 				crossTarget.y = crossTargetOffset.y + player.body.position.y;
@@ -74,7 +86,6 @@ package spaceshiptHunt.controls
 			}
 			else if (aimVector.lsq() > maxCrossTargetDistance * maxCrossTargetDistance)
 			{
-				crossTargetOffset = Vec2.get(crossTarget.x, crossTarget.y).subeq(player.body.position);
 				crossTargetOffset.length = maxCrossTargetDistance;
 				crossTarget.x = crossTargetOffset.x + player.body.position.x;
 				crossTarget.y = crossTargetOffset.y + player.body.position.y;
@@ -90,7 +101,10 @@ package spaceshiptHunt.controls
 			{
 				if (!xboxController.rt.held)
 				{
-					player.stopShooting();
+					if (player)
+					{
+						player.stopShooting();
+					}
 				}
 			}
 		}
@@ -102,7 +116,20 @@ package spaceshiptHunt.controls
 		
 		public function set player(value:Player):void
 		{
+			if (_player)
+			{
+				_player.graphics.removeEventListener(Event.REMOVED, onPlayerDeath);
+			}
 			_player = value;
+			if (_player)
+			{
+				_player.graphics.addEventListener(Event.REMOVED, onPlayerDeath);
+			}
+		}
+		
+		protected function onPlayerDeath(e:Event):void
+		{
+			player = null;
 		}
 		
 		private function handleKeyboardInput():void
@@ -113,41 +140,35 @@ package spaceshiptHunt.controls
 			}
 			if (Key.isDown(upKey))
 			{
-				player.leftImpulse.y = player.rightImpulse.y = -player.maxAcceleration;
+				player.impulse.y = -1.0;
 				if (Key.isDown(leftKey))
 				{
-					player.leftImpulse.y -= player.maxAcceleration;
-					player.rightImpulse.y += player.maxTurningAcceleration / 3;
+					player.impulse.x = -1.0;
 				}
 				else if (Key.isDown(rightKey))
 				{
-					player.leftImpulse.y += player.maxTurningAcceleration / 3;
-					player.rightImpulse.y -= player.maxAcceleration;
+					player.impulse.x = 1.0;
 				}
 			}
 			else if (Key.isDown(downKey))
 			{
-				player.leftImpulse.y = player.rightImpulse.y = player.maxAcceleration;
+				player.impulse.y = 1.0;
 				if (Key.isDown(leftKey))
 				{
-					player.leftImpulse.y -= player.maxAcceleration;
-					player.rightImpulse.y += player.maxTurningAcceleration / 3;
+					player.impulse.x = -1.0;
 				}
 				else if (Key.isDown(rightKey))
 				{
-					player.leftImpulse.y += player.maxTurningAcceleration / 3;
-					player.rightImpulse.y -= player.maxAcceleration;
+					player.impulse.x = 1.0;
 				}
 			}
 			else if (Key.isDown(leftKey))
 			{
-				player.leftImpulse.y -= player.maxAcceleration;
-				player.rightImpulse.y += player.maxTurningAcceleration;
+				player.impulse.x = -1.0;
 			}
 			else if (Key.isDown(rightKey))
 			{
-				player.leftImpulse.y += player.maxTurningAcceleration;
-				player.rightImpulse.y -= player.maxAcceleration;
+				player.impulse.x = 1.0;
 			}
 		}
 		

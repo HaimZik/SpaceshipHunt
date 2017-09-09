@@ -1,25 +1,28 @@
 package spaceshiptHunt.entities
-{
+{	
+	/**
+	 * ...
+	 * @author Haim Shnitzer
+	 */
+	
 	import DDLS.ai.DDLSEntityAI;
 	import spaceshiptHunt.level.Environment;
 	import spaceshiptHunt.entities.Entity;
+	import spaceshiptHunt.utils.MathUtilities;
 	import flash.utils.Dictionary;
 	import nape.geom.Vec2;
 	import starling.core.Starling;
 	import starling.display.DisplayObjectContainer;
 	import starling.display.Image;
 	import starling.textures.Texture;
-	import starling.utils.MathUtil;
 	
-	/**
-	 * ...
-	 * @author Haim Shnitzer
-	 */
 	public class Spaceship extends Entity
 	{
 		public var maxAcceleration:Number;
 		public var maxAngularAcceleration:Number;
 		public var engineLocation:Vec2;
+		public var armorDefance:Number = 8.0;
+		protected var life:Number = 150;
 		protected var _gunType:String;
 		protected var fireType:String = "fireball";
 		protected var weaponsPlacement:Dictionary;
@@ -27,6 +30,7 @@ package spaceshiptHunt.entities
 		protected var weaponLeft:Image;
 		protected var firingRate:Number = 0.1;
 		protected var bulletSpeed:Number = 80.0;
+		protected const rotateTowardThreshold:Number = 0.1;
 		private var shootingCallId:uint;
 		
 		public function Spaceship(position:Vec2)
@@ -41,6 +45,18 @@ package spaceshiptHunt.entities
 			engineLocation = Vec2.get(bodyDescription.engineLocation.x, bodyDescription.engineLocation.y);
 			maxAcceleration = body.mass * 8;
 			maxAngularAcceleration = body.mass * 180;
+		}
+		
+		protected function dispose():void
+		{
+			stopShooting();
+			body.space = null;
+			body.userData.info = null;
+			body = null;
+			graphics.removeFromParent(true);
+			BodyInfo.list.removeAt(BodyInfo.list.indexOf(this));
+			Environment.current.navMesh.deleteObject(pathfindingAgent.approximateObject);
+			pathfindingAgent.dispose();
 		}
 		
 		public function set gunType(gunType:String):void
@@ -73,6 +89,20 @@ package spaceshiptHunt.entities
 			return _gunType;
 		}
 		
+		public function get lifePoints():Number
+		{
+			return life;
+		}
+		
+		public function set lifePoints(value:Number):void
+		{
+			life = value;
+			if (life <= 0)
+			{
+				onDeath();
+			}
+		}
+		
 		public function startShooting():void
 		{
 			if (!Starling.juggler.containsDelayedCalls(shootParticle))
@@ -88,16 +118,14 @@ package spaceshiptHunt.entities
 		
 		public function rotateTowards(angle:Number):void
 		{
-			angle = MathUtil.normalizeAngle(angle);
-			var bodyRotation:Number = MathUtil.normalizeAngle(body.rotation);
-			var rotaDiff:Number = angle + Math.PI / 2 - bodyRotation;
-			if (Math.abs(rotaDiff) > Math.PI / 2)
+			if (Math.abs(angleDifference) > Math.PI)
 			{
-				//in order for the ship to rotate in the shorter angle
-				rotaDiff -= (Math.abs(rotaDiff) / rotaDiff) * Math.PI * 2;
+				trace(angleDifference);
+				trace(angle-body.rotation);
 			}
-			//			trace(angle +" player " + body.rotation+" diff "+rotaDiff);
-			body.applyAngularImpulse(maxAngularAcceleration * MathUtil.normalizeAngle(rotaDiff));
+			{
+				body.applyAngularImpulse(maxAngularAcceleration * angleDifference);
+			}
 		}
 		
 		public function findPathTo(x:Number, y:Number, outPath:Vector.<Number>):void
@@ -125,6 +153,16 @@ package spaceshiptHunt.entities
 			}
 			diraction.dispose();
 			Environment.current.meshNeedsUpdate = true;
+		}
+		
+		public function onBulletHit(impactForce:Number):void
+		{
+			lifePoints -= impactForce / armorDefance;
+		}
+		
+		protected function onDeath():void
+		{
+			dispose();
 		}
 		
 		protected function shootParticle():void

@@ -81,15 +81,15 @@ package spaceshiptHunt.entities
 			}
 		}
 		
-		public function get nextPoint():int 
+		public function get nextPoint():int
 		{
 			return _nextPoint;
 		}
 		
-		public function set nextPoint(value:int):void 
+		public function set nextPoint(value:int):void
 		{
 			_nextPoint = value;
-			if (_nextPoint ==-1)
+			if (_nextPoint == -1)
 			{
 				chasingTarget = null;
 			}

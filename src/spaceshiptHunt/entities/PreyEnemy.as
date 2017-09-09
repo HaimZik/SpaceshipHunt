@@ -28,42 +28,42 @@ package spaceshiptHunt.entities
 		
 		public override function update():void
 		{
-			super.update();
-			if (pointingArrow.visible != !canViewPlayer)
-			{
-				pointingArrow.visible = !canViewPlayer;
-			}
-			if (canViewPlayer)
-			{
-				if (graphics.alpha < 1)
+				super.update();
+				if (pointingArrow.visible != !canViewPlayer)
 				{
-					graphics.alpha += 0.025;
+					pointingArrow.visible = !canViewPlayer;
 				}
-				if (body.space.timeStamp - playerPathCheckTime > pathUpdateInterval)
+				if (canViewPlayer)
 				{
-					Player.current.findPathToEntity(pathfindingAgent, _playerPredictedPath);
-					playerPathCheckTime = body.space.timeStamp;
+					if (graphics.alpha < 1)
+					{
+						graphics.alpha += 0.025;
+					}
+					if (body.space.timeStamp - playerPathCheckTime > pathUpdateInterval)
+					{
+						Player.current.findPathToEntity(pathfindingAgent, _playerPredictedPath);
+						playerPathCheckTime = body.space.timeStamp;
+					}
 				}
-			}
-			else
-			{
-				if (graphics.alpha > 0.4)
+				else
 				{
-					graphics.alpha -= 0.005;
+					if (graphics.alpha > 0.4)
+					{
+						graphics.alpha -= 0.005;
+					}
+					if (body.space.timeStamp - playerPathCheckTime > pathUpdateInterval)
+					{
+						var playerPosX:Number = Player.current.pathfindingAgent.x;
+						var playerPosY:Number = Player.current.pathfindingAgent.y;
+						Player.current.pathfindingAgent.x = lastSeenPlayerPos.x;
+						Player.current.pathfindingAgent.y = lastSeenPlayerPos.y;
+						Player.current.findPathToEntity(pathfindingAgent, _playerPredictedPath);
+						Player.current.pathfindingAgent.x = playerPosX;
+						Player.current.pathfindingAgent.y = playerPosY;
+						playerPathCheckTime = body.space.timeStamp;
+					}
 				}
-				if (body.space.timeStamp - playerPathCheckTime > pathUpdateInterval)
-				{
-					var playerPosX:Number = Player.current.pathfindingAgent.x;
-					var playerPosY:Number = Player.current.pathfindingAgent.y;
-					Player.current.pathfindingAgent.x = lastSeenPlayerPos.x;
-					Player.current.pathfindingAgent.y = lastSeenPlayerPos.y;
-					Player.current.findPathToEntity(pathfindingAgent, _playerPredictedPath);
-					Player.current.pathfindingAgent.x = playerPosX;
-					Player.current.pathfindingAgent.y = playerPosY;
-					playerPathCheckTime = body.space.timeStamp;
-				}
-			}
-			updateArrow();
+				updateArrow();
 		}
 		
 		static public function get current():PreyEnemy
@@ -177,7 +177,7 @@ package spaceshiptHunt.entities
 			override public function drawDebug(canvas:DDLSSimpleView):void
 			{
 				super.drawDebug(canvas);
-					canvas.drawPath(playerPredictedPath, false, Color.BLUE);
+				canvas.drawPath(playerPredictedPath, false, Color.BLUE);
 			}
 		}
 	

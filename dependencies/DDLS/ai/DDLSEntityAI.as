@@ -40,15 +40,24 @@ package DDLS.ai
 				coordinates.push( _radius * Math.sin(2*Math.PI*i/NUM_SEGMENTS) );
 				coordinates.push( _radius * Math.cos(2*Math.PI*(i+1)/NUM_SEGMENTS) );
 				coordinates.push( _radius * Math.sin(2*Math.PI*(i+1)/NUM_SEGMENTS) );
-			}
-			
+			}		
 		}
 		
 		public function get approximateObject():DDLSObject
 		{
+			if (!_approximateObject)
+			{
+				return null;
+			}
 			_approximateObject.matrix.identity();
 			_approximateObject.matrix.translate(x, y);
 			return _approximateObject;
+		}
+		
+		public function dispose():void
+		{
+			_approximateObject.dispose();
+			_approximateObject = null;
 		}
 
 		public function get angleFOV():Number
