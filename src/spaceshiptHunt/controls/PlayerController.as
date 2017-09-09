@@ -71,6 +71,7 @@ package spaceshiptHunt.controls
 			var crossTargetOffset:Vec2 = Vec2.get(crossTarget.x, crossTarget.y).subeq(player.body.position);
 			if (MathUtilities.angleDifferenceAbs(player.body.velocity.angle - Math.PI / 2, player.body.rotation) < 0.1)
 			{
+				var angleDiff:Number = MathUtilities.angleDifference(crossTargetOffset.angle+Math.PI / 2,player.body.rotation);
 				if (Math.abs(angleDiff) < 0.2)
 				{
 					crossTargetOffset.rotate(angleDiff);
