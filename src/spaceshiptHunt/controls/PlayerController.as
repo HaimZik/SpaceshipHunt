@@ -11,6 +11,7 @@ package spaceshiptHunt.controls
 	import nape.geom.Vec2;
 	import spaceshiptHunt.entities.Player;
 	import spaceshiptHunt.utils.MathUtilities;
+	import starling.core.Starling;
 	import starling.display.Image;
 	import starling.display.Mesh;
 	import starling.events.Event;
@@ -26,12 +27,13 @@ package spaceshiptHunt.controls
 		protected static var rightKey:uint = Keyboard.RIGHT;
 		protected static var leftKey:uint = Keyboard.LEFT;
 		
-		protected var lastDirectionChange:Number;
 		protected var analogStick:Mesh;
 		protected var crossTarget:Image;
 		protected var minCrossTargetDistance:Number;
 		protected var maxCrossTargetDistance:Number;
 		protected var rightStickAxis:Vec2 = new Vec2();
+		private var lastDirectionChange:Number;
+		private var lockDirectionDelay:Number = 0.5;
 		private var _player:Player;
 		private var xboxController:Xbox360Controller;
 		
@@ -85,6 +87,10 @@ package spaceshiptHunt.controls
 			if (player.impulse.lsq() == 0)
 			{
 				handleJoystickInput();
+			}
+			if (Math.abs(player.impulse.x) > 0.5 || Math.abs(rightStickAxis.x) > 0.1)
+			{
+				lastDirectionChange = Starling.juggler.elapsedTime;
 			}
 			handleCrossTargetControls();
 		}
@@ -162,16 +168,10 @@ package spaceshiptHunt.controls
 				crossTargetOffset.angle += rightStickAxis.x * aimAngleSpeed;
 				rightStickAxis.setxy(0, 0);
 			}
-			else if (player.body.velocity.lsq() > 0 && Math.abs(player.body.angularVel) < 0.1)
+			else if (Starling.juggler.elapsedTime - lastDirectionChange > lockDirectionDelay)
 			{
-				if (MathUtilities.angleDifferenceAbs(player.body.velocity.angle + Math.PI / 2, player.body.rotation) < 0.1)
-				{
-					var angleDiff:Number = MathUtilities.angleDifference(crossTargetOffset.angle + Math.PI / 2, player.body.rotation);
-					if (Math.abs(angleDiff) < 0.2)
-					{
-						crossTargetOffset.rotate(-angleDiff);
-					}
-				}
+				var angleDiff:Number = MathUtilities.angleDifference(crossTargetOffset.angle + Math.PI / 2, player.body.rotation);
+				crossTargetOffset.rotate(-angleDiff / 6.0);
 			}
 			MathUtilities.clampVector(crossTargetOffset, minCrossTargetDistance, maxCrossTargetDistance);
 			crossTarget.x = crossTargetOffset.x + player.body.position.x;
