@@ -2,7 +2,7 @@ package spaceshiptHunt.entities
 {
 	import spaceshiptHunt.level.Environment;
 	import nape.geom.Vec2;
-	
+	import spaceshiptHunt.entities.Spaceship;
 	/**
 	 * ...
 	 * @author Haim Shnitzer

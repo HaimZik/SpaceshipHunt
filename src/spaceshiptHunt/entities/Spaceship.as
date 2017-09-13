@@ -1,5 +1,5 @@
 package spaceshiptHunt.entities
-{	
+{
 	/**
 	 * ...
 	 * @author Haim Shnitzer
@@ -118,13 +118,8 @@ package spaceshiptHunt.entities
 		
 		public function rotateTowards(angle:Number):void
 		{
-			var angleDifference:Number = MathUtilities.angleDifference(angle+Math.PI / 2, body.rotation);
-			if (Math.abs(angleDifference) > Math.PI)
-			{
-				trace(angleDifference);
-				trace(angle-body.rotation);
-			}
-			 if (Math.abs(angleDifference) > rotateTowardThreshold)
+			var angleDifference:Number = MathUtilities.angleDifference(angle + Math.PI / 2, body.rotation);
+		//	if (Math.abs(angleDifference) > rotateTowardThreshold)
 			{
 				body.applyAngularImpulse(maxAngularAcceleration * angleDifference);
 			}
