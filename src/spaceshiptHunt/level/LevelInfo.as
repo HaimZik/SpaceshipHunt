@@ -11,15 +11,15 @@ package spaceshiptHunt.level
 	public class LevelInfo
 	{
 		//to enable dynamic creation of clasess from json files.
-		private static const allowedTypes:Vector.<Class> = new <Class>[PreyEnemy,Player,EnemyPathBlocker];
-		public static var entityTypes:Dictionary=new Dictionary();
+		private static const allowedTypes:Vector.<Class> = new <Class>[PreyEnemy, Player, EnemyPathBlocker];
+		public static var entityTypes:Dictionary = new Dictionary();
 		
 		[Embed(source = "level1.json", mimeType = "application/octet-stream")]
 		public static const Level1:Class;
 		[Embed(source = "level1Test.json", mimeType = "application/octet-stream")]
 		public static const Level1Test:Class;
 		
-		   // static initializer
+		// static initializer()
 		{
 			init();
 		}
@@ -31,7 +31,7 @@ package spaceshiptHunt.level
 				entityTypes[getQualifiedClassName(allowedTypes[i])] = allowedTypes[i];
 			}
 		}
-
+	
 	}
 
 }

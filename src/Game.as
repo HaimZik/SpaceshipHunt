@@ -53,13 +53,18 @@ package
 		//initialization functions		
 		public function init():void
 		{
-			CONFIG::debug
-			{
-				gameEnvironment = new LevelEditor(this);
-			}
-			CONFIG::release
+			var releaseMode:Boolean = CONFIG::release;
+			releaseMode = true;
+			if (releaseMode)
 			{
 				gameEnvironment = new Environment(this);
+			}
+			CONFIG::debug
+			{
+				if (!releaseMode)
+				{
+					gameEnvironment = new LevelEditor(this);
+				}
 			}
 			drawJoystick();
 			gameEnvironment.enqueueLevel("Level1Test");
@@ -177,10 +182,8 @@ package
 				}
 				else
 				{
-					CONFIG::debug
-					{
-						(gameEnvironment as LevelEditor).handleTouch(e);
-					}
+					playerController.handleGameAreaTouch(touch);
+					gameEnvironment.handleGameAreaTouch(e);
 				}
 			}
 		}
@@ -203,9 +206,10 @@ package
 		private function enterFrame(event:EnterFrameEvent, passedTime:Number):void
 		{
 			//Starling.current.juggler.advanceTime(event.passedTime);
-			if (event.passedTime > 0.010)
+			//some strange bug or maybe I optimize faster than the speed of light
+			if (event.passedTime > 0)
 			{
-				gameEnvironment.updatePhysics(passedTime);
+				gameEnvironment.update(passedTime);
 				if (Player.current)
 				{
 					playerController.update();

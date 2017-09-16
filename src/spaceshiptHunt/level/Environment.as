@@ -33,6 +33,9 @@ package spaceshiptHunt.level
 	import starling.display.DisplayObjectContainer;
 	import starling.display.Mesh;
 	import starling.display.Sprite;
+	import starling.events.Touch;
+	import starling.events.TouchEvent;
+	import starling.events.TouchPhase;
 	import starling.extensions.PDParticleSystem;
 	import starling.extensions.lighting.LightSource;
 	import starling.extensions.lighting.LightStyle;
@@ -66,9 +69,11 @@ package spaceshiptHunt.level
 		protected static const JetFireConfig:Class;
 		
 		protected var asteroidField:Sprite;
+		protected var staticMeshRelativePath:String;
 		
 		public function Environment(mainSprite:Sprite)
 		{
+			staticMeshRelativePath = "physicsBodies/";
 			currentEnvironment = this;
 			mainDisplay = mainSprite;
 			physicsSpace = new Space(new Vec2(0, 0));
@@ -105,12 +110,9 @@ package spaceshiptHunt.level
 			return currentEnvironment;
 		}
 		
-		public function updatePhysics(passedTime:Number):void
+		public function update(passedTime:Number):void
 		{
-			if (passedTime > 0) //some strange bug or maybe I optimize faster than the speed of light
-			{
-				physicsSpace.step(passedTime);
-			}
+			physicsSpace.step(passedTime);
 			if (Player.current)
 			{
 				light.x = Player.current.graphics.x;
@@ -148,18 +150,11 @@ package spaceshiptHunt.level
 		{
 			var infoFileName:String = assetsLoader.enqueueWithName("physicsBodies/" + fileName + "/Info.json", fileName + "Info");
 			var meshFileName:String;
-			CONFIG::debug
+			if (fileName.indexOf("static") != -1)
 			{
-				if (fileName.indexOf("static") != -1)
-				{
-					meshFileName = assetsLoader.enqueueWithName("devPhysicsBodies/" + fileName + "/Mesh.json", fileName + "Mesh");
-				}
-				else
-				{
-					meshFileName = assetsLoader.enqueueWithName("physicsBodies/" + fileName + "/Mesh.json", fileName + "Mesh");
-				}
+				meshFileName = assetsLoader.enqueueWithName(staticMeshRelativePath + fileName + "/Mesh.json", fileName + "Mesh");
 			}
-			CONFIG::release
+			else
 			{
 				meshFileName = assetsLoader.enqueueWithName("physicsBodies/" + fileName + "/Mesh.json", fileName + "Mesh");
 			}
@@ -174,18 +169,18 @@ package spaceshiptHunt.level
 					var bodyDescription:Object = assetsLoader.getObject(infoFileName);
 					var EntityType:Class = LevelInfo.entityTypes["spaceshiptHunt.entities::" + bodyDescription.type];
 					var polygonArray:Array = assetsLoader.getObject(meshFileName) as Array;
-					for (var i:int = 0; i < fileInfo.cordsX.length; i++)
+					for (var i:int = 0; i < fileInfo.cords.length; i++)
 					{
 						var bodyInfo:Entity
 						if (EntityType == Player)
 						{
 							bodyInfo = Player.current;
-							bodyInfo.body.position.x = fileInfo.cordsX[i];
-							bodyInfo.body.position.y = fileInfo.cordsY[i];
+							bodyInfo.body.position.x = fileInfo.cords[i];
+							bodyInfo.body.position.y = fileInfo.cords[++i];
 						}
 						else
 						{
-							bodyInfo = new EntityType(new Vec2(fileInfo.cordsX[i], fileInfo.cordsY[i]));
+							bodyInfo = new EntityType(new Vec2(fileInfo.cords[i], fileInfo.cords[++i]));
 						}
 						bodyInfo.infoFileName = fileName;
 						mainDisplay.addChild(bodyInfo.graphics);
@@ -367,6 +362,10 @@ package spaceshiptHunt.level
 				return true;
 			}
 			return false;
+		}
+		
+		public function handleGameAreaTouch(e:TouchEvent):void
+		{
 		}
 	
 	}

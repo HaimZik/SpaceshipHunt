@@ -15,6 +15,11 @@ package spaceshiptHunt.controls
 	import starling.display.Image;
 	import starling.display.Mesh;
 	import starling.events.Event;
+	import starling.events.Touch;
+	import starling.events.TouchEvent;
+	import starling.events.TouchPhase;
+	import starling.utils.MathUtil;
+	import starling.utils.SystemUtil;
 	
 	public class PlayerController
 	{
@@ -32,6 +37,9 @@ package spaceshiptHunt.controls
 		protected var minCrossTargetDistance:Number;
 		protected var maxCrossTargetDistance:Number;
 		protected var rightStickAxis:Vec2 = new Vec2();
+		protected var turningSpeedRatio:Number = 200.0;
+		protected var aimvVerticalSpeedRatio:Number = 20.0;
+		protected var isTouchingScreen:Boolean = false;
 		private var lastDirectionChange:Number;
 		private var lockDirectionDelay:Number = 0.5;
 		private var _player:Player;
@@ -88,7 +96,7 @@ package spaceshiptHunt.controls
 			{
 				handleJoystickInput();
 			}
-			if (Math.abs(player.impulse.x) > 0.5 || Math.abs(rightStickAxis.x) > 0.1)
+			if (Math.abs(player.impulse.x) > 0.5 || Math.abs(rightStickAxis.x) > 0.2)
 			{
 				lastDirectionChange = Starling.juggler.elapsedTime;
 			}
@@ -117,27 +125,40 @@ package spaceshiptHunt.controls
 			}
 			var xAxis:Number;
 			var yAxis:Number;
-			var turningSpeed:Number;
 			xAxis = Math.min(1, analogStick.x / 160);
 			yAxis = Math.min(1, analogStick.y / 160);
-			if (xboxController && Math.abs(xAxis) + Math.abs(yAxis) == 0)
+			if (xboxController)
 			{
-				xAxis = xboxController.leftStick.x;
-				yAxis = -xboxController.leftStick.y;
-				if (Math.abs(xAxis) + Math.abs(yAxis) < 0.1)
+				if (xAxis == 0 && yAxis == 0 && rightStickAxis.lsq() == 0)
 				{
-					xAxis = 0;
-					yAxis = 0;
+					xAxis = xboxController.leftStick.x;
+					yAxis = -xboxController.leftStick.y;
+					if (Math.abs(xAxis) < 0.1)
+					{
+						xAxis = 0;
+					}
+					if (Math.abs(yAxis) < 0.1)
+					{
+						yAxis = 0;
+					}
+					rightStickAxis.setxy(xboxController.rightStick.x, xboxController.rightStick.y);
+					if (Math.abs(rightStickAxis.x) < 0.1)
+					{
+						rightStickAxis.x = 0;
+					}
+					if (Math.abs(rightStickAxis.y) < 0.1)
+					{
+						rightStickAxis.y = 0;
+					}
+					if (xboxController.rt.held)
+					{
+						player.startShooting();
+					}
+					else if (xboxController.rt.released)
+					{
+						player.stopShooting();
+					}
 				}
-				if (xboxController.rt.held)
-				{
-					player.startShooting();
-				}
-				else if (xboxController.rt.released)
-				{
-					player.stopShooting();
-				}
-				rightStickAxis.setxy(xboxController.rightStick.x, xboxController.rightStick.y);
 			}
 			else if (ControllerInput.hasReadyController())
 			{
@@ -160,15 +181,26 @@ package spaceshiptHunt.controls
 		protected function handleCrossTargetControls():void
 		{
 			var crossTargetOffset:Vec2 = Vec2.get(crossTarget.x, crossTarget.y).subeq(player.body.position);
-			if (rightStickAxis.lsq() > 0.1)
+			if (isTouchingScreen || rightStickAxis.lsq() > 0.1)
 			{
 				var aimAngleSpeed:Number = 0.05;
 				var aimDistanceSpeed:Number = 20.0;
 				crossTargetOffset.length += rightStickAxis.y * aimDistanceSpeed;
 				crossTargetOffset.angle += rightStickAxis.x * aimAngleSpeed;
+				if (!isTouchingScreen) //&& !SystemUtil.isDesktop)
+				{
+					rightStickAxis.muleq(0.5);
+				}
+			}
+			else if (!isTouchingScreen)
+			{
 				rightStickAxis.setxy(0, 0);
 			}
-			else if (Starling.juggler.elapsedTime - lastDirectionChange > lockDirectionDelay)
+			if (SystemUtil.isDesktop)
+			{
+				//	rightStickAxis.setxy(0, 0);
+			}
+			if (Starling.juggler.elapsedTime - lastDirectionChange > lockDirectionDelay)
 			{
 				var angleDiff:Number = MathUtilities.angleDifference(crossTargetOffset.angle + Math.PI / 2, player.body.rotation);
 				crossTargetOffset.rotate(-angleDiff / 6.0);
@@ -217,6 +249,22 @@ package spaceshiptHunt.controls
 			else if (Key.isDown(rightKey))
 			{
 				player.impulse.x = 1.0;
+			}
+		}
+		
+		public function handleGameAreaTouch(touch:Touch):void
+		{
+			if (touch.phase == TouchPhase.MOVED)
+			{
+				isTouchingScreen = true;
+				rightStickAxis.x += (touch.globalX - touch.previousGlobalX) / turningSpeedRatio;
+				rightStickAxis.x = MathUtil.clamp(rightStickAxis.x, -1.0, 1.0);
+				rightStickAxis.y += (touch.previousGlobalY - touch.globalY) / aimvVerticalSpeedRatio;
+				rightStickAxis.y = MathUtil.clamp(rightStickAxis.y, -1.0, 1.0);
+			}
+			else if (touch.phase == TouchPhase.ENDED)
+			{
+				isTouchingScreen = false;
 			}
 		}
 	

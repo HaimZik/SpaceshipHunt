@@ -70,6 +70,7 @@ package spaceshiptHuntDevelopment.level
 		public function LevelEditor(mainSprite:Sprite)
 		{
 			super(mainSprite);
+			staticMeshRelativePath = "devPhysicsBodies/";
 			obstacleDisplay = new Vector.<Canvas>();
 			obstacleBody = new Vector.<Body>();
 			obstacle = new Vector.<starling.geom.Polygon>();
@@ -90,7 +91,7 @@ package spaceshiptHuntDevelopment.level
 			}
 		}
 		
-		override public function updatePhysics(passedTime:Number):void
+		override public function update(passedTime:Number):void
 		{
 			super.updatePhysics(passedTime);
 			drawDebugGrp();
@@ -200,12 +201,10 @@ package spaceshiptHuntDevelopment.level
 					if (!levelData[infoFileName])
 					{
 						levelData[infoFileName] = new Object();
-						levelData[infoFileName].cordsX = new Vector.<int>();
-						levelData[infoFileName].cordsY = new Vector.<int>();
+						levelData[infoFileName].cords = new Vector.<int>();
 					}
 					var typeArray:Object = levelData[infoFileName];
-					(typeArray.cordsX as Vector.<int>).push(BodyInfo.list[i].body.position.x);
-					(typeArray.cordsY as Vector.<int>).push(BodyInfo.list[i].body.position.y);
+					(typeArray.cords as Vector.<int>).push(BodyInfo.list[i].body.position.x, BodyInfo.list[i].body.position.y);
 				}
 			}
 			levelData["levelSpecific/" + currentLevel + "/static/asteroidField"] = new Object();
@@ -224,7 +223,7 @@ package spaceshiptHuntDevelopment.level
 			}
 		}
 		
-		public function handleTouch(e:TouchEvent):void
+		override public function handleGameAreaTouch(e:TouchEvent):void
 		{
 			var touch:Touch = e.getTouch(mainDisplay.parent);
 			if (touch)

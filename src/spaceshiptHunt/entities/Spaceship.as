@@ -30,7 +30,7 @@ package spaceshiptHunt.entities
 		protected var weaponLeft:Image;
 		protected var firingRate:Number = 0.1;
 		protected var bulletSpeed:Number = 80.0;
-		protected const rotateTowardThreshold:Number = 0.1;
+		protected const rotateTowardThreshold:Number = 0.02;
 		private var shootingCallId:uint;
 		
 		public function Spaceship(position:Vec2)
@@ -119,7 +119,7 @@ package spaceshiptHunt.entities
 		public function rotateTowards(angle:Number):void
 		{
 			var angleDifference:Number = MathUtilities.angleDifference(angle + Math.PI / 2, body.rotation);
-		//	if (Math.abs(angleDifference) > rotateTowardThreshold)
+			if (Math.abs(angleDifference) > rotateTowardThreshold)
 			{
 				body.applyAngularImpulse(maxAngularAcceleration * angleDifference);
 			}

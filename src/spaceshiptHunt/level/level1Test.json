@@ -1,1 +1,3 @@
-{"player":{"cordsY":[4519],"cordsX":[3551]},"batship":{"cordsY":[4351],"cordsX":[2951]},"batshipMiniBlur":{"cordsY":[4319,4416],"cordsX":[2675,3638]},"levelSpecific/Level1Test/static/asteroidField":{}}
+{"player":{"cords":[3551,4519]},"batship":{"cords":[2951,4351]},
+"batshipMiniBlur":{"cords":[2675,4319,3638,4416,3738,4416]},
+"levelSpecific/Level1Test/static/asteroidField":{}}

@@ -1,1 +1,1 @@
-{"levelSpecific/Level1/static/asteroidField":{},"player":{"cordsX":[3551],"cordsY":[4519]},"batship":{"cordsX":[3750],"cordsY":[4100]}}
+{"player":{"cords":[3551,4519]},"batship":{"cords":[2951,4351]},"batshipMiniBlur":{"cords":[2675,4319,3638,4416]},"levelSpecific/Level1Test/static/asteroidField":{}}
