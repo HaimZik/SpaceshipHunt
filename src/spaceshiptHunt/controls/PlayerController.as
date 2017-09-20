@@ -37,7 +37,7 @@ package spaceshiptHunt.controls
 		protected var minCrossTargetDistance:Number;
 		protected var maxCrossTargetDistance:Number;
 		protected var rightStickAxis:Vec2 = new Vec2();
-		protected var turningSpeedRatio:Number = 200.0;
+		protected var turningSpeedRatio:Number = 20.0;
 		protected var aimvVerticalSpeedRatio:Number = 20.0;
 		protected var isTouchingScreen:Boolean = false;
 		private var lastDirectionChange:Number;
@@ -60,7 +60,7 @@ package spaceshiptHunt.controls
 			this.analogStick = analogStick;
 			player = playerToControl;
 			crossTarget.alignPivot();
-			minCrossTargetDistance = 200.0;
+			minCrossTargetDistance = 300.0;
 			maxCrossTargetDistance = 400.0;
 			crossTarget.x = player.body.position.x;
 			crossTarget.y = player.body.position.y - minCrossTargetDistance;
@@ -181,18 +181,18 @@ package spaceshiptHunt.controls
 		protected function handleCrossTargetControls():void
 		{
 			var crossTargetOffset:Vec2 = Vec2.get(crossTarget.x, crossTarget.y).subeq(player.body.position);
-			if (isTouchingScreen || rightStickAxis.lsq() > 0.1)
+			if (rightStickAxis.lsq() > 0.1)
 			{
 				var aimAngleSpeed:Number = 0.05;
 				var aimDistanceSpeed:Number = 20.0;
 				crossTargetOffset.length += rightStickAxis.y * aimDistanceSpeed;
 				crossTargetOffset.angle += rightStickAxis.x * aimAngleSpeed;
-				if (!isTouchingScreen) //&& !SystemUtil.isDesktop)
+			//	if (!SystemUtil.isDesktop)
 				{
-					rightStickAxis.muleq(0.5);
+					rightStickAxis.muleq(0.2);
 				}
 			}
-			else if (!isTouchingScreen)
+			else
 			{
 				rightStickAxis.setxy(0, 0);
 			}
@@ -257,10 +257,16 @@ package spaceshiptHunt.controls
 			if (touch.phase == TouchPhase.MOVED)
 			{
 				isTouchingScreen = true;
-				rightStickAxis.x += (touch.globalX - touch.previousGlobalX) / turningSpeedRatio;
-				rightStickAxis.x = MathUtil.clamp(rightStickAxis.x, -1.0, 1.0);
-				rightStickAxis.y += (touch.previousGlobalY - touch.globalY) / aimvVerticalSpeedRatio;
-				rightStickAxis.y = MathUtil.clamp(rightStickAxis.y, -1.0, 1.0);
+				var touchVelocity:Number = touch.globalX - touch.previousGlobalX
+				if (touchVelocity != 0)
+				{
+					var easeOutAmount:Number = 2.0;
+					touchVelocity = touchVelocity / Math.abs(touchVelocity) * Math.pow(Math.abs(touchVelocity), easeOutAmount);
+					rightStickAxis.x = touchVelocity / turningSpeedRatio;
+					rightStickAxis.x = MathUtil.clamp(rightStickAxis.x, -1.0, 1.0);
+					rightStickAxis.y += (touch.previousGlobalY - touch.globalY) / aimvVerticalSpeedRatio;
+					rightStickAxis.y = MathUtil.clamp(rightStickAxis.y, -1.0, 1.0);
+				}
 			}
 			else if (touch.phase == TouchPhase.ENDED)
 			{
