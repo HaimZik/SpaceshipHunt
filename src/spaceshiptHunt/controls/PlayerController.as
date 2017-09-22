@@ -41,7 +41,7 @@ package spaceshiptHunt.controls
 		protected var aimvVerticalSpeedRatio:Number = 20.0;
 		protected var isTouchingScreen:Boolean = false;
 		private var lastDirectionChange:Number;
-		private var lockDirectionDelay:Number = 0.5;
+		private var lockDirectionDelay:Number = 1.5;
 		private var _player:Player;
 		private var xboxController:Xbox360Controller;
 		
@@ -187,7 +187,7 @@ package spaceshiptHunt.controls
 				var aimDistanceSpeed:Number = 20.0;
 				crossTargetOffset.length += rightStickAxis.y * aimDistanceSpeed;
 				crossTargetOffset.angle += rightStickAxis.x * aimAngleSpeed;
-			//	if (!SystemUtil.isDesktop)
+				//	if (!SystemUtil.isDesktop)
 				{
 					rightStickAxis.muleq(0.2);
 				}
@@ -200,12 +200,16 @@ package spaceshiptHunt.controls
 			{
 				//	rightStickAxis.setxy(0, 0);
 			}
+			MathUtilities.clampVector(crossTargetOffset, minCrossTargetDistance, maxCrossTargetDistance);
+			var angleDiff:Number = MathUtilities.angleDifference(crossTargetOffset.angle + Math.PI / 2, player.body.rotation);
 			if (Starling.juggler.elapsedTime - lastDirectionChange > lockDirectionDelay)
 			{
-				var angleDiff:Number = MathUtilities.angleDifference(crossTargetOffset.angle + Math.PI / 2, player.body.rotation);
 				crossTargetOffset.rotate(-angleDiff / 6.0);
 			}
-			MathUtilities.clampVector(crossTargetOffset, minCrossTargetDistance, maxCrossTargetDistance);
+			else if (Math.abs(angleDiff) > 0.2)
+			{
+				player.impulse.y /= 2.0;
+			}
 			crossTarget.x = crossTargetOffset.x + player.body.position.x;
 			crossTarget.y = crossTargetOffset.y + player.body.position.y;
 			player.rotateTowards(crossTargetOffset.angle);
