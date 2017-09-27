@@ -4,6 +4,8 @@ package spaceshiptHunt.controls
 	 * ...
 	 * @author Haim Shnitzer
 	 */
+	import flash.display.StageDisplayState;
+	import flash.events.MouseEvent;
 	import flash.ui.Keyboard;
 	import input.Key;
 	import io.arkeus.ouya.ControllerInput;
@@ -25,12 +27,16 @@ package spaceshiptHunt.controls
 	{
 		
 		//keyboardSetup
-		protected static var alternativeFireKey:uint = Keyboard.SPACE;
-		protected static var fireKey:uint = Keyboard.Z;
-		protected static var upKey:uint = Keyboard.UP;
-		protected static var downKey:uint = Keyboard.DOWN;
-		protected static var rightKey:uint = Keyboard.RIGHT;
-		protected static var leftKey:uint = Keyboard.LEFT;
+		protected static var upKey:uint = Keyboard.W;
+		protected static var downKey:uint = Keyboard.S;
+		protected static var rightKey:uint = Keyboard.D;
+		protected static var leftKey:uint = Keyboard.A;
+		protected static var moveAimForwardKey:uint = Keyboard.UP;
+		protected static var moveAimBackwardKey:uint = Keyboard.DOWN;
+		protected static var rotateAimRightKey:uint = Keyboard.RIGHT;
+		protected static var rotateAimLeftKey:uint = Keyboard.LEFT;
+		protected static var fireKey:uint = Keyboard.SPACE;
+		protected static var alternativeFireKey:uint = Keyboard.Z;
 		
 		protected var analogStick:Mesh;
 		protected var crossTarget:Image;
@@ -39,20 +45,10 @@ package spaceshiptHunt.controls
 		protected var rightStickAxis:Vec2 = new Vec2();
 		protected var turningSpeedRatio:Number = 20.0;
 		protected var aimvVerticalSpeedRatio:Number = 20.0;
-		protected var isTouchingScreen:Boolean = false;
 		private var lastDirectionChange:Number;
 		private var lockDirectionDelay:Number = 1.5;
 		private var _player:Player;
 		private var xboxController:Xbox360Controller;
-		
-		CONFIG::debug
-		{
-			fireKey = Keyboard.NUMPAD_ADD;
-			upKey = Keyboard.W;
-			downKey = Keyboard.S;
-			rightKey = Keyboard.D;
-			leftKey = Keyboard.A;
-		}
 		
 		public function PlayerController(playerToControl:Player, analogStick:Mesh, crossTarget:Image)
 		{
@@ -222,31 +218,16 @@ package spaceshiptHunt.controls
 			{
 				player.startShooting();
 			}
+			// movement
 			if (Key.isDown(upKey))
 			{
 				player.impulse.y = -1.0;
-				if (Key.isDown(leftKey))
-				{
-					player.impulse.x = -1.0;
-				}
-				else if (Key.isDown(rightKey))
-				{
-					player.impulse.x = 1.0;
-				}
 			}
 			else if (Key.isDown(downKey))
 			{
 				player.impulse.y = 1.0;
-				if (Key.isDown(leftKey))
-				{
-					player.impulse.x = -1.0;
-				}
-				else if (Key.isDown(rightKey))
-				{
-					player.impulse.x = 1.0;
-				}
 			}
-			else if (Key.isDown(leftKey))
+			if (Key.isDown(leftKey))
 			{
 				player.impulse.x = -1.0;
 			}
@@ -254,28 +235,49 @@ package spaceshiptHunt.controls
 			{
 				player.impulse.x = 1.0;
 			}
+			//moving aim
+			if (Key.isDown(moveAimForwardKey))
+			{
+				rightStickAxis.y = 1.0;
+			}
+			else if (Key.isDown(moveAimBackwardKey))
+			{
+				rightStickAxis.y = -1.0;
+			}
+			if (Key.isDown(rotateAimLeftKey))
+			{
+				rightStickAxis.x = -1.0;
+			}
+			else if (Key.isDown(rotateAimRightKey))
+			{
+				rightStickAxis.x = 1.0;
+			}
 		}
 		
 		public function handleGameAreaTouch(touch:Touch):void
 		{
-			if (touch.phase == TouchPhase.MOVED)
+			if (touch.phase == TouchPhase.MOVED && (!SystemUtil.isDesktop || Starling.current.nativeStage.displayState == StageDisplayState.NORMAL))
 			{
-				isTouchingScreen = true;
-				var touchVelocity:Number = touch.globalX - touch.previousGlobalX
-				if (touchVelocity != 0)
-				{
-					var easeOutAmount:Number = 2.0;
-					touchVelocity = touchVelocity / Math.abs(touchVelocity) * Math.pow(Math.abs(touchVelocity), easeOutAmount);
-					rightStickAxis.x = touchVelocity / turningSpeedRatio;
-					rightStickAxis.x = MathUtil.clamp(rightStickAxis.x, -1.0, 1.0);
-					rightStickAxis.y += (touch.previousGlobalY - touch.globalY) / aimvVerticalSpeedRatio;
-					rightStickAxis.y = MathUtil.clamp(rightStickAxis.y, -1.0, 1.0);
-				}
+				onSwipe(touch.globalX - touch.previousGlobalX, touch.previousGlobalY - touch.globalY);
 			}
-			else if (touch.phase == TouchPhase.ENDED)
+		}
+		
+		public function onSwipe(swipeVelocityX:Number, swipeVelocityY:Number):void
+		{
+			if (swipeVelocityX != 0)
 			{
-				isTouchingScreen = false;
+				var easeOutAmount:Number = 2.0;
+				swipeVelocityX = swipeVelocityX / Math.abs(swipeVelocityX) * Math.pow(Math.abs(swipeVelocityX), easeOutAmount);
+				rightStickAxis.x = swipeVelocityX / turningSpeedRatio;
+				rightStickAxis.x = MathUtil.clamp(rightStickAxis.x, -1.0, 1.0);
 			}
+			rightStickAxis.y += swipeVelocityY / aimvVerticalSpeedRatio;
+			rightStickAxis.y = MathUtil.clamp(rightStickAxis.y, -1.0, 1.0);
+		}
+		
+		public function onMouseMove(e:MouseEvent):void
+		{
+			onSwipe(e.movementX, -e.movementY);
 		}
 	
 	}

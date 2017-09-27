@@ -1,5 +1,9 @@
 package
 {
+	import flash.display.Stage;
+	import flash.display.StageDisplayState;
+	import flash.events.FullScreenEvent;
+	import flash.events.MouseEvent;
 	import flash.geom.Point;
 	import flash.media.SoundChannel;
 	import flash.media.SoundTransform;
@@ -18,6 +22,7 @@ package
 	import starling.rendering.VertexData;
 	import starling.utils.Color;
 	import starling.utils.Pool;
+	import starling.utils.SystemUtil;
 	
 	CONFIG::debug
 	{
@@ -79,6 +84,18 @@ package
 			gameEnvironment.startLoading(onFinishLoading);
 		}
 		
+		protected function onFullscreen(e:FullScreenEvent):void
+		{
+			if (e.fullScreen)
+			{
+				Starling.current.nativeStage.addEventListener(MouseEvent.MOUSE_MOVE, playerController.onMouseMove);
+			}
+			else
+			{
+				Starling.current.nativeStage.removeEventListener(MouseEvent.MOUSE_MOVE, playerController.onMouseMove);
+			}
+		}
+		
 		public function onFocusReturn():void
 		{
 			Key.reset();
@@ -87,6 +104,7 @@ package
 		
 		private function onFinishLoading():void
 		{
+			Starling.current.stage.addEventListener(Event.RESIZE, stageResize);
 			player = Player.current;
 			shootButton = new Image(Environment.current.assetsLoader.getTexture("shootButton"));
 			addChild(shootButton);
@@ -100,13 +118,18 @@ package
 			this.setChildIndex(joystick, this.numChildren);
 			crossTarget = new Image(Environment.current.assetsLoader.getTexture("crossTarget"));
 			addChild(crossTarget);
-			
 			Key.init(stage);
 			ControllerInput.initialize(Starling.current.nativeStage);
 			playerController = new PlayerController(Player.current, analogStick, crossTarget);
+			if (SystemUtil.isDesktop && CONFIG::release)
+			{
+				var flashStage:Stage = Starling.current.nativeStage;
+				flashStage.addEventListener(FullScreenEvent.FULL_SCREEN, onFullscreen);
+				flashStage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
+				flashStage.mouseLock = true;
+			}
 			addEventListener(Event.ENTER_FRAME, enterFrame);
 			addEventListener(TouchEvent.TOUCH, onTouch);
-			Starling.current.stage.addEventListener(Event.RESIZE, stage_resize);
 			Environment.current.assetsLoader.enqueueWithName("audio/Nihilore.mp3", "music");
 			Environment.current.assetsLoader.loadQueue(function onProgress(ratio:Number):void
 			{
@@ -188,7 +211,7 @@ package
 			}
 		}
 		
-		private function stage_resize(e:ResizeEvent = null):void
+		private function stageResize(e:ResizeEvent = null):void
 		{
 			stage.stageWidth = e.width;
 			stage.stageHeight = e.height;
