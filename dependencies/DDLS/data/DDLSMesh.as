@@ -1345,9 +1345,9 @@ package DDLS.data
 				realB = constrainedEdgeB.leftFace.isReal;
 				// we update the segments infos
 				edgeA.fromConstraintSegments.length = constrainedEdgeA.fromConstraintSegments.length;
-				for (var j:int = 0; j < constrainedEdgeA.fromConstraintSegments.length; j++)
+				for (i = 0; i < constrainedEdgeA.fromConstraintSegments.length; i++)
 				{
-					edgeA.fromConstraintSegments[j] = constrainedEdgeA.fromConstraintSegments[j];
+					edgeA.fromConstraintSegments[i] = constrainedEdgeA.fromConstraintSegments[i];
 				}
 				edgeB.fromConstraintSegments = edgeA.fromConstraintSegments;
 				var index:int;
@@ -1384,13 +1384,24 @@ package DDLS.data
 				faceToDelete.dispose();
 				
 				edge.destinationVertex.edge = edge.nextLeftEdge;
-				
-				_edges.removeAt(_edges.indexOf(edge.oppositeEdge));
+				var j:int = -1;
+				while (_edges[++j] != edge && _edges[j] != edge.oppositeEdge);
+				if (_edges[j] == edge)
+				{
+					_edges.removeAt(j);
+					while (_edges[j++] != edge.oppositeEdge)
+						;
+				}
+				else
+				{
+					_edges.removeAt(j);
+						while (_edges[j++] != edge)
+						;
+				}
+				_edges.removeAt(j-1);
 				edge.oppositeEdge.dispose();
-				_edges.removeAt(_edges.indexOf(edge));
 				edge.dispose();
 			}
-			
 			_vertices.removeAt(_vertices.indexOf(vertex));
 			vertex.dispose();
 			

@@ -26,12 +26,12 @@ package spaceshiptHunt.entities
 		
 		//	public static const fill:BlurFilter = new BlurFilter(2,2);
 		
-		public function PhysicsParticle(particleTexture:Vector.<Texture>, position:Vec2 = null)
+		public function PhysicsParticle(particleTexture:Texture, position:Vec2 = null)
 		{
 			super(position);
 			body.isBullet = true;
 			body.type = BodyType.KINEMATIC;
-			graphics = new MovieClip(particleTexture);
+			graphics = new Image(particleTexture);
 			graphics.pivotX = graphics.width / 2;
 			graphics.pivotY = graphics.height / 2;
 			body.cbTypes.add(PhysicsParticle.INTERACTION_TYPE);
@@ -47,10 +47,10 @@ package spaceshiptHunt.entities
 		
 		public static function spawn(particleType:String, position:Vec2, impulse:Vec2):void
 		{
-			var particleTexture:Vector.<Texture> = Environment.current.assetsLoader.getTextures(particleType)
+			var particleTexture:Texture = Environment.current.assetsLoader.getTexture(particleType)
 			if (particlePool.length == 0)
 			{
-				var circleShape:Circle = new Circle(particleTexture[0].width / 2);
+				var circleShape:Circle = new Circle(particleTexture.width / 2);
 				circleShape.sensorEnabled = true;
 				for (var i:int = 0; i < poolGrowth; i++)
 				{
@@ -70,8 +70,6 @@ package spaceshiptHunt.entities
 			particle.updateGraphics();
 			BodyInfo.list.push(particle);
 			particle.currentCallId = Starling.juggler.delayCall(particle.despawn, 5);
-			Starling.juggler.add(particle.graphics as MovieClip);
-			(particle.graphics as MovieClip).play();
 		}
 		
 		public function despawn():void

@@ -278,12 +278,14 @@ package spaceshiptHunt.level
 		
 		protected function addFireParticle(bodyInfo:Spaceship):void
 		{
+			if (SystemUtil.isDesktop)
+			{
 			//if (!particleSystem)
 			//{
-			particleSystem = new PDParticleSystem(XML(new JetFireConfig()), assetsLoader.getTexture("fireball_0"));
+			particleSystem = new PDParticleSystem(XML(new JetFireConfig()), assetsLoader.getTexture("fireball"));
 			particleSystem.batchable = true;
 			(bodyInfo.graphics as DisplayObjectContainer).addChild(particleSystem);
-			var particleSystem2:PDParticleSystem = new PDParticleSystem(XML(new JetFireConfig()), assetsLoader.getTexture("fireball_0"));
+			var particleSystem2:PDParticleSystem = new PDParticleSystem(XML(new JetFireConfig()), assetsLoader.getTexture("fireball"));
 			(bodyInfo.graphics as DisplayObjectContainer).addChild(particleSystem2);
 			particleSystem.start();
 			particleSystem2.start();
@@ -297,6 +299,7 @@ package spaceshiptHunt.level
 			particleSystem2.gravityY = 100;
 			//	}
 			//particleSystem.customFunction = bodyInfo.jetParticlePositioning;
+			}
 		}
 		
 		protected function createStaticMesh(infoFileName:String, meshFileName:String):void

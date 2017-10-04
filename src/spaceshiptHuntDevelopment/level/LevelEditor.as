@@ -21,6 +21,7 @@ package spaceshiptHuntDevelopment.level
 	import nape.util.ShapeDebug;
 	import spaceshiptHunt.entities.BodyInfo;
 	import spaceshiptHunt.entities.Entity;
+	import spaceshiptHunt.entities.PhysicsParticle;
 	import spaceshiptHunt.level.Environment;
 	import starling.core.Starling;
 	import starling.display.Canvas;
@@ -93,7 +94,7 @@ package spaceshiptHuntDevelopment.level
 		
 		override public function update(passedTime:Number):void
 		{
-			super.updatePhysics(passedTime);
+			super.update(passedTime);
 			drawDebugGrp();
 		}
 		
@@ -409,11 +410,12 @@ package spaceshiptHuntDevelopment.level
 			var bodies:BodyList = physicsSpace.bodies;
 			for (i = 0; i < bodies.length; i++)
 			{
-				if (bodies.at(i).type != BodyType.DYNAMIC)
+				var body:Body = bodies.at(i);
+				if (body.type != BodyType.DYNAMIC && !body.cbTypes.has(PhysicsParticle.INTERACTION_TYPE))
 				{
-					for (k = bodies.at(i).shapes.length - 1; k >= 0; k--)
+					for (k = body.shapes.length - 1; k >= 0; k--)
 					{
-						shape = bodies.at(i).shapes.at(k).castPolygon;
+						shape = body.shapes.at(k).castPolygon;
 						meshData.push(new Vector.<int>(shape.worldVerts.length * 2, true));
 						for (j = 0; j < shape.worldVerts.length; j++)
 						{

@@ -6,14 +6,9 @@ package DDLS.data
 	{
 		public function get destinationVertex():DDLSVertex
 		{
-			return _oppositeEdge.originVertex;
+			return oppositeEdge.originVertex;
 		}
-		
-		public function get oppositeEdge():DDLSEdge
-		{
-			return _oppositeEdge;
-		}
-		
+			
 		public function get nextLeftEdge():DDLSEdge
 		{
 			return _nextLeftEdge;
@@ -26,12 +21,12 @@ package DDLS.data
 		
 		public function get nextRightEdge():DDLSEdge
 		{
-			return _oppositeEdge.nextLeftEdge.nextLeftEdge.oppositeEdge;
+			return oppositeEdge.nextLeftEdge.nextLeftEdge.oppositeEdge;
 		}
 		
 		public function get prevRightEdge():DDLSEdge
 		{
-			return _oppositeEdge.nextLeftEdge.oppositeEdge;
+			return oppositeEdge.nextLeftEdge.oppositeEdge;
 		}
 		
 		public function get rotLeftEdge():DDLSEdge
@@ -41,7 +36,7 @@ package DDLS.data
 		
 		public function get rotRightEdge():DDLSEdge
 		{
-			return _oppositeEdge.nextLeftEdge;
+			return oppositeEdge.nextLeftEdge;
 		}
 		
 		public function get leftFace():DDLSFace
@@ -51,17 +46,17 @@ package DDLS.data
 		
 		public function get rightFace():DDLSFace
 		{
-			return _oppositeEdge.leftFace;
+			return oppositeEdge.leftFace;
 		}
 		
 		public var originVertex:DDLSVertex;
+		public var oppositeEdge:DDLSEdge;
 		private static var INC:int = 0;
 		private var _id:int;
 		
 		// root datas
 		private var _isReal:Boolean;
 		private var _isConstrained:Boolean;
-		private var _oppositeEdge:DDLSEdge;
 		private var _nextLeftEdge:DDLSEdge;
 		private var _leftFace:DDLSFace;
 
@@ -97,7 +92,7 @@ package DDLS.data
 			_isConstrained = isConstrained;
 			_isReal = isReal;
 			this.originVertex = originVertex;
-			_oppositeEdge = oppositeEdge;
+			this.oppositeEdge = oppositeEdge;
 			_nextLeftEdge = nextLeftEdge;
 			_leftFace = leftFace;
 		}
@@ -143,7 +138,7 @@ package DDLS.data
 		public function dispose():void
 		{
 			originVertex = null;
-			_oppositeEdge = null;
+			oppositeEdge = null;
 			_nextLeftEdge = null;
 			_leftFace = null;
 			_fromConstraintSegments = null;

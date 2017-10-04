@@ -7,6 +7,7 @@ package
 	import flash.geom.Point;
 	import flash.media.SoundChannel;
 	import flash.media.SoundTransform;
+	import flash.ui.Keyboard;
 	import input.Key;
 	import io.arkeus.ouya.ControllerInput;
 	import nape.geom.Vec2;
@@ -58,15 +59,14 @@ package
 		//initialization functions		
 		public function init():void
 		{
-			var releaseMode:Boolean = CONFIG::release;
-			releaseMode = true;
-			if (releaseMode)
+			var levelEditorMode:Boolean = false;
+			if (!levelEditorMode || CONFIG::release)
 			{
 				gameEnvironment = new Environment(this);
 			}
 			CONFIG::debug
 			{
-				if (!releaseMode)
+				if (levelEditorMode)
 				{
 					gameEnvironment = new LevelEditor(this);
 				}
@@ -123,10 +123,10 @@ package
 			playerController = new PlayerController(Player.current, analogStick, crossTarget);
 			if (SystemUtil.isDesktop && CONFIG::release)
 			{
-				var flashStage:Stage = Starling.current.nativeStage;
-				flashStage.addEventListener(FullScreenEvent.FULL_SCREEN, onFullscreen);
-				flashStage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
-				flashStage.mouseLock = true;
+				Starling.current.nativeStage.addEventListener(FullScreenEvent.FULL_SCREEN, onFullscreen);
+				toggleFullscreen();
+				Key.addKeyUpCallback(Keyboard.F11, toggleFullscreen);
+				Key.addKeyUpCallback(Keyboard.ESCAPE, toggleFullscreen);
 			}
 			addEventListener(Event.ENTER_FRAME, enterFrame);
 			addEventListener(TouchEvent.TOUCH, onTouch);
@@ -140,6 +140,20 @@ package
 				}
 			})
 			//	PhysicsParticle.fill.cache();
+		}
+		
+		protected function toggleFullscreen():void
+		{
+			var flashStage:Stage = Starling.current.nativeStage;
+			if (flashStage.displayState == StageDisplayState.NORMAL)
+			{
+				flashStage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
+				flashStage.mouseLock = true;
+			}
+			else
+			{
+				flashStage.displayState = StageDisplayState.NORMAL;
+			}
 		}
 		
 		private function drawJoystick():void

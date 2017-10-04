@@ -27,7 +27,7 @@ package spaceshiptHunt.entities
 			minAttackRange = 400.0;
 			maxAttackRange = minAttackRange * 1.5;
 			attackTriggerRange = minAttackRange * 3;
-			firingRate = 0.9;
+			firingRate = 0.4;
 		}
 		
 		override protected function decideNextAction():void
