@@ -43,8 +43,7 @@ package spaceshiptHunt.controls
 		protected var minCrossTargetDistance:Number;
 		protected var maxCrossTargetDistance:Number;
 		protected var rightStickAxis:Vec2 = new Vec2();
-		protected var turningSpeedRatio:Number = 20.0;
-		protected var aimvVerticalSpeedRatio:Number = 30.0;
+		protected var turningSpeedRatio:Number = 17.0;
 		protected var aimAngleSpeed:Number=0.04;
 		private var lastDirectionChange:Number;
 		private var lockDirectionDelay:Number = 1.5;
@@ -181,7 +180,6 @@ package spaceshiptHunt.controls
 			if (rightStickAxis.lsq() > 0.01)
 			{
 				var aimDistanceSpeed:Number = 20.0;
-				//crossTargetOffset.length += rightStickAxis.y * aimDistanceSpeed;
 				crossTargetOffset.angle += rightStickAxis.x * aimAngleSpeed;
 				if (!SystemUtil.isDesktop)
 				{
@@ -241,14 +239,6 @@ package spaceshiptHunt.controls
 				player.impulse.x = 1.0;
 			}
 			//moving aim
-			if (Key.isDown(moveAimForwardKey))
-			{
-				//rightStickAxis.y = 1.0;
-			}
-			else if (Key.isDown(moveAimBackwardKey))
-			{
-			//	rightStickAxis.y = -1.0;
-			}
 			if (Key.isDown(rotateAimLeftKey))
 			{
 				rightStickAxis.x = -1.0;
@@ -273,11 +263,9 @@ package spaceshiptHunt.controls
 			{
 				var easeOutAmount:Number = 2;
 				swipeVelocityX = swipeVelocityX / Math.abs(swipeVelocityX) * Math.pow(Math.abs(swipeVelocityX), easeOutAmount);
-				rightStickAxis.x = swipeVelocityX / turningSpeedRatio;
+				rightStickAxis.x += swipeVelocityX / turningSpeedRatio;
 				rightStickAxis.x = MathUtil.clamp(rightStickAxis.x, -1.0, 1.0);
 			}
-			//rightStickAxis.y += swipeVelocityY / aimvVerticalSpeedRatio;
-			//rightStickAxis.y = MathUtil.clamp(rightStickAxis.y, -1.0, 1.0);
 		}
 		
 		public function onMouseMove(e:MouseEvent):void
