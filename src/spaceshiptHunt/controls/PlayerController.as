@@ -43,8 +43,11 @@ package spaceshiptHunt.controls
 		protected var minCrossTargetDistance:Number;
 		protected var maxCrossTargetDistance:Number;
 		protected var rightStickAxis:Vec2 = new Vec2();
-		protected var turningSpeedRatio:Number = 17.0;
-		protected var aimAngleSpeed:Number=0.04;
+		protected var turningSpeedRatio:Number = 120.0;
+		protected var aimAngleSpeed:Number = 0.028;
+		protected const DEFAULT_AIM_FRICTION:Number = 0.2;
+		protected const TOUCH_AIM_FRICTION:Number = 0.65;
+		protected var aimFriction:Number = DEFAULT_AIM_FRICTION;
 		private var lastDirectionChange:Number;
 		private var lockDirectionDelay:Number = 1.5;
 		private var _player:Player;
@@ -125,7 +128,7 @@ package spaceshiptHunt.controls
 			yAxis = Math.min(1, analogStick.y / 160);
 			if (xboxController)
 			{
-				if (xAxis == 0 && yAxis == 0 && rightStickAxis.lsq() == 0)
+				if (xAxis == 0 && yAxis == 0)
 				{
 					xAxis = xboxController.leftStick.x;
 					yAxis = -xboxController.leftStick.y;
@@ -137,14 +140,11 @@ package spaceshiptHunt.controls
 					{
 						yAxis = 0;
 					}
-					rightStickAxis.setxy(xboxController.rightStick.x, xboxController.rightStick.y);
-					if (Math.abs(rightStickAxis.x) < 0.1)
+					var rightStickX:Number = xboxController.rightStick.x;
+					if (Math.abs(rightStickX) > 0.1)
 					{
-						rightStickAxis.x = 0;
-					}
-					if (Math.abs(rightStickAxis.y) < 0.1)
-					{
-						rightStickAxis.y = 0;
+						rightStickAxis.x += rightStickX;
+						aimFriction = DEFAULT_AIM_FRICTION;
 					}
 					if (xboxController.rt.held)
 					{
@@ -177,26 +177,21 @@ package spaceshiptHunt.controls
 		protected function handleCrossTargetControls():void
 		{
 			var crossTargetOffset:Vec2 = Vec2.get(crossTarget.x, crossTarget.y).subeq(player.body.position);
-			if (rightStickAxis.lsq() > 0.01)
+			if (Math.abs(rightStickAxis.x) > 0.01)
 			{
-				var aimDistanceSpeed:Number = 20.0;
 				crossTargetOffset.angle += rightStickAxis.x * aimAngleSpeed;
-				if (!SystemUtil.isDesktop)
-				{
-					rightStickAxis.length = rightStickAxis.length * 0.2;
-				}
-				else
-				{
-					rightStickAxis.setxy(0, 0);
-				}
+				//if (Math.abs(rightStickAxis.x) > 0.05) //!SystemUtil.isDesktop)
+				//{
+				rightStickAxis.x = rightStickAxis.x * aimFriction;
+					//}
+					//else
+					//{
+					//rightStickAxis.x = 0;
+					//}
 			}
 			else
 			{
-				rightStickAxis.setxy(0, 0);
-			}
-			if (SystemUtil.isDesktop)
-			{
-				//	rightStickAxis.setxy(0, 0);
+				rightStickAxis.x = 0;
 			}
 			MathUtilities.clampVector(crossTargetOffset, minCrossTargetDistance, maxCrossTargetDistance);
 			var angleDiff:Number = MathUtilities.angleDifference(crossTargetOffset.angle + Math.PI / 2, player.body.rotation);
@@ -241,10 +236,12 @@ package spaceshiptHunt.controls
 			//moving aim
 			if (Key.isDown(rotateAimLeftKey))
 			{
+				aimFriction = DEFAULT_AIM_FRICTION;
 				rightStickAxis.x = -1.0;
 			}
 			else if (Key.isDown(rotateAimRightKey))
 			{
+				aimFriction = DEFAULT_AIM_FRICTION;
 				rightStickAxis.x = 1.0;
 			}
 		}
@@ -261,6 +258,7 @@ package spaceshiptHunt.controls
 		{
 			if (swipeVelocityX != 0)
 			{
+				aimFriction = TOUCH_AIM_FRICTION;
 				var easeOutAmount:Number = 2;
 				swipeVelocityX = swipeVelocityX / Math.abs(swipeVelocityX) * Math.pow(Math.abs(swipeVelocityX), easeOutAmount);
 				rightStickAxis.x += swipeVelocityX / turningSpeedRatio;

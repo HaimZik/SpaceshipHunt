@@ -27,6 +27,7 @@ package starling.extensions
     import starling.styles.MeshStyle;
     import starling.textures.Texture;
     import starling.utils.MatrixUtil;
+    import starling.utils.MeshSubset;
 
     /** Dispatched when emission of particles is finished. */
     [Event(name="complete", type="starling.events.Event")]
@@ -54,6 +55,7 @@ package starling.extensions
         // helper objects
         private static var sHelperMatrix:Matrix = new Matrix();
         private static var sHelperPoint:Point = new Point();
+        private static var sSubset:MeshSubset = new MeshSubset();
 
         public function ParticleSystem(texture:Texture=null)
         {
@@ -106,8 +108,18 @@ package starling.extensions
                 _vertexData.premultipliedAlpha = false;
             }
 
-            blendMode = _blendFactorSource + ", " + _blendFactorDestination;
-            BlendMode.register(blendMode, _blendFactorSource, _blendFactorDestination);
+            // When the default normal blend combination is used, use BlendMode.NORMAL instead
+            // of registering a new blendMode - that way, textures can be batched together
+            if (_blendFactorSource == Context3DBlendFactor.ONE &&
+                _blendFactorDestination == Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA)
+            {
+                blendMode = BlendMode.NORMAL
+            }
+            else
+            {
+                blendMode = _blendFactorSource + ", " + _blendFactorDestination;
+                BlendMode.register(blendMode, _blendFactorSource, _blendFactorDestination);
+            }
         }
         
         protected function createParticle():Particle
@@ -194,7 +206,7 @@ package starling.extensions
 
             while (particleIndex < _numParticles)
             {
-                particle = _particles[particleIndex];
+                particle = _particles[particleIndex] as Particle;
                 
                 if (particle.currentTime < particle.totalTime)
                 {
@@ -205,7 +217,7 @@ package starling.extensions
                 {
                     if (particleIndex != _numParticles - 1)
                     {
-                        var nextParticle:Particle = _particles[int(_numParticles-1)];
+                        var nextParticle:Particle = _particles[int(_numParticles-1)] as Particle;
                         _particles[int(_numParticles-1)] = particle;
                         _particles[particleIndex] = nextParticle;
                     }
@@ -228,7 +240,7 @@ package starling.extensions
                 {
                     if (_numParticles < maxNumParticles)
                     {
-                        particle = _particles[_numParticles];
+                        particle = _particles[_numParticles] as Particle;
                         initParticle(particle);
                         
                         // particle might be dead at birth
@@ -261,7 +273,7 @@ package starling.extensions
             for (var i:int=0; i<_numParticles; ++i)
             {
                 vertexID = i * 4;
-                particle = _particles[i];
+                particle = _particles[i] as Particle;
                 rotation = particle.rotation;
                 offsetX = pivotX * particle.scale;
                 offsetY = pivotY * particle.scale;
@@ -303,7 +315,8 @@ package starling.extensions
             }
             else if (_batchable)
             {
-                painter.batchMesh(this);
+                sSubset.setTo(0, _numParticles * 4, 0, _numParticles * 6);
+                painter.batchMesh(this, sSubset);
             }
             else
             {
@@ -372,6 +385,9 @@ package starling.extensions
                 _particles.length = newCapacity;
                 _indexData.numIndices = newCapacity * 6;
                 _vertexData.numVertices = newCapacity * 4;
+
+                if (_numParticles > newCapacity)
+                    _numParticles = newCapacity;
             }
 
             _indexData.trim();
