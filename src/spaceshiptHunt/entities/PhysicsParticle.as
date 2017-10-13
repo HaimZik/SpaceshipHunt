@@ -19,7 +19,7 @@ package spaceshiptHunt.entities
 		internal static var particlePool:Vector.<PhysicsParticle> = new Vector.<PhysicsParticle>();
 		protected static const poolGrowth:int = 10;
 		protected var currentCallId:uint;
-		public static const INTERACTION_TYPE:CbType = new CbType(); 
+		public static const INTERACTION_TYPE:CbType = new CbType();
 		public static var impactForce:Number = 100.0;
 		
 		//	protected var 
@@ -55,18 +55,18 @@ package spaceshiptHunt.entities
 				for (var i:int = 0; i < poolGrowth; i++)
 				{
 					particlePool.push(new PhysicsParticle(particleTexture));
-					circleShape.filter.collisionMask = ~2;//in order for the raytracing to ignore it
+					circleShape.filter.collisionMask = ~2; //in order for the raytracing to ignore it
 					particlePool[i].body.shapes.add(circleShape.copy());
 					particlePool[i].body.mass /= 3;
 				}
 			}
-			var particle:PhysicsParticle=particlePool.pop();
+			var particle:PhysicsParticle = particlePool.pop();
 			particle.body.position.set(position);
 			particle.body.rotation = impulse.angle;
-            particle.body.velocity = impulse;
+			particle.body.velocity = impulse;
 			particle.body.space = Environment.current.physicsSpace;
 			var otherBodyGrp:DisplayObject = BodyInfo.list[0].graphics;
-			otherBodyGrp.parent.addChildAt(particle.graphics,otherBodyGrp.parent.getChildIndex(otherBodyGrp));
+			otherBodyGrp.parent.addChildAt(particle.graphics, otherBodyGrp.parent.getChildIndex(otherBodyGrp));
 			particle.updateGraphics();
 			BodyInfo.list.push(particle);
 			particle.currentCallId = Starling.juggler.delayCall(particle.despawn, 5);
@@ -74,13 +74,19 @@ package spaceshiptHunt.entities
 		
 		public function despawn():void
 		{
-			if (body.space) {
-			Starling.juggler.removeByID(currentCallId);
-			graphics.removeFromParent();
-			body.space = null;
-			BodyInfo.list.removeAt(BodyInfo.list.indexOf(this));
-			particlePool.push(this);
+			if (body.space)
+			{
+				Starling.juggler.removeByID(currentCallId);
+				graphics.removeFromParent();
+				body.space = null;
+				BodyInfo.list.removeAt(BodyInfo.list.indexOf(this));
+				particlePool.push(this);
 			}
+		}
+		
+		override public function dispose():void
+		{
+			despawn();
 		}
 	
 	}

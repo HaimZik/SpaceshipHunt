@@ -47,16 +47,12 @@ package spaceshiptHunt.entities
 			maxAngularAcceleration = body.mass * 180;
 		}
 		
-		protected function dispose():void
+		override public function dispose():void
 		{
 			stopShooting();
-			body.space = null;
-			body.userData.info = null;
-			body = null;
-			graphics.removeFromParent(true);
-			BodyInfo.list.removeAt(BodyInfo.list.indexOf(this));
 			Environment.current.navMesh.deleteObject(pathfindingAgent.approximateObject);
 			pathfindingAgent.dispose();
+			super.dispose();
 		}
 		
 		public function set gunType(gunType:String):void

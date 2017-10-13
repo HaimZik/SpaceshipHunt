@@ -83,6 +83,7 @@ package spaceshiptHuntDevelopment.level
 			navMeshDebugView.surface.mouseEnabled = false;
 			Starling.current.nativeOverlay.addChild(navMeshDebugView.surface);
 			Key.addKeyUpCallback(Keyboard.N, switchNavMeshView);
+			Key.addKeyUpCallback(Keyboard.R, resetLevel);
 			//Starling.current.nativeOverlay.addChild(napeDebug.display);
 			CONFIG::air
 			{
@@ -98,9 +99,9 @@ package spaceshiptHuntDevelopment.level
 			drawDebugGrp();
 		}
 		
-		override public function enqueueLevel(levelName:String):void
+		override public function enqueueLevel(levelName:String,onFinsh:Function=null):void
 		{
-			super.enqueueLevel(levelName);
+			super.enqueueLevel(levelName,onFinsh);
 			commandQueue.push(function addCommand():void
 			{
 				mainDisplay.addChild(verticesDisplay);
@@ -208,8 +209,8 @@ package spaceshiptHuntDevelopment.level
 					(typeArray.cords as Vector.<int>).push(BodyInfo.list[i].body.position.x, BodyInfo.list[i].body.position.y);
 				}
 			}
-			levelData["levelSpecific/" + currentLevel + "/static/asteroidField"] = new Object();
-			saveFile(File.applicationDirectory.resolvePath("").nativePath + "/../src/spaceshiptHunt/level/" + currentLevel + ".json", JSON.stringify(levelData), "");
+			levelData["levelSpecific/" + currentLevelName + "/static/asteroidField"] = new Object();
+			saveFile(File.applicationDirectory.resolvePath("").nativePath + "/../src/spaceshiptHunt/level/" + currentLevelName + ".json", JSON.stringify(levelData), "");
 		}
 		
 		CONFIG::air public function saveAsteroidField(bodyInfo:Object):void
@@ -217,10 +218,10 @@ package spaceshiptHuntDevelopment.level
 			var meshData:String = meshToString(getMeshData());
 			if (meshData.length > 7)
 			{
-				saveFile("physicsBodies/levelSpecific/" + currentLevel + "/static/asteroidField/Mesh.json", meshData);
+				saveFile("physicsBodies/levelSpecific/" + currentLevelName + "/static/asteroidField/Mesh.json", meshData);
 				var meshDevData:String = "[[" + getDevMesh().join("],[") + "]]";
-				saveFile("devPhysicsBodies/levelSpecific/" + currentLevel + "/static/asteroidField/Mesh.json", meshDevData);
-				saveFile("physicsBodies/levelSpecific/" + currentLevel + "/static/asteroidField/Info.json", JSON.stringify(bodyInfo));
+				saveFile("devPhysicsBodies/levelSpecific/" + currentLevelName + "/static/asteroidField/Mesh.json", meshDevData);
+				saveFile("physicsBodies/levelSpecific/" + currentLevelName + "/static/asteroidField/Info.json", JSON.stringify(bodyInfo));
 			}
 		}
 		

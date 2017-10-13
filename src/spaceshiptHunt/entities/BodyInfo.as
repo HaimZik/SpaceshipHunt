@@ -23,6 +23,14 @@ package spaceshiptHunt.entities
 			body.userData.info = this;
 		}
 		
+		public function dispose():void
+		{
+			body.space = null;
+			body.userData.info = null;
+			graphics.removeFromParent(true);
+			BodyInfo.list.removeAt(BodyInfo.list.indexOf(this));
+		}
+		
 		protected function updateGraphics():void
 		{
 			graphics.x = body.position.x;
@@ -32,6 +40,7 @@ package spaceshiptHunt.entities
 		
 		public function init(bodyDescription:Object):void
 		{
+			body.userData.info = this;
 		}
 		
 		public function update():void

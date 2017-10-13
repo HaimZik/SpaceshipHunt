@@ -171,7 +171,7 @@ package spaceshiptHunt.controls
 		
 		protected function onPlayerDeath(e:Event):void
 		{
-			player = null;
+		//	player = null;
 		}
 		
 		protected function handleCrossTargetControls():void

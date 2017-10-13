@@ -1,5 +1,5 @@
 {
 "type":"EnemyPathBlocker",
 "children":[{"textureName":"batshipMiniBlur","y":0,"x":0}],
-"engineLocation":{"y":-24,"x":26}
+"engineLocation":{"y":-23,"x":27}
 }

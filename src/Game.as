@@ -59,7 +59,7 @@ package
 		//initialization functions		
 		public function init():void
 		{
-			var levelEditorMode:Boolean = false;
+			var levelEditorMode:Boolean = true;
 			if (!levelEditorMode || CONFIG::release)
 			{
 				gameEnvironment = new Environment(this);
@@ -72,7 +72,6 @@ package
 				}
 			}
 			drawJoystick();
-			gameEnvironment.enqueueLevel("Level1Test");
 			var atlaseNum:int = 1;
 			for (var i:int = 0; i < atlaseNum; i++)
 			{
@@ -81,7 +80,7 @@ package
 			}
 			Environment.current.assetsLoader.enqueue("grp/concrete_baked.atf");
 			Environment.current.assetsLoader.enqueue("grp/concrete_baked_n.atf");
-			gameEnvironment.startLoading(onFinishLoading);
+			gameEnvironment.enqueueLevel("Level1Test", onFinishLoading);
 		}
 		
 		protected function onFullscreen(e:FullScreenEvent):void
@@ -208,13 +207,16 @@ package
 				}
 				else if (touch.target == shootButton)
 				{
-					if (touch.phase == TouchPhase.ENDED)
+					if (Player.current)
 					{
-						player.stopShooting();
-					}
-					else if (touch.phase == TouchPhase.BEGAN)
-					{
-						player.startShooting();
+						if (touch.phase == TouchPhase.ENDED)
+						{
+							player.stopShooting();
+						}
+						else if (touch.phase == TouchPhase.BEGAN)
+						{
+							player.startShooting();
+						}
 					}
 				}
 				else
@@ -250,12 +252,12 @@ package
 				if (Player.current)
 				{
 					playerController.update();
-					moveCam();
+					focusCam();
 				}
 			}
 		}
 		
-		private function moveCam():void
+		private function focusCam():void
 		{
 			this.pivotX = this.x - stage.stageWidth / 2;
 			this.pivotY = this.y + stage.stageHeight / 2;

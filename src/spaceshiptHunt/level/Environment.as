@@ -55,7 +55,7 @@ package spaceshiptHunt.level
 		public var physicsSpace:Space;
 		
 		public var light:LightSource;
-		public var currentLevel:String;
+		public var currentLevelName:String;
 		static private var currentEnvironment:Environment;
 		protected var pathfinder:DDLSPathFinder;
 		protected var lastNavMeshUpdate:Number;
@@ -131,32 +131,73 @@ package spaceshiptHunt.level
 			}
 		}
 		
-		public function enqueueLevel(levelName:String):void
+		public function enqueueLevel(levelName:String, onFinish:Function = null):void
 		{
-			currentLevel = levelName;
-			var level:Object = JSON.parse(new LevelInfo[currentLevel](), function(k, v):Object
+			disposeLevel();
+			var level:Object = JSON.parse(new LevelInfo[levelName](), function(k, v):Object
 			{
 				if (isNaN(Number(k)) && !(v is Array))
-					enqueueBody(k, v);
+				{
+					if (currentLevelName != levelName || k.indexOf("static") == -1)
+					{
+						enqueueBody(k, v);
+					}
+				}
 				return v;
 			});
 			//for (var entitieType:String in level)
 			//{
 			//enqueueBody(entitieType, level[entitieType]);
 			//}
+			currentLevelName = levelName;
+			assetsLoader.loadQueue(function onProgress(ratio:Number):void
+			{
+				if (ratio == 1.0)
+				{
+					var length:int = commandQueue.length;
+					for (var i:int = 0; i < length; i++)
+					{
+						(commandQueue.shift())();
+					}
+					if (onFinish)
+					{
+						onFinish();
+					}
+					navMesh.updateObjects();
+				}
+			})
+		}
+		
+		public function disposeLevel():void
+		{
+			navMesh.updateObjects();
+			for (var i:int = 0; i < BodyInfo.list.length; i++)
+			{
+				BodyInfo.list[i].dispose();
+				navMesh.updateObjects();
+			}
+		}
+		
+		public function resetLevel():void
+		{
+			enqueueLevel(currentLevelName);
 		}
 		
 		public function enqueueBody(fileName:String, fileInfo:Object):void
 		{
-			var infoFileName:String = assetsLoader.enqueueWithName("physicsBodies/" + fileName + "/Info.json", fileName + "Info");
-			var meshFileName:String;
+			var infoFileName:String = fileName + "Info";
+			if (assetsLoader.getObject(infoFileName) == null)
+			{
+				assetsLoader.enqueueWithName("physicsBodies/" + fileName + "/Info.json", infoFileName);
+			}
+			var meshFileName:String = fileName + "Mesh";
 			if (fileName.indexOf("static") != -1)
 			{
-				meshFileName = assetsLoader.enqueueWithName(staticMeshRelativePath + fileName + "/Mesh.json", fileName + "Mesh");
+				meshFileName = assetsLoader.enqueueWithName(staticMeshRelativePath + fileName + "/Mesh.json", meshFileName);
 			}
-			else
+			else if (assetsLoader.getObject(meshFileName) == null)
 			{
-				meshFileName = assetsLoader.enqueueWithName("physicsBodies/" + fileName + "/Mesh.json", fileName + "Mesh");
+				meshFileName = assetsLoader.enqueueWithName("physicsBodies/" + fileName + "/Mesh.json", meshFileName);
 			}
 			commandQueue.push(function onFinish():void
 			{
@@ -171,19 +212,17 @@ package spaceshiptHunt.level
 					var polygonArray:Array = assetsLoader.getObject(meshFileName) as Array;
 					for (var i:int = 0; i < fileInfo.cords.length; i++)
 					{
-						var bodyInfo:Entity
+						var bodyInfo:Entity;
 						if (EntityType == Player)
 						{
+							Player.current.body.position.setxy(fileInfo.cords[i], fileInfo.cords[++i]);
 							bodyInfo = Player.current;
-							bodyInfo.body.position.x = fileInfo.cords[i];
-							bodyInfo.body.position.y = fileInfo.cords[++i];
 						}
 						else
 						{
 							bodyInfo = new EntityType(new Vec2(fileInfo.cords[i], fileInfo.cords[++i]));
 						}
 						bodyInfo.infoFileName = fileName;
-						mainDisplay.addChild(bodyInfo.graphics);
 						for (var j:int = 0; j < polygonArray.length; j++)
 						{
 							addMesh(polygonArray[j], bodyInfo.body);
@@ -192,9 +231,10 @@ package spaceshiptHunt.level
 						if (bodyDescription.hasOwnProperty("engineLocation"))
 						{
 							var spcaeship:Spaceship = bodyInfo as Spaceship;
-							addFireParticle(spcaeship);
+								//addFireParticle(spcaeship);
 						}
 						physicsSpace.bodies.add(bodyInfo.body);
+						mainDisplay.addChild(bodyInfo.graphics);
 					}
 				}
 			});
@@ -259,46 +299,29 @@ package spaceshiptHunt.level
 			vec2List = null;
 		}
 		
-		public function startLoading(onFinish:Function):void
-		{
-			assetsLoader.loadQueue(function onProgress(ratio:Number):void
-			{
-				if (ratio == 1.0)
-				{
-					var length:int = commandQueue.length;
-					for (var i:int = 0; i < length; i++)
-					{
-						(commandQueue.shift())();
-					}
-					onFinish();
-					navMesh.updateObjects();
-				}
-			})
-		}
-		
 		protected function addFireParticle(bodyInfo:Spaceship):void
 		{
 			if (SystemUtil.isDesktop)
 			{
-			//if (!particleSystem)
-			//{
-			particleSystem = new PDParticleSystem(XML(new JetFireConfig()), assetsLoader.getTexture("fireball"));
-			particleSystem.batchable = true;
-			(bodyInfo.graphics as DisplayObjectContainer).addChild(particleSystem);
-			var particleSystem2:PDParticleSystem = new PDParticleSystem(XML(new JetFireConfig()), assetsLoader.getTexture("fireball"));
-			(bodyInfo.graphics as DisplayObjectContainer).addChild(particleSystem2);
-			particleSystem.start();
-			particleSystem2.start();
-			Starling.juggler.add(particleSystem);
-			Starling.juggler.add(particleSystem2);
-			particleSystem.x = bodyInfo.engineLocation.x;
-			particleSystem.y = -bodyInfo.engineLocation.y;
-			particleSystem.gravityY = 100;
-			particleSystem2.x = -bodyInfo.engineLocation.x;
-			particleSystem2.y = -bodyInfo.engineLocation.y;
-			particleSystem2.gravityY = 100;
-			//	}
-			//particleSystem.customFunction = bodyInfo.jetParticlePositioning;
+				//if (!particleSystem)
+				//{
+				particleSystem = new PDParticleSystem(XML(new JetFireConfig()), assetsLoader.getTexture("fireball"));
+				particleSystem.batchable = true;
+				(bodyInfo.graphics as DisplayObjectContainer).addChild(particleSystem);
+				var particleSystem2:PDParticleSystem = new PDParticleSystem(XML(new JetFireConfig()), assetsLoader.getTexture("fireball"));
+				(bodyInfo.graphics as DisplayObjectContainer).addChild(particleSystem2);
+				particleSystem.start();
+				particleSystem2.start();
+				Starling.juggler.add(particleSystem);
+				Starling.juggler.add(particleSystem2);
+				particleSystem.x = bodyInfo.engineLocation.x;
+				particleSystem.y = -bodyInfo.engineLocation.y;
+				particleSystem.gravityY = 100;
+				particleSystem2.x = -bodyInfo.engineLocation.x;
+				particleSystem2.y = -bodyInfo.engineLocation.y;
+				particleSystem2.gravityY = 100;
+					//	}
+					//particleSystem.customFunction = bodyInfo.jetParticlePositioning;
 			}
 		}
 		

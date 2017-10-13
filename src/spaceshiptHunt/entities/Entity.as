@@ -26,12 +26,13 @@ package spaceshiptHunt.entities
 			_pathfindingAgent = new DDLSEntityAI();
 			_pathfindingAgent.x = position.x;
 			_pathfindingAgent.y = _pathfindingAgent.y;
-			BodyInfo.list.push(this);
-			graphics = new Sprite();
+		    graphics = new Sprite();
 		}
 		
 		override public function init(bodyDescription:Object):void
 		{
+			super.init(bodyDescription);
+			BodyInfo.list.push(this);
 			var child:Image;
 			for (var i:int = 0; i < bodyDescription.children.length; i++)
 			{

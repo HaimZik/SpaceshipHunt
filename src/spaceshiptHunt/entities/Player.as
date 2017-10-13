@@ -1,8 +1,9 @@
 package spaceshiptHunt.entities
 {
-	import spaceshiptHunt.level.Environment;
 	import nape.geom.Vec2;
+	import spaceshiptHunt.level.Environment;
 	import spaceshiptHunt.entities.Spaceship;
+	
 	/**
 	 * ...
 	 * @author Haim Shnitzer
@@ -28,6 +29,11 @@ package spaceshiptHunt.entities
 			return _current;
 		}
 		
+		static public function set current(value:Player):void
+		{
+			_current=value;
+		}
+		
 		override public function init(bodyDescription:Object):void
 		{
 			super.init(bodyDescription);
@@ -41,6 +47,11 @@ package spaceshiptHunt.entities
 			maxAngularAcceleration = body.mass * 220;
 			maxAcceleration = body.mass * 18.0;
 			life = 1500.0;
+		}
+		
+		override public function dispose():void
+		{
+			super.dispose();
 		}
 		
 		override public function update():void
@@ -57,15 +68,6 @@ package spaceshiptHunt.entities
 			//{
 			//body.velocity.length = 500;
 			//}			
-		}
-		
-		override protected function onDeath():void
-		{
-			super.onDeath();
-			if (this == _current)
-			{
-				_current = null;
-			}
 		}
 	
 	}
