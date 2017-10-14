@@ -29,7 +29,6 @@ package spaceshiptHunt.entities
 		protected var rayList:RayResultList;
 		protected static const PLAYER_FILTER:InteractionFilter = new InteractionFilter(2, -1);
 		protected var pathCheckTime:int;
-		protected var pointingArrow:Image;
 		protected var currentAction:Function;
 		protected var chasingTarget:DDLSEntityAI;
 		
@@ -58,9 +57,6 @@ package spaceshiptHunt.entities
 				body.shapes.at(i).filter.collisionGroup = 8;
 			}
 			rayPool = Ray.fromSegment(this.body.position, Player.current.body.position);
-			pointingArrow = new Image(Environment.current.assetsLoader.getTexture("arrow"));
-			var mainDisplay:Sprite = Environment.current.mainDisplay;
-			mainDisplay.addChildAt(pointingArrow, 0);
 		}
 		
 		public function get canViewPlayer():Boolean

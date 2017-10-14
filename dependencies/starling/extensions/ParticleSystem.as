@@ -14,6 +14,7 @@ package starling.extensions
     import flash.geom.Matrix;
     import flash.geom.Point;
     import flash.geom.Rectangle;
+	import starling.core.Starling;
 
     import starling.animation.IAnimatable;
     import starling.display.BlendMode;

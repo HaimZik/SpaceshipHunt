@@ -157,9 +157,7 @@ package spaceshiptHuntDevelopment.level
 		{
 			if (displayNavMesh)
 			{
-				navMeshDebugView.cleanPaths();
-				navMeshDebugView.cleanEntities();
-				navMeshDebugView.cleanMesh();
+				cleanDebugView();
 			}
 			else
 			{
@@ -383,6 +381,13 @@ package spaceshiptHuntDevelopment.level
 				lastViewCenter.y = viewCenter.y;
 				Pool.putPoint(viewCenter);
 			}
+		}
+		
+		protected function cleanDebugView():void 
+		{
+			navMeshDebugView.cleanPaths();
+			navMeshDebugView.cleanEntities();
+			navMeshDebugView.cleanMesh();
 		}
 		
 		private function getDevMesh():Vector.<Vector.<Number>>

@@ -171,11 +171,11 @@ package spaceshiptHunt.level
 		public function disposeLevel():void
 		{
 			navMesh.updateObjects();
-			for (var i:int = 0; i < BodyInfo.list.length; i++)
+			for (var i:int = BodyInfo.list.length-1; i >=0; i--)
 			{
 				BodyInfo.list[i].dispose();
-				navMesh.updateObjects();
 			}
+			navMesh.updateObjects();
 		}
 		
 		public function resetLevel():void
@@ -231,7 +231,7 @@ package spaceshiptHunt.level
 						if (bodyDescription.hasOwnProperty("engineLocation"))
 						{
 							var spcaeship:Spaceship = bodyInfo as Spaceship;
-								//addFireParticle(spcaeship);
+							addFireParticle(spcaeship);
 						}
 						physicsSpace.bodies.add(bodyInfo.body);
 						mainDisplay.addChild(bodyInfo.graphics);
@@ -309,6 +309,7 @@ package spaceshiptHunt.level
 				particleSystem.batchable = true;
 				(bodyInfo.graphics as DisplayObjectContainer).addChild(particleSystem);
 				var particleSystem2:PDParticleSystem = new PDParticleSystem(XML(new JetFireConfig()), assetsLoader.getTexture("fireball"));
+				particleSystem2.batchable = true;
 				(bodyInfo.graphics as DisplayObjectContainer).addChild(particleSystem2);
 				particleSystem.start();
 				particleSystem2.start();

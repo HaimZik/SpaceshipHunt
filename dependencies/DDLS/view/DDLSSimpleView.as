@@ -109,7 +109,7 @@ package DDLS.view
 				{
 					if (!dictVerticesDone[incomingEdge.originVertex])
 					{
-						if (viewRadius == -1 || isLineInView(incomingEdge.originVertex.pos,incomingEdge.destinationVertex.pos,viewCenterX,viewCenterY,viewRadius))
+						if (viewRadius == -1 || isLineInView(incomingEdge.originVertex.pos, incomingEdge.destinationVertex.pos, viewCenterX, viewCenterY, viewRadius))
 						{
 							if (incomingEdge.isConstrained)
 							{
@@ -129,14 +129,6 @@ package DDLS.view
 				}
 			}
 		
-		}
-		
-		public function cleanMesh():void
-		{
-			_surface.graphics.clear();
-			_edges.graphics.clear();
-			_constraints.graphics.clear();
-			_vertices.graphics.clear();
 		}
 		
 		public function drawEntity(entity:DDLSEntityAI, cleanBefore:Boolean = true):void
@@ -164,11 +156,6 @@ package DDLS.view
 			}
 		}
 		
-		public function cleanEntities():void
-		{
-			_entities.graphics.clear();
-		}
-		
 		public function drawPath(path:Vector.<Number>, cleanBefore:Boolean = true, color:uint = 0xFF00FF):void
 		{
 			if (cleanBefore)
@@ -184,9 +171,22 @@ package DDLS.view
 				_paths.graphics.lineTo(path[i], path[i + 1]);
 		}
 		
+		public function cleanMesh():void
+		{
+			_surface.graphics.clear();
+			_edges.graphics.clear();
+			_constraints.graphics.clear();
+			_vertices.graphics.clear();
+		}
+		
 		public function cleanPaths():void
 		{
 			_paths.graphics.clear();
+		}
+		
+		public function cleanEntities():void
+		{
+			_entities.graphics.clear();
 		}
 		
 		private function vertexIsInsideAABB(vertex:DDLSVertex, mesh:DDLSMesh):Boolean
@@ -197,12 +197,12 @@ package DDLS.view
 				return true;
 		}
 		
-		private function isLineInView(lineStart:DDLSPoint2D,lineEnd:DDLSPoint2D,viewCenterX:Number,viewCenterY:Number,viewRadius:Number):Boolean
+		private function isLineInView(lineStart:DDLSPoint2D, lineEnd:DDLSPoint2D, viewCenterX:Number, viewCenterY:Number, viewRadius:Number):Boolean
 		{
 			var viewRangeSquared:Number = Math.pow(viewRadius * 1.5, 2);
 			var isStartVertexInView:Boolean = Math.pow(viewCenterX - lineStart.x, 2) < viewRangeSquared && Math.abs(viewCenterY - lineStart.y) < viewRangeSquared;
-			var isEndVertexInView:Boolean=Math.pow(viewCenterX - lineEnd.x, 2) < viewRangeSquared && Math.abs(viewCenterY - lineEnd.y) < viewRangeSquared
-			return isStartVertexInView || isEndVertexInView || lineStart.distanceTo(lineEnd)>viewRadius*2;
+			var isEndVertexInView:Boolean = Math.pow(viewCenterX - lineEnd.x, 2) < viewRangeSquared && Math.abs(viewCenterY - lineEnd.y) < viewRangeSquared
+			return isStartVertexInView || isEndVertexInView || lineStart.distanceTo(lineEnd) > viewRadius * 2;
 		}
 	
 	}

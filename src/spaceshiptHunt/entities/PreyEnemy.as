@@ -1,12 +1,14 @@
 package spaceshiptHunt.entities
 {
 	import DDLS.view.DDLSSimpleView;
-	import spaceshiptHunt.level.Environment;
 	import nape.geom.RayResult;
 	import nape.geom.Vec2;
+	import spaceshiptHunt.entities.Enemy;
+	import spaceshiptHunt.level.Environment;
+	import starling.display.Image;
+	import starling.display.Sprite;
 	import starling.utils.Color;
 	import starling.utils.deg2rad;
-	import spaceshiptHunt.entities.Enemy;
 	
 	/**
 	 * ...
@@ -14,6 +16,7 @@ package spaceshiptHunt.entities
 	 */
 	public class PreyEnemy extends Enemy
 	{
+		protected var pointingArrow:Image;
 		protected var _playerPredictedPath:Vector.<Number>;
 		protected var playerPathCheckTime:int;
 		private static var _current:PreyEnemy;
@@ -26,44 +29,58 @@ package spaceshiptHunt.entities
 			_playerPredictedPath = new Vector.<Number>();
 		}
 		
+		override public function init(bodyDescription:Object):void
+		{
+			super.init(bodyDescription);
+			pointingArrow = new Image(Environment.current.assetsLoader.getTexture("arrow"));
+			var mainDisplay:Sprite = Environment.current.mainDisplay;
+			mainDisplay.addChildAt(pointingArrow, 0);
+		}
+		
+		override public function dispose():void 
+		{
+			super.dispose();
+			pointingArrow.removeFromParent(true);
+		}
+		
 		public override function update():void
 		{
-				super.update();
-				if (pointingArrow.visible != !canViewPlayer)
+			super.update();
+			if (pointingArrow.visible != !canViewPlayer)
+			{
+				pointingArrow.visible = !canViewPlayer;
+			}
+			if (canViewPlayer)
+			{
+				if (graphics.alpha < 1)
 				{
-					pointingArrow.visible = !canViewPlayer;
+					graphics.alpha += 0.025;
 				}
-				if (canViewPlayer)
+				if (body.space.timeStamp - playerPathCheckTime > pathUpdateInterval)
 				{
-					if (graphics.alpha < 1)
-					{
-						graphics.alpha += 0.025;
-					}
-					if (body.space.timeStamp - playerPathCheckTime > pathUpdateInterval)
-					{
-						Player.current.findPathToEntity(pathfindingAgent, _playerPredictedPath);
-						playerPathCheckTime = body.space.timeStamp;
-					}
+					Player.current.findPathToEntity(pathfindingAgent, _playerPredictedPath);
+					playerPathCheckTime = body.space.timeStamp;
 				}
-				else
+			}
+			else
+			{
+				if (graphics.alpha > 0.4)
 				{
-					if (graphics.alpha > 0.4)
-					{
-						graphics.alpha -= 0.005;
-					}
-					if (body.space.timeStamp - playerPathCheckTime > pathUpdateInterval)
-					{
-						var playerPosX:Number = Player.current.pathfindingAgent.x;
-						var playerPosY:Number = Player.current.pathfindingAgent.y;
-						Player.current.pathfindingAgent.x = lastSeenPlayerPos.x;
-						Player.current.pathfindingAgent.y = lastSeenPlayerPos.y;
-						Player.current.findPathToEntity(pathfindingAgent, _playerPredictedPath);
-						Player.current.pathfindingAgent.x = playerPosX;
-						Player.current.pathfindingAgent.y = playerPosY;
-						playerPathCheckTime = body.space.timeStamp;
-					}
+					graphics.alpha -= 0.005;
 				}
-				updateArrow();
+				if (body.space.timeStamp - playerPathCheckTime > pathUpdateInterval)
+				{
+					var playerPosX:Number = Player.current.pathfindingAgent.x;
+					var playerPosY:Number = Player.current.pathfindingAgent.y;
+					Player.current.pathfindingAgent.x = lastSeenPlayerPos.x;
+					Player.current.pathfindingAgent.y = lastSeenPlayerPos.y;
+					Player.current.findPathToEntity(pathfindingAgent, _playerPredictedPath);
+					Player.current.pathfindingAgent.x = playerPosX;
+					Player.current.pathfindingAgent.y = playerPosY;
+					playerPathCheckTime = body.space.timeStamp;
+				}
+			}
+			updateArrow();
 		}
 		
 		static public function get current():PreyEnemy
