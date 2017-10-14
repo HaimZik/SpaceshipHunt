@@ -83,7 +83,6 @@ package spaceshiptHuntDevelopment.level
 			navMeshDebugView.surface.mouseEnabled = false;
 			Starling.current.nativeOverlay.addChild(navMeshDebugView.surface);
 			Key.addKeyUpCallback(Keyboard.N, switchNavMeshView);
-			Key.addKeyUpCallback(Keyboard.R, resetLevel);
 			//Starling.current.nativeOverlay.addChild(napeDebug.display);
 			CONFIG::air
 			{

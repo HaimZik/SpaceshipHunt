@@ -9,6 +9,7 @@ package spaceshiptHunt.entities
 	import nape.phys.Body;
 	import nape.phys.BodyType;
 	import starling.display.DisplayObject;
+	import starling.display.DisplayObjectContainer;
 	
 	public class BodyInfo
 	{

@@ -52,6 +52,7 @@ package spaceshiptHunt.entities
 		override public function dispose():void
 		{
 			super.dispose();
+			body.shapes.clear();
 		}
 		
 		override public function update():void

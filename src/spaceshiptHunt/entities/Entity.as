@@ -66,6 +66,12 @@ package spaceshiptHunt.entities
 			pathfindingAgent.approximateObject.y = body.position.y + body.velocity.y / 2;
 		}
 		
+		override public function dispose():void 
+		{
+			(graphics as DisplayObjectContainer).removeChildren(0, -1, true);
+			super.dispose();
+		}
+		
 		public function get pathfindingAgent():DDLSEntityAI
 		{
 			return _pathfindingAgent;

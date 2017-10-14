@@ -85,6 +85,7 @@ package starling.extensions
         {
             _effect.dispose();
             super.dispose();
+			Starling.juggler.remove(this);
         }
 
         /** Always returns <code>null</code>. An actual test would be too expensive. */

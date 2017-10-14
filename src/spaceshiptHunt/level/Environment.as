@@ -14,6 +14,8 @@ package spaceshiptHunt.level
 	import flash.geom.Point;
 	import flash.system.Capabilities;
 	import flash.system.TouchscreenType;
+	import flash.ui.Keyboard;
+	import input.Key;
 	import nape.callbacks.CbEvent;
 	import nape.callbacks.CbType;
 	import nape.callbacks.InteractionCallback;
@@ -103,6 +105,7 @@ package spaceshiptHunt.level
 			//light.showLightBulb = true;
 			lastNavMeshUpdate = Starling.juggler.elapsedTime;
 			rayHelper = Ray.fromSegment(Vec2.get(), Vec2.get());
+			Key.addKeyUpCallback(Keyboard.R, resetLevel);
 		}
 		
 		public static function get current():Environment
