@@ -95,6 +95,7 @@ package spaceshiptHunt.entities
 			life = value;
 			if (life <= 0)
 			{
+				life = 0;
 				onDeath();
 			}
 		}

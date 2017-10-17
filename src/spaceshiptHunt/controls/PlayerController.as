@@ -43,15 +43,17 @@ package spaceshiptHunt.controls
 		protected var minCrossTargetDistance:Number;
 		protected var maxCrossTargetDistance:Number;
 		protected var rightStickAxis:Vec2 = new Vec2();
+		protected var lastDirectionChange:Number;
 		protected var turningSpeedRatio:Number = 120.0;
-		protected var aimAngleSpeed:Number = 0.028;
+		protected var aimAngularAcceleration:Number;
+		protected var aimFriction:Number;
 		protected const DEFAULT_AIM_FRICTION:Number = 0.2;
 		protected const TOUCH_AIM_FRICTION:Number = 0.65;
-		protected var aimFriction:Number = DEFAULT_AIM_FRICTION;
-		private var lastDirectionChange:Number;
-		private var lockDirectionDelay:Number = 1.5;
-		private var _player:Player;
-		private var xboxController:Xbox360Controller;
+		protected const TOUCH_AIM_ANGULAR_ACCELERATION:Number = 0.050;
+		protected const DEFAULT_AIM_ANGULAR_ACCELERATION:Number = 0.028;
+		protected var lockDirectionDelay:Number = 1.5;
+		protected var _player:Player;
+		protected var xboxController:Xbox360Controller;
 		
 		public function PlayerController(playerToControl:Player, analogStick:Mesh, crossTarget:Image)
 		{
@@ -145,6 +147,7 @@ package spaceshiptHunt.controls
 					{
 						rightStickAxis.x += rightStickX;
 						aimFriction = DEFAULT_AIM_FRICTION;
+						aimAngularAcceleration = DEFAULT_AIM_ANGULAR_ACCELERATION;
 					}
 					if (xboxController.rt.held)
 					{
@@ -171,7 +174,7 @@ package spaceshiptHunt.controls
 		
 		protected function onPlayerDeath(e:Event):void
 		{
-		//	player = null;
+			//	player = null;
 		}
 		
 		protected function handleCrossTargetControls():void
@@ -179,7 +182,7 @@ package spaceshiptHunt.controls
 			var crossTargetOffset:Vec2 = Vec2.get(crossTarget.x, crossTarget.y).subeq(player.body.position);
 			if (Math.abs(rightStickAxis.x) > 0.01)
 			{
-				crossTargetOffset.angle += rightStickAxis.x * aimAngleSpeed;
+				crossTargetOffset.angle += rightStickAxis.x * aimAngularAcceleration;
 				//if (Math.abs(rightStickAxis.x) > 0.05) //!SystemUtil.isDesktop)
 				//{
 				rightStickAxis.x = rightStickAxis.x * aimFriction;
@@ -237,11 +240,13 @@ package spaceshiptHunt.controls
 			if (Key.isDown(rotateAimLeftKey))
 			{
 				aimFriction = DEFAULT_AIM_FRICTION;
+				aimAngularAcceleration = DEFAULT_AIM_ANGULAR_ACCELERATION;
 				rightStickAxis.x = -1.0;
 			}
 			else if (Key.isDown(rotateAimRightKey))
 			{
 				aimFriction = DEFAULT_AIM_FRICTION;
+				aimAngularAcceleration = DEFAULT_AIM_ANGULAR_ACCELERATION;
 				rightStickAxis.x = 1.0;
 			}
 		}
@@ -259,6 +264,7 @@ package spaceshiptHunt.controls
 			if (swipeVelocityX != 0)
 			{
 				aimFriction = TOUCH_AIM_FRICTION;
+				aimAngularAcceleration = TOUCH_AIM_ANGULAR_ACCELERATION;
 				var easeOutAmount:Number = 2;
 				swipeVelocityX = swipeVelocityX / Math.abs(swipeVelocityX) * Math.pow(Math.abs(swipeVelocityX), easeOutAmount);
 				rightStickAxis.x += swipeVelocityX / turningSpeedRatio;

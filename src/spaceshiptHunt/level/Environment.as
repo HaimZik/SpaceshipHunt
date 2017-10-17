@@ -117,7 +117,7 @@ package spaceshiptHunt.level
 		public function update(passedTime:Number):void
 		{
 			physicsSpace.step(passedTime);
-			if (Player.current)
+			if (Player.current.lifePoints > 0)
 			{
 				light.x = Player.current.graphics.x;
 				light.y = Player.current.graphics.y + 400;
@@ -175,7 +175,7 @@ package spaceshiptHunt.level
 		public function disposeLevel():void
 		{
 			navMesh.updateObjects();
-			for (var i:int = BodyInfo.list.length-1; i >=0; i--)
+			for (var i:int = BodyInfo.list.length - 1; i >= 0; i--)
 			{
 				BodyInfo.list[i].dispose();
 			}
