@@ -10,8 +10,8 @@
 
 package starling.rendering
 {
+    import com.adobe.utils.AGALMiniAssembler;
 
-	import com.adobe.utils.AGALMiniAssembler;
     import flash.display3D.Context3D;
     import flash.display3D.Context3DProgramType;
     import flash.display3D.Program3D;

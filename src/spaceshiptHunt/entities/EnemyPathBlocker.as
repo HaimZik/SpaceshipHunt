@@ -26,10 +26,10 @@ package spaceshiptHunt.entities
 			super.init(bodyDescription);
 			this.gunType = "fireCannon";
 			minAttackRange = 500.0;
-			maxAttackRange = minAttackRange * 1.5;
+			maxAttackRange = minAttackRange * 1.3;
 			attackTriggerRange = minAttackRange * 3;
 			firingRate = 0.4;
-			aimAccuracy = Math.PI / 4.0;
+			aimAccuracy = Math.PI / 6; //4.0;
 		}
 		
 		override protected function decideNextAction():void
@@ -43,21 +43,35 @@ package spaceshiptHunt.entities
 		
 		protected function aimToPlayer():void
 		{
-			var rotaDiff:Number = rotationDiffrenceToPoint(Player.current.body.position);
+			var predictedPosition:Vec2 = playerPredictedPosition();
+			var rotaDiff:Number = rotationDiffrenceToPoint(predictedPosition);
+			predictedPosition.dispose();
 			body.applyAngularImpulse(maxAngularAcceleration * rotaDiff);
-			if (Math.abs(rotaDiff) < aimAccuracy/2)
+			if (Math.abs(rotaDiff) < aimAccuracy / 2)
 			{
 				currentAction = attackPlayer;
 			}
+		}
+		
+		protected function playerPredictedPosition():Vec2
+		{
+			return Player.current.body.position.add(Player.current.body.velocity.mul(0.6, true));
 		}
 		
 		protected function attackPlayer():void
 		{
 			if (isPlayerInRange(maxAttackRange))
 			{
-				if (Math.abs(rotationDiffrenceToPoint(Player.current.body.position)) < aimAccuracy)
+				var predictedPosition:Vec2 = playerPredictedPosition();
+				var angleToPlayer:Number = Math.abs(rotationDiffrenceToPoint(predictedPosition));
+				predictedPosition.dispose();
+				if (angleToPlayer < aimAccuracy)
 				{
 					startShooting();
+					if (angleToPlayer > aimAccuracy * 0.75)
+					{
+						aimToPlayer();
+					}
 				}
 				else
 				{

@@ -67,6 +67,7 @@ package spaceshiptHuntDevelopment.level
 		{
 			private var dragEx:DragAndDropArea;
 		}
+		private var _levelEditorMode:Boolean = false;
 		
 		public function LevelEditor(mainSprite:Sprite)
 		{
@@ -90,6 +91,7 @@ package spaceshiptHuntDevelopment.level
 				Starling.current.nativeStage.addChild(dragEx);
 				Key.addKeyUpCallback(Keyboard.F1, saveLevel);
 			}
+			Key.addKeyUpCallback(Keyboard.F12, toggleLevelEditorMode);
 		}
 		
 		override public function update(passedTime:Number):void
@@ -98,14 +100,19 @@ package spaceshiptHuntDevelopment.level
 			drawDebugGrp();
 		}
 		
-		override public function enqueueLevel(levelName:String,onFinsh:Function=null):void
+		override public function loadLevel(levelName:String, onFinsh:Function = null):void
 		{
-			super.enqueueLevel(levelName,onFinsh);
+			super.loadLevel(levelName, onFinsh);
 			commandQueue.push(function addCommand():void
 			{
 				mainDisplay.addChild(verticesDisplay);
 				drawNavMesh();
 			});
+		}
+		
+		private function toggleLevelEditorMode():void
+		{
+			levelEditorMode = !levelEditorMode;
 		}
 		
 		private static function meshToString(mesh:Vector.<Vector.<int>>):String
@@ -224,123 +231,130 @@ package spaceshiptHuntDevelopment.level
 		
 		override public function handleGameAreaTouch(e:TouchEvent):void
 		{
-			var touch:Touch = e.getTouch(mainDisplay.parent);
-			if (touch)
+			if (levelEditorMode)
 			{
-				var mouseLocation:Point = touch.getLocation(mainDisplay);
-				if (lastObstacleIndex != -1 && !e.ctrlKey)
+				var touch:Touch = e.getTouch(mainDisplay.parent);
+				if (touch)
 				{
-					mouseLocation.offset(-obstacleDisplay[lastObstacleIndex].x, -obstacleDisplay[lastObstacleIndex].y);
-				}
-				if (touch.phase == TouchPhase.BEGAN)
-				{
-					var i:int = -1;
-					for (i = 0; i < obstacleBody.length; i++)
+					var mouseLocation:Point = touch.getLocation(mainDisplay);
+					if (lastObstacleIndex != -1 && !e.ctrlKey)
 					{
-						if (obstacleBody[i].contains(Vec2.fromPoint(touch.getLocation(mainDisplay))))
-						{
-							currentPoly = obstacle[i];
-							break;
-						}
+						mouseLocation.offset(-obstacleDisplay[lastObstacleIndex].x, -obstacleDisplay[lastObstacleIndex].y);
 					}
-					if (e.ctrlKey || lastObstacleIndex == -1)
+					if (touch.phase == TouchPhase.BEGAN)
 					{
-						addMesh([mouseLocation.x, mouseLocation.y], new Body(BodyType.KINEMATIC));
-					}
-					if (closeVertexIndex == -1 && !e.shiftKey && (lastObstacleIndex == i || i == obstacle.length))
-					{
-						var distanceToEdge:Number;
-						var closestDistance:Number = Number.MAX_VALUE;
-						var pressedEdge:Boolean = false;
-						for (var x:int = 0; x < currentPoly.numVertices; x++)
+						var i:int = -1;
+						for (i = 0; i < obstacleBody.length; i++)
 						{
-							distanceToEdge = Point.distance(currentPoly.getVertex(x), mouseLocation);
-							if (distanceToEdge < closestDistance)
+							if (obstacleBody[i].contains(Vec2.fromPoint(touch.getLocation(mainDisplay))))
 							{
-								closestDistance = distanceToEdge;
-								closeVertexIndex = x;
-								if (distanceToEdge < 30.0)
+								currentPoly = obstacle[i];
+								break;
+							}
+						}
+						if (e.ctrlKey || lastObstacleIndex == -1)
+						{
+							addMesh([mouseLocation.x, mouseLocation.y], new Body(BodyType.KINEMATIC));
+						}
+						if (closeVertexIndex == -1 && !e.shiftKey && (lastObstacleIndex == i || i == obstacle.length))
+						{
+							var distanceToEdge:Number;
+							var closestDistance:Number = Number.MAX_VALUE;
+							var pressedEdge:Boolean = false;
+							for (var x:int = 0; x < currentPoly.numVertices; x++)
+							{
+								distanceToEdge = Point.distance(currentPoly.getVertex(x), mouseLocation);
+								if (distanceToEdge < closestDistance)
 								{
-									var preVertex:Point = currentPoly.getVertex(closeVertexIndex, Pool.getPoint());
-									currentPoly.setVertex(closeVertexIndex, mouseLocation.x, mouseLocation.y);
-									if (!currentPoly.isSimple)
+									closestDistance = distanceToEdge;
+									closeVertexIndex = x;
+									if (distanceToEdge < 30.0)
 									{
-										currentPoly.setVertex(closeVertexIndex, preVertex.x, preVertex.y);
+										var preVertex:Point = currentPoly.getVertex(closeVertexIndex, Pool.getPoint());
+										currentPoly.setVertex(closeVertexIndex, mouseLocation.x, mouseLocation.y);
+										if (!currentPoly.isSimple)
+										{
+											currentPoly.setVertex(closeVertexIndex, preVertex.x, preVertex.y);
+										}
+										Pool.putPoint(preVertex);
+										pressedEdge = true;
+										break;
 									}
-									Pool.putPoint(preVertex);
-									pressedEdge = true;
-									break;
 								}
 							}
-						}
-						if (!pressedEdge)
-						{
-							if (currentPoly.numVertices < 3)
+							if (!pressedEdge)
 							{
-								currentPoly.addVertices(mouseLocation);
-								closeVertexIndex = currentPoly.numVertices - 1;
-							}
-							else
-							{
-								var closeToEdge:Point = Point.interpolate(currentPoly.getVertex(closeVertexIndex), mouseLocation, 0.99999);
-								if (!currentPoly.containsPoint(mouseLocation))
+								if (currentPoly.numVertices < 3)
 								{
-									if (currentPoly.containsPoint(closeToEdge))
+									currentPoly.addVertices(mouseLocation);
+									closeVertexIndex = currentPoly.numVertices - 1;
+								}
+								else
+								{
+									var closeToEdge:Point = Point.interpolate(currentPoly.getVertex(closeVertexIndex), mouseLocation, 0.99999);
+									if (!currentPoly.containsPoint(mouseLocation))
+									{
+										if (currentPoly.containsPoint(closeToEdge))
+										{
+											closeVertexIndex = -1;
+										}
+									}
+									else if (!currentPoly.containsPoint(closeToEdge))
 									{
 										closeVertexIndex = -1;
 									}
-								}
-								else if (!currentPoly.containsPoint(closeToEdge))
-								{
-									closeVertexIndex = -1;
-								}
-								if (closeVertexIndex != -1)
-								{
-									addVertex(mouseLocation);
+									if (closeVertexIndex != -1)
+									{
+										addVertex(mouseLocation);
+									}
 								}
 							}
 						}
-					}
-					else if (i != obstacle.length && i != -1 && currentPoly.numVertices > 2)
-					{
-						lastObstacleIndex = i;
-					}
-				}
-				else
-				{
-					if (touch.phase == TouchPhase.MOVED && lastObstacleIndex != -1)
-					{
-						if (e.shiftKey)
+						else if (i != obstacle.length && i != -1 && currentPoly.numVertices > 2)
 						{
-							var mouseMovement:Point = touch.getMovement(obstacleDisplay[lastObstacleIndex]);
-							obstacleDisplay[lastObstacleIndex].x += mouseMovement.x;
-							obstacleDisplay[lastObstacleIndex].y += mouseMovement.y;
-							obstacleBody[lastObstacleIndex].translateShapes(Vec2.fromPoint(mouseMovement));
-							navShape[lastObstacleIndex].x += mouseMovement.x;
-							navShape[lastObstacleIndex].y += mouseMovement.y;
-							Environment.current.meshNeedsUpdate = true;
-							drawVertices(Color.BLUE);
-						}
-						else if (closeVertexIndex != -1)
-						{
-							//	var previousVertex:Point = currentPoly.getVertex(closeVertexIndex, Pool.getPoint());
-							currentPoly.setVertex(closeVertexIndex, mouseLocation.x, mouseLocation.y);
-								//if (!currentPoly.isSimple)
-								//{
-								//currentPoly.setVertex(closeVertexIndex, previousVertex.x, previousVertex.y);
-								//}
-								//	Pool.putPoint(previousVertex);
+							lastObstacleIndex = i;
 						}
 					}
-					else if (touch.phase == TouchPhase.ENDED)
+					else
 					{
-						closeVertexIndex = -1;
+						if (touch.phase == TouchPhase.MOVED && lastObstacleIndex != -1)
+						{
+							if (e.shiftKey)
+							{
+								var mouseMovement:Point = touch.getMovement(obstacleDisplay[lastObstacleIndex]);
+								obstacleDisplay[lastObstacleIndex].x += mouseMovement.x;
+								obstacleDisplay[lastObstacleIndex].y += mouseMovement.y;
+								obstacleBody[lastObstacleIndex].translateShapes(Vec2.fromPoint(mouseMovement));
+								navShape[lastObstacleIndex].x += mouseMovement.x;
+								navShape[lastObstacleIndex].y += mouseMovement.y;
+								Environment.current.meshNeedsUpdate = true;
+								drawVertices(Color.BLUE);
+							}
+							else if (closeVertexIndex != -1)
+							{
+								//	var previousVertex:Point = currentPoly.getVertex(closeVertexIndex, Pool.getPoint());
+								currentPoly.setVertex(closeVertexIndex, mouseLocation.x, mouseLocation.y);
+									//if (!currentPoly.isSimple)
+									//{
+									//currentPoly.setVertex(closeVertexIndex, previousVertex.x, previousVertex.y);
+									//}
+									//	Pool.putPoint(previousVertex);
+							}
+						}
+						else if (touch.phase == TouchPhase.ENDED)
+						{
+							closeVertexIndex = -1;
+						}
+					}
+					if (touch.phase != TouchPhase.HOVER && !e.shiftKey)
+					{
+						updateCurrentPoly();
 					}
 				}
-				if (touch.phase != TouchPhase.HOVER && !e.shiftKey)
-				{
-					updateCurrentPoly();
-				}
+			}
+			else
+			{
+				super.handleGameAreaTouch(e);
 			}
 		}
 		
@@ -382,7 +396,7 @@ package spaceshiptHuntDevelopment.level
 			}
 		}
 		
-		protected function cleanDebugView():void 
+		protected function cleanDebugView():void
 		{
 			navMeshDebugView.cleanPaths();
 			navMeshDebugView.cleanEntities();
@@ -612,6 +626,16 @@ package spaceshiptHuntDevelopment.level
 				{
 					dropImage(x, y, file);
 				}
+			}
+			
+			public function get levelEditorMode():Boolean
+			{
+				return _levelEditorMode;
+			}
+			
+			public function set levelEditorMode(value:Boolean):void
+			{
+				_levelEditorMode = value;
 			}
 		
 		}

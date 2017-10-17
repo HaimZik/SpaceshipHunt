@@ -59,14 +59,14 @@ package
 		//initialization functions		
 		public function init():void
 		{
-			var levelEditorMode:Boolean = true;
-			if (!levelEditorMode || CONFIG::release)
+			var fakeReleaseMode:Boolean = false;
+			if (fakeReleaseMode || CONFIG::release)
 			{
 				gameEnvironment = new Environment(this);
 			}
 			CONFIG::debug
 			{
-				if (levelEditorMode)
+				if (!fakeReleaseMode)
 				{
 					gameEnvironment = new LevelEditor(this);
 				}
@@ -80,7 +80,7 @@ package
 			}
 			Environment.current.assetsLoader.enqueue("grp/concrete_baked.atf");
 			Environment.current.assetsLoader.enqueue("grp/concrete_baked_n.atf");
-			gameEnvironment.enqueueLevel("Level1Test", onFinishLoading);
+			gameEnvironment.loadLevel("Level1Test", onFinishLoading);
 		}
 		
 		protected function onFullscreen(e:FullScreenEvent):void
@@ -120,13 +120,13 @@ package
 			Key.init(stage);
 			ControllerInput.initialize(Starling.current.nativeStage);
 			playerController = new PlayerController(Player.current, analogStick, crossTarget);
+			Starling.current.nativeStage.addEventListener(FullScreenEvent.FULL_SCREEN, onFullscreen);
 			if (SystemUtil.isDesktop && CONFIG::release)
 			{
-				Starling.current.nativeStage.addEventListener(FullScreenEvent.FULL_SCREEN, onFullscreen);
 				toggleFullscreen();
-				Key.addKeyUpCallback(Keyboard.F11, toggleFullscreen);
-				Key.addKeyUpCallback(Keyboard.ESCAPE, toggleFullscreen);
 			}
+			Key.addKeyUpCallback(Keyboard.F11, toggleFullscreen);
+			Key.addKeyUpCallback(Keyboard.ESCAPE, toggleFullscreen);
 			addEventListener(Event.ENTER_FRAME, enterFrame);
 			addEventListener(TouchEvent.TOUCH, onTouch);
 			Environment.current.assetsLoader.enqueueWithName("audio/Nihilore.mp3", "music");

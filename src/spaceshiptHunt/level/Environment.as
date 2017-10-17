@@ -32,6 +32,7 @@ package spaceshiptHunt.level
 	import nape.space.Space;
 	import spaceshiptHunt.entities.*;
 	import starling.core.Starling;
+	import starling.display.BlendMode;
 	import starling.display.DisplayObjectContainer;
 	import starling.display.Mesh;
 	import starling.display.Sprite;
@@ -134,7 +135,7 @@ package spaceshiptHunt.level
 			}
 		}
 		
-		public function enqueueLevel(levelName:String, onFinish:Function = null):void
+		public function loadLevel(levelName:String, onFinish:Function = null):void
 		{
 			disposeLevel();
 			var level:Object = JSON.parse(new LevelInfo[levelName](), function(k, v):Object
@@ -183,7 +184,7 @@ package spaceshiptHunt.level
 		
 		public function resetLevel():void
 		{
-			enqueueLevel(currentLevelName);
+			loadLevel(currentLevelName);
 		}
 		
 		public function enqueueBody(fileName:String, fileInfo:Object):void
