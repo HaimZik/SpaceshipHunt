@@ -97,11 +97,11 @@ package spaceshiptHunt.controls
 			{
 				handleJoystickInput();
 			}
+			handleCrossTargetControls();
 			if (Math.abs(player.impulse.x) > 0.5 || Math.abs(rightStickAxis.x) > 0.2)
 			{
 				lastDirectionChange = Starling.juggler.elapsedTime;
 			}
-			handleCrossTargetControls();
 		}
 		
 		public function onFocusReturn():void

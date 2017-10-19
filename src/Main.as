@@ -30,7 +30,10 @@ package
 			this.stage.scaleMode = StageScaleMode.NO_SCALE;
 			this.stage.align = StageAlign.TOP_LEFT;
 			gameEngine = new Starling(Game, stage, null, null, "auto", "baselineExtended");
+			if (CONFIG::release)
+			{
 			gameEngine.antiAliasing = 4;
+			}
 			gameEngine.showStats = true;
 			gameEngine.start();
 			stage.addEventListener(Event.ACTIVATE, function(e:Event):void
