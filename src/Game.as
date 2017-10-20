@@ -207,7 +207,7 @@ package
 				}
 				else if (touch.target == shootButton)
 				{
-					if (Player.current.lifePoints>0)
+					if (!gameEnvironment.paused)
 					{
 						if (touch.phase == TouchPhase.ENDED)
 						{
@@ -249,7 +249,7 @@ package
 			if (event.passedTime > 0)
 			{
 				gameEnvironment.update(passedTime);
-				if (Player.current.lifePoints>0)
+				if (!gameEnvironment.paused)
 				{
 					playerController.update();
 					focusCam();

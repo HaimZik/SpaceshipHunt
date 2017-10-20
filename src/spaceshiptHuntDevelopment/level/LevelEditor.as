@@ -8,6 +8,7 @@ package spaceshiptHuntDevelopment.level
 	import flash.geom.Point;
 	import flash.net.URLRequest;
 	import flash.ui.Keyboard;
+	import flash.utils.Dictionary;
 	import input.Key;
 	import nape.geom.GeomPoly;
 	import nape.geom.GeomPolyList;
@@ -51,9 +52,9 @@ package spaceshiptHuntDevelopment.level
 	 */
 	public class LevelEditor extends Environment
 	{
-		private var obstacle:Vector.<starling.geom.Polygon>;
 		private var obstacleBody:Vector.<Body>;
-		private var obstacleDisplay:Vector.<Canvas>;
+		private var obstacle:Vector.<starling.geom.Polygon>;
+		private var obstacleDisplay:Dictionary;
 		private var verticesDisplay:Canvas;
 		private var closeVertexIndex:int = -1;
 		private var currentPoly:starling.geom.Polygon;
@@ -73,7 +74,7 @@ package spaceshiptHuntDevelopment.level
 		{
 			super(mainSprite);
 			staticMeshRelativePath = "devPhysicsBodies/";
-			obstacleDisplay = new Vector.<Canvas>();
+			obstacleDisplay = new Dictionary();
 			obstacleBody = new Vector.<Body>();
 			obstacle = new Vector.<starling.geom.Polygon>();
 			navShape = new Vector.<DDLSObject>();
@@ -94,6 +95,24 @@ package spaceshiptHuntDevelopment.level
 			Key.addKeyUpCallback(Keyboard.F12, toggleLevelEditorMode);
 		}
 		
+		public function get levelEditorMode():Boolean
+		{
+			return _levelEditorMode;
+		}
+		
+		public function set levelEditorMode(value:Boolean):void
+		{
+			_levelEditorMode = value;
+			if (_levelEditorMode)
+			{
+				mainDisplay.addChild(verticesDisplay);
+			}
+			else
+			{
+				mainDisplay.removeChild(verticesDisplay);
+			}
+		}
+		
 		override public function update(passedTime:Number):void
 		{
 			super.update(passedTime);
@@ -105,7 +124,6 @@ package spaceshiptHuntDevelopment.level
 			super.loadLevel(levelName, onFinsh);
 			commandQueue.push(function addCommand():void
 			{
-				mainDisplay.addChild(verticesDisplay);
 				drawNavMesh();
 			});
 		}
@@ -231,130 +249,128 @@ package spaceshiptHuntDevelopment.level
 		
 		override public function handleGameAreaTouch(e:TouchEvent):void
 		{
-			if (levelEditorMode)
+			if (!levelEditorMode)
 			{
-				var touch:Touch = e.getTouch(mainDisplay.parent);
-				if (touch)
+				super.handleGameAreaTouch(e);
+				return;
+			}
+			var touch:Touch = e.getTouch(mainDisplay.parent);
+			if (touch)
+			{
+				var mouseLocation:Point = touch.getLocation(mainDisplay);
+				if (lastObstacleIndex != -1 && !e.ctrlKey)
 				{
-					var mouseLocation:Point = touch.getLocation(mainDisplay);
-					if (lastObstacleIndex != -1 && !e.ctrlKey)
+					mouseLocation.offset(-obstacleDisplay[lastObstacleIndex].x, -obstacleDisplay[lastObstacleIndex].y);
+				}
+				if (touch.phase == TouchPhase.BEGAN)
+				{
+					var i:int = -1;
+					for (i = 0; i < obstacleBody.length; i++)
 					{
-						mouseLocation.offset(-obstacleDisplay[lastObstacleIndex].x, -obstacleDisplay[lastObstacleIndex].y);
+						if (obstacleBody[i].contains(Vec2.fromPoint(touch.getLocation(mainDisplay))))
+						{
+							currentPoly = obstacle[i];
+							break;
+						}
 					}
-					if (touch.phase == TouchPhase.BEGAN)
+					if (e.ctrlKey || lastObstacleIndex == -1)
 					{
-						var i:int = -1;
-						for (i = 0; i < obstacleBody.length; i++)
+						addMesh([mouseLocation.x, mouseLocation.y], new Body(BodyType.KINEMATIC));
+					}
+					if (closeVertexIndex == -1 && !e.shiftKey && (lastObstacleIndex == i || i == obstacle.length))
+					{
+						var distanceToEdge:Number;
+						var closestDistance:Number = Number.MAX_VALUE;
+						var pressedEdge:Boolean = false;
+						for (var x:int = 0; x < currentPoly.numVertices; x++)
 						{
-							if (obstacleBody[i].contains(Vec2.fromPoint(touch.getLocation(mainDisplay))))
+							distanceToEdge = Point.distance(currentPoly.getVertex(x), mouseLocation);
+							if (distanceToEdge < closestDistance)
 							{
-								currentPoly = obstacle[i];
-								break;
-							}
-						}
-						if (e.ctrlKey || lastObstacleIndex == -1)
-						{
-							addMesh([mouseLocation.x, mouseLocation.y], new Body(BodyType.KINEMATIC));
-						}
-						if (closeVertexIndex == -1 && !e.shiftKey && (lastObstacleIndex == i || i == obstacle.length))
-						{
-							var distanceToEdge:Number;
-							var closestDistance:Number = Number.MAX_VALUE;
-							var pressedEdge:Boolean = false;
-							for (var x:int = 0; x < currentPoly.numVertices; x++)
-							{
-								distanceToEdge = Point.distance(currentPoly.getVertex(x), mouseLocation);
-								if (distanceToEdge < closestDistance)
+								closestDistance = distanceToEdge;
+								closeVertexIndex = x;
+								if (distanceToEdge < 30.0)
 								{
-									closestDistance = distanceToEdge;
-									closeVertexIndex = x;
-									if (distanceToEdge < 30.0)
+									var preVertex:Point = currentPoly.getVertex(closeVertexIndex, Pool.getPoint());
+									currentPoly.setVertex(closeVertexIndex, mouseLocation.x, mouseLocation.y);
+									if (!currentPoly.isSimple)
 									{
-										var preVertex:Point = currentPoly.getVertex(closeVertexIndex, Pool.getPoint());
-										currentPoly.setVertex(closeVertexIndex, mouseLocation.x, mouseLocation.y);
-										if (!currentPoly.isSimple)
-										{
-											currentPoly.setVertex(closeVertexIndex, preVertex.x, preVertex.y);
-										}
-										Pool.putPoint(preVertex);
-										pressedEdge = true;
-										break;
+										currentPoly.setVertex(closeVertexIndex, preVertex.x, preVertex.y);
 									}
+									Pool.putPoint(preVertex);
+									pressedEdge = true;
+									break;
 								}
 							}
-							if (!pressedEdge)
+						}
+						if (!pressedEdge)
+						{
+							if (currentPoly.numVertices < 3)
 							{
-								if (currentPoly.numVertices < 3)
+								currentPoly.addVertices(mouseLocation);
+								closeVertexIndex = currentPoly.numVertices - 1;
+							}
+							else
+							{
+								var closeToEdge:Point = Point.interpolate(currentPoly.getVertex(closeVertexIndex), mouseLocation, 0.99999);
+								if (!currentPoly.containsPoint(mouseLocation))
 								{
-									currentPoly.addVertices(mouseLocation);
-									closeVertexIndex = currentPoly.numVertices - 1;
-								}
-								else
-								{
-									var closeToEdge:Point = Point.interpolate(currentPoly.getVertex(closeVertexIndex), mouseLocation, 0.99999);
-									if (!currentPoly.containsPoint(mouseLocation))
-									{
-										if (currentPoly.containsPoint(closeToEdge))
-										{
-											closeVertexIndex = -1;
-										}
-									}
-									else if (!currentPoly.containsPoint(closeToEdge))
+									if (currentPoly.containsPoint(closeToEdge))
 									{
 										closeVertexIndex = -1;
 									}
-									if (closeVertexIndex != -1)
-									{
-										addVertex(mouseLocation);
-									}
+								}
+								else if (!currentPoly.containsPoint(closeToEdge))
+								{
+									closeVertexIndex = -1;
+								}
+								if (closeVertexIndex != -1)
+								{
+									addVertex(mouseLocation);
 								}
 							}
 						}
-						else if (i != obstacle.length && i != -1 && currentPoly.numVertices > 2)
-						{
-							lastObstacleIndex = i;
-						}
 					}
-					else
+					else if (i != obstacle.length && i != -1 && currentPoly.numVertices > 2)
 					{
-						if (touch.phase == TouchPhase.MOVED && lastObstacleIndex != -1)
-						{
-							if (e.shiftKey)
-							{
-								var mouseMovement:Point = touch.getMovement(obstacleDisplay[lastObstacleIndex]);
-								obstacleDisplay[lastObstacleIndex].x += mouseMovement.x;
-								obstacleDisplay[lastObstacleIndex].y += mouseMovement.y;
-								obstacleBody[lastObstacleIndex].translateShapes(Vec2.fromPoint(mouseMovement));
-								navShape[lastObstacleIndex].x += mouseMovement.x;
-								navShape[lastObstacleIndex].y += mouseMovement.y;
-								Environment.current.meshNeedsUpdate = true;
-								drawVertices(Color.BLUE);
-							}
-							else if (closeVertexIndex != -1)
-							{
-								//	var previousVertex:Point = currentPoly.getVertex(closeVertexIndex, Pool.getPoint());
-								currentPoly.setVertex(closeVertexIndex, mouseLocation.x, mouseLocation.y);
-									//if (!currentPoly.isSimple)
-									//{
-									//currentPoly.setVertex(closeVertexIndex, previousVertex.x, previousVertex.y);
-									//}
-									//	Pool.putPoint(previousVertex);
-							}
-						}
-						else if (touch.phase == TouchPhase.ENDED)
-						{
-							closeVertexIndex = -1;
-						}
-					}
-					if (touch.phase != TouchPhase.HOVER && !e.shiftKey)
-					{
-						updateCurrentPoly();
+						lastObstacleIndex = i;
 					}
 				}
-			}
-			else
-			{
-				super.handleGameAreaTouch(e);
+				else
+				{
+					if (touch.phase == TouchPhase.MOVED && lastObstacleIndex != -1)
+					{
+						if (e.shiftKey)
+						{
+							var mouseMovement:Point = touch.getMovement(obstacleDisplay[lastObstacleIndex]);
+							obstacleDisplay[lastObstacleIndex].x += mouseMovement.x;
+							obstacleDisplay[lastObstacleIndex].y += mouseMovement.y;
+							obstacleBody[lastObstacleIndex].translateShapes(Vec2.fromPoint(mouseMovement));
+							navShape[lastObstacleIndex].x += mouseMovement.x;
+							navShape[lastObstacleIndex].y += mouseMovement.y;
+							Environment.current.meshNeedsUpdate = true;
+							drawVertices(Color.BLUE);
+						}
+						else if (closeVertexIndex != -1)
+						{
+							//	var previousVertex:Point = currentPoly.getVertex(closeVertexIndex, Pool.getPoint());
+							currentPoly.setVertex(closeVertexIndex, mouseLocation.x, mouseLocation.y);
+								//if (!currentPoly.isSimple)
+								//{
+								//currentPoly.setVertex(closeVertexIndex, previousVertex.x, previousVertex.y);
+								//}
+								//	Pool.putPoint(previousVertex);
+						}
+					}
+					else if (touch.phase == TouchPhase.ENDED)
+					{
+						closeVertexIndex = -1;
+					}
+				}
+				if (touch.phase != TouchPhase.HOVER && !e.shiftKey)
+				{
+					updateCurrentPoly();
+				}
 			}
 		}
 		
@@ -626,16 +642,6 @@ package spaceshiptHuntDevelopment.level
 				{
 					dropImage(x, y, file);
 				}
-			}
-			
-			public function get levelEditorMode():Boolean
-			{
-				return _levelEditorMode;
-			}
-			
-			public function set levelEditorMode(value:Boolean):void
-			{
-				_levelEditorMode = value;
 			}
 		
 		}

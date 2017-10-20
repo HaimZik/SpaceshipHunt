@@ -56,6 +56,7 @@ package spaceshiptHunt.level
 		public var assetsLoader:AssetManager;
 		public var navMesh:DDLSMesh;
 		public var physicsSpace:Space;
+		public var paused:Boolean = false;
 		
 		public var light:LightSource;
 		public var currentLevelName:String;
@@ -107,6 +108,7 @@ package spaceshiptHunt.level
 			lastNavMeshUpdate = Starling.juggler.elapsedTime;
 			rayHelper = Ray.fromSegment(Vec2.get(), Vec2.get());
 			Key.addKeyUpCallback(Keyboard.R, resetLevel);
+			Key.addKeyUpCallback(Keyboard.P, togglePaused);
 		}
 		
 		public static function get current():Environment
@@ -116,9 +118,9 @@ package spaceshiptHunt.level
 		
 		public function update(passedTime:Number):void
 		{
-			physicsSpace.step(passedTime);
-			if (Player.current.lifePoints > 0)
+			if (!paused)
 			{
+				physicsSpace.step(passedTime);
 				light.x = Player.current.graphics.x;
 				light.y = Player.current.graphics.y + 400;
 				var length:int = BodyInfo.list.length;
@@ -132,6 +134,14 @@ package spaceshiptHunt.level
 				navMesh.updateObjects();
 				lastNavMeshUpdate = Starling.juggler.elapsedTime;
 				meshNeedsUpdate = false;
+			}
+		}
+		
+		public function togglePaused():void
+		{
+			if (Player.current.lifePoints > 0)
+			{
+				paused = !paused;
 			}
 		}
 		

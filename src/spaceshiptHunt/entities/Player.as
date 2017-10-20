@@ -22,6 +22,7 @@ package spaceshiptHunt.entities
 			super(position);
 			impulse = Vec2.get(0, 0);
 			weaponsPlacement["fireCannon"] = Vec2.get(16, -37);
+			skewSpeed = 0.2;
 		}
 		
 		static public function get current():Player
@@ -46,7 +47,13 @@ package spaceshiptHunt.entities
 			maxTurningAcceleration = body.mass * 5;
 			maxAngularAcceleration = body.mass * 220;
 			maxAcceleration = body.mass * 18.0;
-			life = 1500.0;
+			life = 1000.0;
+		}
+		
+		override protected function onDeath():void 
+		{
+			super.onDeath();
+			Environment.current.paused = true;
 		}
 		
 		override public function dispose():void
@@ -58,7 +65,6 @@ package spaceshiptHunt.entities
 		override public function update():void
 		{
 			super.update();
-			skewSpeed = 0.2;
 			graphics.skewY = graphics.skewY * (1.0 - skewSpeed) + (impulse.x * 0.4) * skewSpeed;
 			if (impulse.length != 0)
 			{

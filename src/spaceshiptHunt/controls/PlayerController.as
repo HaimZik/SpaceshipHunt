@@ -18,7 +18,6 @@ package spaceshiptHunt.controls
 	import starling.display.Mesh;
 	import starling.events.Event;
 	import starling.events.Touch;
-	import starling.events.TouchEvent;
 	import starling.events.TouchPhase;
 	import starling.utils.MathUtil;
 	import starling.utils.SystemUtil;
