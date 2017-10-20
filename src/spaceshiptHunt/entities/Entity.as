@@ -53,9 +53,9 @@ package spaceshiptHunt.entities
 			Environment.current.navMesh.insertObject(pathfindingAgent.approximateObject);
 		}
 		
-		override protected function updateGraphics():void
+		override public function syncGraphics():void
 		{
-			super.updateGraphics();
+			super.syncGraphics();
 			pathfindingAgent.x = body.position.x;
 			pathfindingAgent.y = body.position.y;
 			var dirNorm:Vec2 = Vec2.fromPolar(1, body.rotation - Math.PI / 2);

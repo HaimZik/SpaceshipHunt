@@ -32,7 +32,7 @@ package spaceshiptHunt.entities
 			BodyInfo.list.removeAt(BodyInfo.list.indexOf(this));
 		}
 		
-		protected function updateGraphics():void
+		public function syncGraphics():void
 		{
 			graphics.x = body.position.x;
 			graphics.y = body.position.y;
@@ -48,7 +48,7 @@ package spaceshiptHunt.entities
 		{
 			if (!body.isSleeping)
 			{
-				updateGraphics();
+				syncGraphics();
 			}
 		}
 	
