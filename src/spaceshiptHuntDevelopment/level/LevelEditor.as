@@ -52,14 +52,14 @@ package spaceshiptHuntDevelopment.level
 	 */
 	public class LevelEditor extends Environment
 	{
-		private var obstacleBody:Vector.<Body>;
-		private var obstacle:Vector.<starling.geom.Polygon>;
+		private var obstacleBody:Dictionary;
+		private var obstaclePolygon:Dictionary;
 		private var obstacleDisplay:Dictionary;
+		private var navShape:Dictionary;
 		private var verticesDisplay:Canvas;
 		private var closeVertexIndex:int = -1;
 		private var currentPoly:starling.geom.Polygon;
-		private var lastObstacleIndex:int = -1;
-		private var navShape:Vector.<DDLSObject>;
+		private var lastObstacleId:int = -1;
 		private var napeDebug:ShapeDebug;
 		private var navMeshDebugView:DDLSSimpleView;
 		private var lastViewCenter:Point = new Point(0, 0);
@@ -75,24 +75,24 @@ package spaceshiptHuntDevelopment.level
 			super(mainSprite);
 			staticMeshRelativePath = "devPhysicsBodies/";
 			obstacleDisplay = new Dictionary();
-			obstacleBody = new Vector.<Body>();
-			obstacle = new Vector.<starling.geom.Polygon>();
-			navShape = new Vector.<DDLSObject>();
+			obstacleBody = new Dictionary();
+			obstaclePolygon = new Dictionary();
+			navShape = new Dictionary();
 			verticesDisplay = new Canvas();
 			var stage:Stage = Starling.current.stage;
 			napeDebug = new ShapeDebug(stage.stageWidth, stage.stageHeight, 0x33333333);
 			navMeshDebugView = new DDLSSimpleView();
 			navMeshDebugView.surface.mouseEnabled = false;
 			Starling.current.nativeOverlay.addChild(navMeshDebugView.surface);
-			Key.addKeyUpCallback(Keyboard.N, switchNavMeshView);
 			//Starling.current.nativeOverlay.addChild(napeDebug.display);
+			Key.addKeyUpCallback(Keyboard.N, switchNavMeshView);
+			Key.addKeyUpCallback(Keyboard.F12, toggleLevelEditorMode);
 			CONFIG::air
 			{
 				dragEx = new DragAndDropArea(0, 0, stage.stageWidth, stage.stageHeight, onFileDrop);
 				Starling.current.nativeStage.addChild(dragEx);
 				Key.addKeyUpCallback(Keyboard.F1, saveLevel);
 			}
-			Key.addKeyUpCallback(Keyboard.F12, toggleLevelEditorMode);
 		}
 		
 		public function get levelEditorMode():Boolean
@@ -131,6 +131,7 @@ package spaceshiptHuntDevelopment.level
 		private function toggleLevelEditorMode():void
 		{
 			levelEditorMode = !levelEditorMode;
+			togglePaused();
 		}
 		
 		private static function meshToString(mesh:Vector.<Vector.<int>>):String
@@ -258,108 +259,55 @@ package spaceshiptHuntDevelopment.level
 			if (touch)
 			{
 				var mouseLocation:Point = touch.getLocation(mainDisplay);
-				if (lastObstacleIndex != -1 && !e.ctrlKey)
+				if (lastObstacleId != -1 && !e.ctrlKey)
 				{
-					mouseLocation.offset(-obstacleDisplay[lastObstacleIndex].x, -obstacleDisplay[lastObstacleIndex].y);
+					mouseLocation.offset(-obstacleDisplay[lastObstacleId].x, -obstacleDisplay[lastObstacleId].y);
 				}
 				if (touch.phase == TouchPhase.BEGAN)
 				{
-					var i:int = -1;
-					for (i = 0; i < obstacleBody.length; i++)
-					{
-						if (obstacleBody[i].contains(Vec2.fromPoint(touch.getLocation(mainDisplay))))
-						{
-							currentPoly = obstacle[i];
-							break;
-						}
-					}
-					if (e.ctrlKey || lastObstacleIndex == -1)
+					if (e.ctrlKey || lastObstacleId == -1)
 					{
 						addMesh([mouseLocation.x, mouseLocation.y], new Body(BodyType.KINEMATIC));
 					}
-					if (closeVertexIndex == -1 && !e.shiftKey && (lastObstacleIndex == i || i == obstacle.length))
+					var pressedBodyId:Number = -1;
+					for each (var body:Body in obstacleBody)
 					{
-						var distanceToEdge:Number;
-						var closestDistance:Number = Number.MAX_VALUE;
-						var pressedEdge:Boolean = false;
-						for (var x:int = 0; x < currentPoly.numVertices; x++)
+						if (body.contains(Vec2.fromPoint(touch.getLocation(mainDisplay))))
 						{
-							distanceToEdge = Point.distance(currentPoly.getVertex(x), mouseLocation);
-							if (distanceToEdge < closestDistance)
-							{
-								closestDistance = distanceToEdge;
-								closeVertexIndex = x;
-								if (distanceToEdge < 30.0)
-								{
-									var preVertex:Point = currentPoly.getVertex(closeVertexIndex, Pool.getPoint());
-									currentPoly.setVertex(closeVertexIndex, mouseLocation.x, mouseLocation.y);
-									if (!currentPoly.isSimple)
-									{
-										currentPoly.setVertex(closeVertexIndex, preVertex.x, preVertex.y);
-									}
-									Pool.putPoint(preVertex);
-									pressedEdge = true;
-									break;
-								}
-							}
-						}
-						if (!pressedEdge)
-						{
-							if (currentPoly.numVertices < 3)
-							{
-								currentPoly.addVertices(mouseLocation);
-								closeVertexIndex = currentPoly.numVertices - 1;
-							}
-							else
-							{
-								var closeToEdge:Point = Point.interpolate(currentPoly.getVertex(closeVertexIndex), mouseLocation, 0.99999);
-								if (!currentPoly.containsPoint(mouseLocation))
-								{
-									if (currentPoly.containsPoint(closeToEdge))
-									{
-										closeVertexIndex = -1;
-									}
-								}
-								else if (!currentPoly.containsPoint(closeToEdge))
-								{
-									closeVertexIndex = -1;
-								}
-								if (closeVertexIndex != -1)
-								{
-									addVertex(mouseLocation);
-								}
-							}
+							pressedBodyId = body.id;
+							currentPoly = obstaclePolygon[pressedBodyId];
+							break;
 						}
 					}
-					else if (i != obstacle.length && i != -1 && currentPoly.numVertices > 2)
+					if (closeVertexIndex == -1 && !e.shiftKey && (currentPoly == obstaclePolygon[lastObstacleId] || pressedBodyId == -1))
 					{
-						lastObstacleIndex = i;
+						selectVertex(mouseLocation);
+					}
+					else if (currentPoly.numVertices > 2 && pressedBodyId != -1)
+					{
+						lastObstacleId = pressedBodyId;
 					}
 				}
 				else
 				{
-					if (touch.phase == TouchPhase.MOVED && lastObstacleIndex != -1)
+					if (touch.phase == TouchPhase.MOVED && lastObstacleId != -1)
 					{
 						if (e.shiftKey)
 						{
-							var mouseMovement:Point = touch.getMovement(obstacleDisplay[lastObstacleIndex]);
-							obstacleDisplay[lastObstacleIndex].x += mouseMovement.x;
-							obstacleDisplay[lastObstacleIndex].y += mouseMovement.y;
-							obstacleBody[lastObstacleIndex].translateShapes(Vec2.fromPoint(mouseMovement));
-							navShape[lastObstacleIndex].x += mouseMovement.x;
-							navShape[lastObstacleIndex].y += mouseMovement.y;
-							Environment.current.meshNeedsUpdate = true;
-							drawVertices(Color.BLUE);
+							if (obstacleBody[lastObstacleId])
+							{
+								var mouseMovement:Point = touch.getMovement(obstacleDisplay[lastObstacleId]);
+								moveObstacle(lastObstacleId, mouseMovement.x, mouseMovement.y);
+								Environment.current.meshNeedsUpdate = true;
+								drawVertices(Color.BLUE);
+							}else
+							{
+								
+							}
 						}
 						else if (closeVertexIndex != -1)
 						{
-							//	var previousVertex:Point = currentPoly.getVertex(closeVertexIndex, Pool.getPoint());
 							currentPoly.setVertex(closeVertexIndex, mouseLocation.x, mouseLocation.y);
-								//if (!currentPoly.isSimple)
-								//{
-								//currentPoly.setVertex(closeVertexIndex, previousVertex.x, previousVertex.y);
-								//}
-								//	Pool.putPoint(previousVertex);
 						}
 					}
 					else if (touch.phase == TouchPhase.ENDED)
@@ -388,13 +336,16 @@ package spaceshiptHuntDevelopment.level
 			else
 			{
 				verticesDisplay.clear();
+				var obstaclePhysicsBody:Body = new Body(BodyType.KINEMATIC);
+				obstaclePhysicsBody.space = physicsSpace;
+				lastObstacleId = obstaclePhysicsBody.id;
+				obstacleBody[lastObstacleId] = obstaclePhysicsBody;
 				currentPoly = new starling.geom.Polygon(vertices);
-				lastObstacleIndex = obstacle.push(currentPoly) - 1;
-				obstacleDisplay.push(new Canvas());
-				obstacleBody.push(new Body(BodyType.KINEMATIC));
-				navMesh.insertObject(navShape[navShape.push(new DDLSObject()) - 1]);
-				asteroidField.addChild(obstacleDisplay[lastObstacleIndex]);
-				obstacleBody[lastObstacleIndex].space = physicsSpace;
+				obstaclePolygon[lastObstacleId] = currentPoly;
+				obstacleDisplay[lastObstacleId] = new Canvas();
+				navShape[lastObstacleId] = new DDLSObject();
+				navMesh.insertObject(navShape[lastObstacleId]);
+				asteroidField.addChild(obstacleDisplay[lastObstacleId]);
 			}
 		}
 		
@@ -419,13 +370,77 @@ package spaceshiptHuntDevelopment.level
 			navMeshDebugView.cleanMesh();
 		}
 		
+		protected function selectVertex(mouseLocation:Point):void
+		{
+			var distanceToEdge:Number;
+			var closestDistance:Number = Number.MAX_VALUE;
+			var pressedEdge:Boolean = false;
+			for (var x:int = 0; x < currentPoly.numVertices; x++)
+			{
+				distanceToEdge = Point.distance(currentPoly.getVertex(x), mouseLocation);
+				if (distanceToEdge < closestDistance)
+				{
+					closestDistance = distanceToEdge;
+					closeVertexIndex = x;
+					if (distanceToEdge < 30.0)
+					{
+						var preVertex:Point = currentPoly.getVertex(closeVertexIndex, Pool.getPoint());
+						currentPoly.setVertex(closeVertexIndex, mouseLocation.x, mouseLocation.y);
+						if (!currentPoly.isSimple)
+						{
+							currentPoly.setVertex(closeVertexIndex, preVertex.x, preVertex.y);
+						}
+						Pool.putPoint(preVertex);
+						pressedEdge = true;
+						break;
+					}
+				}
+			}
+			if (!pressedEdge)
+			{
+				if (currentPoly.numVertices < 3)
+				{
+					currentPoly.addVertices(mouseLocation);
+					closeVertexIndex = currentPoly.numVertices - 1;
+				}
+				else
+				{
+					var closeToEdge:Point = Point.interpolate(currentPoly.getVertex(closeVertexIndex), mouseLocation, 0.99999);
+					if (!currentPoly.containsPoint(mouseLocation))
+					{
+						if (currentPoly.containsPoint(closeToEdge))
+						{
+							closeVertexIndex = -1;
+						}
+					}
+					else if (!currentPoly.containsPoint(closeToEdge))
+					{
+						closeVertexIndex = -1;
+					}
+					if (closeVertexIndex != -1)
+					{
+						addVertex(mouseLocation);
+					}
+				}
+			}
+		}
+		
+		protected function moveObstacle(obstacleId:int, x:Number, y:Number):void
+		{
+			obstacleDisplay[obstacleId].x += x;
+			obstacleDisplay[obstacleId].y += y;
+			obstacleBody[obstacleId].translateShapes(Vec2.weak(x, y));
+			navShape[obstacleId].x += x;
+			navShape[obstacleId].y += y;
+		}
+		
 		private function getDevMesh():Vector.<Vector.<Number>>
 		{
-			var mesh:Vector.<Vector.<Number>> = new Vector.<Vector.<Number>>(obstacle.length, true);
-			for (var i:int = 0; i < obstacle.length; i++)
+			var mesh:Vector.<Vector.<Number>> = new Vector.<Vector.<Number>>(obstaclePolygon.length, true);
+			for (var i:int = 0; i < obstaclePolygon.length; i++)
 			{
 				mesh[i] = new Vector.<Number>();
-				polyToVector(obstacle[i], mesh[i], 0);
+				polyToVector(obstaclePolygon[i], mesh[i], 0);
 				for (var j:int = 0; j < mesh[i].length; j++)
 				{
 					mesh[i][j] = int(mesh[i][j] + obstacleDisplay[i].x);
@@ -497,8 +512,8 @@ package spaceshiptHuntDevelopment.level
 		
 		private function drawVertices(color:uint):void
 		{
-			verticesDisplay.x = obstacleDisplay[lastObstacleIndex].x;
-			verticesDisplay.y = obstacleDisplay[lastObstacleIndex].y;
+			verticesDisplay.x = obstacleDisplay[lastObstacleId].x;
+			verticesDisplay.y = obstacleDisplay[lastObstacleId].y;
 			verticesDisplay.clear();
 			verticesDisplay.beginFill(color, 0.5);
 			var edge:Point;
@@ -526,13 +541,13 @@ package spaceshiptHuntDevelopment.level
 						currentPoly.reverse();
 						closeVertexIndex = currentPoly.numVertices - closeVertexIndex - 1;
 					}
-					obstacleBody[lastObstacleIndex].shapes.clear();
+					obstacleBody[lastObstacleId].shapes.clear();
 					var convex:GeomPolyList = shape.convexDecomposition();
 					while (!convex.empty())
 					{
-						obstacleBody[lastObstacleIndex].shapes.add(new nape.shape.Polygon(convex.pop()));
+						obstacleBody[lastObstacleId].shapes.add(new nape.shape.Polygon(convex.pop()));
 					}
-					obstacleBody[lastObstacleIndex].translateShapes(Vec2.weak(obstacleDisplay[lastObstacleIndex].x, obstacleDisplay[lastObstacleIndex].y));
+					obstacleBody[lastObstacleId].translateShapes(Vec2.weak(obstacleDisplay[lastObstacleId].x, obstacleDisplay[lastObstacleId].y));
 					var navMeshCords:Vector.<Number> = new Vector.<Number>(currentPoly.numVertices * 4, true);
 					polyToVector(currentPoly, navMeshCords);
 					for (var l:int = 2; l <= navMeshCords.length - 6; l += 3)
@@ -542,18 +557,18 @@ package spaceshiptHuntDevelopment.level
 					}
 					navMeshCords[navMeshCords.length - 2] = navMeshCords[0];
 					navMeshCords[navMeshCords.length - 1] = navMeshCords[1];
-					navShape[lastObstacleIndex].coordinates = navMeshCords;
-					obstacleDisplay[lastObstacleIndex].clear();
-					super.drawMesh(obstacleDisplay[lastObstacleIndex], currentPoly, assetsLoader.getTexture("concrete_baked"), assetsLoader.getTexture("concrete_baked_n"));
+					navShape[lastObstacleId].coordinates = navMeshCords;
+					obstacleDisplay[lastObstacleId].clear();
+					super.drawMesh(obstacleDisplay[lastObstacleId], currentPoly, assetsLoader.getTexture("concrete_baked"), assetsLoader.getTexture("concrete_baked_n"));
 					drawVertices(Color.BLUE);
 					Environment.current.meshNeedsUpdate = true;
 				}
 				else
 				{
-					obstacleDisplay[lastObstacleIndex].clear();
-					obstacleDisplay[lastObstacleIndex].beginFill(Color.RED, 0.5);
-					obstacleDisplay[lastObstacleIndex].drawPolygon(obstacle[lastObstacleIndex]);
-					obstacleDisplay[lastObstacleIndex].endFill();
+					obstacleDisplay[lastObstacleId].clear();
+					obstacleDisplay[lastObstacleId].beginFill(Color.RED, 0.5);
+					obstacleDisplay[lastObstacleId].drawPolygon(obstaclePolygon[lastObstacleId]);
+					obstacleDisplay[lastObstacleId].endFill();
 					drawVertices(Color.RED);
 				}
 				shape.dispose();

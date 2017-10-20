@@ -197,6 +197,10 @@ package spaceshiptHunt.level
 			loadLevel(currentLevelName);
 		}
 		
+		public function handleGameAreaTouch(e:TouchEvent):void
+		{
+		}
+		
 		public function enqueueBody(fileName:String, fileInfo:Object):void
 		{
 			var infoFileName:String = fileName + "Info";
@@ -252,6 +256,28 @@ package spaceshiptHunt.level
 					}
 				}
 			});
+		}
+		
+		public function findPath(pathfindingAgent:DDLSEntityAI, x:Number, y:Number, outPath:Vector.<Number>):void
+		{
+			pathfinder.entity = pathfindingAgent;
+			pathfinder.findPath(x, y, outPath);
+		}
+		
+		public function hitTestLine(fromEntity:DDLSEntityAI, directionX:Number, directionY:Number):Boolean
+		{
+			rayHelper.origin.x = fromEntity.x;
+			rayHelper.origin.y = fromEntity.y;
+			rayHelper.direction.x = directionX;
+			rayHelper.direction.y = directionY;
+			rayHelper.maxDistance = rayHelper.direction.length;
+			var rayResult:RayResult = physicsSpace.rayCast(rayHelper, false, STATIC_OBSTACLES_FILTER);
+			if (rayResult)
+			{
+				rayResult.dispose();
+				return true;
+			}
+			return false;
 		}
 		
 		protected function drawMesh(container:DisplayObjectContainer, polygon:starling.geom.Polygon, texture:Texture, normalMap:Texture = null):void
@@ -357,12 +383,6 @@ package spaceshiptHunt.level
 			physicsSpace.bodies.add(body);
 		}
 		
-		public function findPath(pathfindingAgent:DDLSEntityAI, x:Number, y:Number, outPath:Vector.<Number>):void
-		{
-			pathfinder.entity = pathfindingAgent;
-			pathfinder.findPath(x, y, outPath);
-		}
-		
 		private function onBulletHit(event:InteractionCallback):void
 		{
 			var bulletBody:Body;
@@ -387,26 +407,6 @@ package spaceshiptHunt.level
 			{
 				(collidedBody.userData.info as Spaceship).onBulletHit(PhysicsParticle.impactForce);
 			}
-		}
-		
-		public function hitTestLine(fromEntity:DDLSEntityAI, directionX:Number, directionY:Number):Boolean
-		{
-			rayHelper.origin.x = fromEntity.x;
-			rayHelper.origin.y = fromEntity.y;
-			rayHelper.direction.x = directionX;
-			rayHelper.direction.y = directionY;
-			rayHelper.maxDistance = rayHelper.direction.length;
-			var rayResult:RayResult = physicsSpace.rayCast(rayHelper, false, STATIC_OBSTACLES_FILTER);
-			if (rayResult)
-			{
-				rayResult.dispose();
-				return true;
-			}
-			return false;
-		}
-		
-		public function handleGameAreaTouch(e:TouchEvent):void
-		{
 		}
 	
 	}
