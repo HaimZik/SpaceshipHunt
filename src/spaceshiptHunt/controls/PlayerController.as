@@ -240,13 +240,13 @@ package spaceshiptHunt.controls
 			{
 				aimFriction = DEFAULT_AIM_FRICTION;
 				aimAngularAcceleration = DEFAULT_AIM_ANGULAR_ACCELERATION;
-				rightStickAxis.x = -1.0;
+				rightStickAxis.x += -1.0;
 			}
 			else if (Key.isDown(rotateAimRightKey))
 			{
 				aimFriction = DEFAULT_AIM_FRICTION;
 				aimAngularAcceleration = DEFAULT_AIM_ANGULAR_ACCELERATION;
-				rightStickAxis.x = 1.0;
+				rightStickAxis.x += 1.0;
 			}
 		}
 		

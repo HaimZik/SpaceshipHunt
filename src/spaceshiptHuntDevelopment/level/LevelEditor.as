@@ -5,6 +5,7 @@ package spaceshiptHuntDevelopment.level
 	import flash.display.Bitmap;
 	import flash.display.Loader;
 	import flash.events.Event;
+	import flash.events.MouseEvent;
 	import flash.geom.Point;
 	import flash.net.URLRequest;
 	import flash.ui.Keyboard;
@@ -23,6 +24,7 @@ package spaceshiptHuntDevelopment.level
 	import spaceshiptHunt.entities.BodyInfo;
 	import spaceshiptHunt.entities.Entity;
 	import spaceshiptHunt.entities.PhysicsParticle;
+	import spaceshiptHunt.entities.Player;
 	import spaceshiptHunt.level.Environment;
 	import starling.core.Starling;
 	import starling.display.Canvas;
@@ -88,11 +90,27 @@ package spaceshiptHuntDevelopment.level
 			//Starling.current.nativeOverlay.addChild(napeDebug.display);
 			Key.addKeyUpCallback(Keyboard.N, switchNavMeshView);
 			Key.addKeyUpCallback(Keyboard.F12, toggleLevelEditorMode);
+			Starling.current.nativeStage.addEventListener(MouseEvent.MOUSE_WHEEL, onZoom);
 			CONFIG::air
 			{
 				dragEx = new DragAndDropArea(0, 0, stage.stageWidth, stage.stageHeight, onFileDrop);
 				Starling.current.nativeStage.addChild(dragEx);
 				Key.addKeyUpCallback(Keyboard.F1, saveLevel);
+			}
+		}
+		
+		protected function onZoom(e:MouseEvent):void
+		{
+			var preBaseZoom:Number = _baseZoom;
+			baseZoom += e.delta * _baseZoom * 0.05;
+			if (paused)
+			{
+				mainDisplay.scale = baseZoom;
+				var camPosition:Point = Pool.getPoint(cameraPosition.x,cameraPosition.y);
+				mainDisplay.localToGlobal(camPosition, camPosition);
+				mainDisplay.x -= camPosition.x - mainDisplay.stage.stageWidth * 0.5;
+				mainDisplay.y -= camPosition.y - mainDisplay.stage.stageHeight * 0.5;
+				Pool.putPoint(camPosition);
 			}
 		}
 		
@@ -132,7 +150,7 @@ package spaceshiptHuntDevelopment.level
 		private function toggleLevelEditorMode():void
 		{
 			levelEditorMode = !levelEditorMode;
-			togglePaused();
+			paused = levelEditorMode;
 		}
 		
 		private static function meshToString(mesh:Vector.<Vector.<int>>):String

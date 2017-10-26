@@ -32,13 +32,10 @@ package spaceshiptHunt.level
 	import nape.space.Space;
 	import spaceshiptHunt.entities.*;
 	import starling.core.Starling;
-	import starling.display.BlendMode;
 	import starling.display.DisplayObjectContainer;
 	import starling.display.Mesh;
 	import starling.display.Sprite;
-	import starling.events.Touch;
 	import starling.events.TouchEvent;
-	import starling.events.TouchPhase;
 	import starling.extensions.PDParticleSystem;
 	import starling.extensions.lighting.LightSource;
 	import starling.extensions.lighting.LightStyle;
@@ -46,6 +43,7 @@ package spaceshiptHunt.level
 	import starling.rendering.VertexData;
 	import starling.textures.Texture;
 	import starling.utils.AssetManager;
+	import starling.utils.MathUtil;
 	import starling.utils.Pool;
 	import starling.utils.SystemUtil;
 	
@@ -57,23 +55,21 @@ package spaceshiptHunt.level
 		public var navMesh:DDLSMesh;
 		public var physicsSpace:Space;
 		public var paused:Boolean = false;
-		
 		public var light:LightSource;
 		public var currentLevelName:String;
+		public var cameraPosition:Point = new Point();
+		protected static const STATIC_OBSTACLES_FILTER:InteractionFilter = new InteractionFilter(2, ~8);
 		static private var currentEnvironment:Environment;
+		protected var _baseZoom:Number = 1.0;
 		protected var pathfinder:DDLSPathFinder;
 		protected var lastNavMeshUpdate:Number;
 		protected var commandQueue:Vector.<Function>;
 		protected var navBody:DDLSObject;
-		protected var particleSystem:PDParticleSystem;
-		protected static const STATIC_OBSTACLES_FILTER:InteractionFilter = new InteractionFilter(2, ~8);
+		protected var staticMeshRelativePath:String;
 		private var rayHelper:Ray;
-		
 		[Embed(source = "JetFire.pex", mimeType = "application/octet-stream")]
 		protected static const JetFireConfig:Class;
-		
 		protected var asteroidField:Sprite;
-		protected var staticMeshRelativePath:String;
 		
 		public function Environment(mainSprite:Sprite)
 		{
@@ -116,10 +112,22 @@ package spaceshiptHunt.level
 			return currentEnvironment;
 		}
 		
+		public function get baseZoom():Number
+		{
+			return _baseZoom;
+		}
+		
+		public function set baseZoom(value:Number):void
+		{
+			_baseZoom = MathUtil.clamp(value, 0.04, 1.0);
+		}
+		
 		public function update(passedTime:Number):void
 		{
 			if (!paused)
 			{
+				cameraPosition.x = Player.current.body.position.x;
+				cameraPosition.y = Player.current.body.position.y;
 				physicsSpace.step(passedTime);
 				light.x = Player.current.graphics.x;
 				light.y = Player.current.graphics.y + 400;
@@ -344,7 +352,7 @@ package spaceshiptHunt.level
 			//if (!particleSystem)
 			//{
 			//	}
-			particleSystem = new PDParticleSystem(XML(new JetFireConfig()), assetsLoader.getTexture("fireball"));
+			var particleSystem:PDParticleSystem = new PDParticleSystem(XML(new JetFireConfig()), assetsLoader.getTexture("fireball"));
 			particleSystem.batchable = true;
 			(bodyInfo.graphics as DisplayObjectContainer).addChild(particleSystem);
 			var particleSystem2:PDParticleSystem = new PDParticleSystem(XML(new JetFireConfig()), assetsLoader.getTexture("fireball"));

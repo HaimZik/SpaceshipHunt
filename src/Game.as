@@ -49,6 +49,7 @@ package
 		private var background:Image;
 		private var player:Player;
 		private var playerController:PlayerController;
+		private const MAX_ZOOM_OUT:Number = 0.3;
 		
 		public function Game()
 		{
@@ -259,34 +260,37 @@ package
 		
 		private function focusCam():void
 		{
-			this.pivotX = this.x - stage.stageWidth / 2;
-			this.pivotY = this.y + stage.stageHeight / 2;
+			//this.pivotX = this.x - stage.stageWidth / 2;
+			//this.pivotY = this.y + stage.stageHeight / 2;
 			this.rotation -= (this.rotation + player.body.rotation) - player.body.angularVel / 17;
 			var velocity:Vec2 = player.body.velocity.copy(true).rotate(rotation).muleq(0.2);
-			var newScale:Number = 1 - velocity.length * velocity.length / 30000;
+			var newScale:Number = gameEnvironment.baseZoom - Math.min(MAX_ZOOM_OUT*gameEnvironment.baseZoom, velocity.length * velocity.length / 30000);
 			this.scale += (newScale - this.scale) / 16;
-			var position:Point = Pool.getPoint(player.body.position.x, player.body.position.y);
-			this.localToGlobal(position, position);
-			this.x -= position.x - velocity.x - stage.stageWidth / 2;
-			this.y -= position.y - velocity.y - stage.stageHeight * 0.7;
+			var camPosition:Point = Pool.getPoint(gameEnvironment.cameraPosition.x, gameEnvironment.cameraPosition.y);
+			this.localToGlobal(camPosition, camPosition);
+			this.x -= camPosition.x - velocity.x - stage.stageWidth / 2;
+			this.y -= camPosition.y - velocity.y - stage.stageHeight * 0.7;
+			Pool.putPoint(camPosition);
 			velocity.dispose();
 			var parallaxRatio:Number = 0.5;
 			background.x = player.body.position.x - (player.body.position.x * parallaxRatio) % 512 - background.width / 2;
 			background.y = player.body.position.y - (player.body.position.y * parallaxRatio) % 512 - background.height / 2;
-			
-			this.globalToLocal(joystickPosition, position);
-			joystick.x = position.x;
-			joystick.y = position.y;
+			var joystickLocalPos:Point = Pool.getPoint();
+			this.globalToLocal(joystickPosition, joystickLocalPos);
+			joystick.x = joystickLocalPos.x;
+			joystick.y = joystickLocalPos.y;
+			Pool.putPoint(joystickLocalPos);
 			joystick.scale = shootButton.scale = 1 / this.scale;
 			joystick.rotation = shootButton.rotation = -this.rotation;
-			position.copyFrom(joystickPosition);
+			var shootButtonPosition:Point = Pool.getPoint();
+			shootButtonPosition.copyFrom(joystickPosition);
 			var shootIconWidth:Number = shootButton.texture.width;
-			position.x += stage.stageWidth - joystickRadios * 2 - shootIconWidth / 2 - 30;
-			position.y -= shootIconWidth / 2 - 5;
-			this.globalToLocal(position, position);
-			shootButton.x = position.x;
-			shootButton.y = position.y;
-			Pool.putPoint(position);
+			shootButtonPosition.x += stage.stageWidth - joystickRadios * 2 - shootIconWidth / 2 - 30;
+			shootButtonPosition.y -= shootIconWidth / 2 - 5;
+			this.globalToLocal(shootButtonPosition, shootButtonPosition);
+			shootButton.x = shootButtonPosition.x;
+			shootButton.y = shootButtonPosition.y;
+			Pool.putPoint(shootButtonPosition);
 		}
 	
 	}
