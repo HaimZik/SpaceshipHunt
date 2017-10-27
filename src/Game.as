@@ -36,19 +36,21 @@ package
 	 */
 	public class Game extends Sprite
 	{
-		private var crossTarget:Image;
-		private var joystickRadios:Number;
-		private var joystick:Sprite;
-		private var analogStick:Mesh;
-		private var shootButton:Image;
-		private var joystickPosition:Point;
-		private var touches:Vector.<Touch> = new Vector.<Touch>();
-		private var backgroundMusic:SoundChannel;
-		private var volume:Number = 0.08;
+		
 		private var gameEnvironment:Environment;
-		private var background:Image;
 		private var player:Player;
 		private var playerController:PlayerController;
+		private var UIDisplay:Sprite;
+		private var joystick:Sprite;
+		private var analogStick:Mesh;
+		private var crossTarget:Image;
+		private var shootButton:Image;
+		private var background:Image;
+		private var touches:Vector.<Touch> = new Vector.<Touch>();
+		private var backgroundMusic:SoundChannel;
+		private var joystickPosition:Point;
+		private var joystickRadios:Number;
+		private var volume:Number = 0.08;
 		private const MAX_ZOOM_OUT:Number = 0.3;
 		
 		public function Game()
@@ -61,15 +63,19 @@ package
 		public function init():void
 		{
 			var fakeReleaseMode:Boolean = false;
+			UIDisplay = new Sprite();
+			var gameArea:Sprite = new Sprite();
+			addChild(gameArea);
+			addChild(UIDisplay);
 			if (fakeReleaseMode || CONFIG::release)
 			{
-				gameEnvironment = new Environment(this);
+				gameEnvironment = new Environment(gameArea);
 			}
 			CONFIG::debug
 			{
 				if (!fakeReleaseMode)
 				{
-					gameEnvironment = new LevelEditor(this);
+					gameEnvironment = new LevelEditor(gameArea);
 				}
 			}
 			drawJoystick();
@@ -107,17 +113,17 @@ package
 			Starling.current.stage.addEventListener(Event.RESIZE, stageResize);
 			player = Player.current;
 			shootButton = new Image(Environment.current.assetsLoader.getTexture("shootButton"));
-			addChild(shootButton);
+			gameEnvironment.mainDisplay.addChild(shootButton);
 			shootButton.alignPivot();
 			background = new Image(Environment.current.assetsLoader.getTexture("stars"));
 			background.tileGrid = Pool.getRectangle();
-			addChildAt(background, 0);
+			gameEnvironment.mainDisplay.addChildAt(background, 0);
 			var backgroundRatio:Number = Math.ceil(Math.sqrt(stage.stageHeight * stage.stageHeight + stage.stageWidth * stage.stageWidth) / 512) * 2;
 			background.scale = backgroundRatio * 2;
-			addChild(Environment.current.light);
-			this.setChildIndex(joystick, this.numChildren);
+			gameEnvironment.mainDisplay.addChild(Environment.current.light);
+			gameEnvironment.mainDisplay.setChildIndex(joystick, gameEnvironment.mainDisplay.numChildren);
 			crossTarget = new Image(Environment.current.assetsLoader.getTexture("crossTarget"));
-			addChild(crossTarget);
+			gameEnvironment.mainDisplay.addChild(crossTarget);
 			Key.init(stage);
 			ControllerInput.initialize(Starling.current.nativeStage);
 			playerController = new PlayerController(Player.current, analogStick, crossTarget);
@@ -130,8 +136,8 @@ package
 			Key.addKeyUpCallback(Keyboard.ESCAPE, toggleFullscreen);
 			addEventListener(Event.ENTER_FRAME, enterFrame);
 			addEventListener(TouchEvent.TOUCH, onTouch);
-			Environment.current.assetsLoader.enqueueWithName("audio/Nihilore.mp3", "music");
-			Environment.current.assetsLoader.loadQueue(function onProgress(ratio:Number):void
+			gameEnvironment.assetsLoader.enqueueWithName("audio/Nihilore.mp3", "music");
+			gameEnvironment.assetsLoader.loadQueue(function onProgress(ratio:Number):void
 			{
 				if (ratio == 1.0)
 				{
@@ -173,7 +179,7 @@ package
 			joystick.addChild(joystickBase);
 			analogStick.scale = 0.6;
 			joystick.addChild(analogStick);
-			addChild(joystick);
+			gameEnvironment.mainDisplay.addChild(joystick);
 			joystick.pivotY = joystick.pivotX = joystickRadios;
 		}
 		
@@ -182,7 +188,7 @@ package
 		
 		private function onTouch(e:TouchEvent):void
 		{
-			e.getTouches(this, null, touches);
+			e.getTouches(gameEnvironment.mainDisplay, null, touches);
 			while (touches.length > 0)
 			{
 				var touch:Touch = touches.pop();
@@ -260,34 +266,32 @@ package
 		
 		private function focusCam():void
 		{
-			//this.pivotX = this.x - stage.stageWidth / 2;
-			//this.pivotY = this.y + stage.stageHeight / 2;
-			this.rotation -= (this.rotation + player.body.rotation) - player.body.angularVel / 17;
+			gameEnvironment.mainDisplay.rotation -= (gameEnvironment.mainDisplay.rotation + player.body.rotation) - player.body.angularVel / 17;
 			var velocity:Vec2 = player.body.velocity.copy(true).rotate(rotation).muleq(0.2);
 			var newScale:Number = gameEnvironment.baseZoom - Math.min(MAX_ZOOM_OUT*gameEnvironment.baseZoom, velocity.length * velocity.length / 30000);
-			this.scale += (newScale - this.scale) / 16;
+			gameEnvironment.mainDisplay.scale += (newScale - gameEnvironment.mainDisplay.scale) / 16;
 			var camPosition:Point = Pool.getPoint(gameEnvironment.cameraPosition.x, gameEnvironment.cameraPosition.y);
-			this.localToGlobal(camPosition, camPosition);
-			this.x -= camPosition.x - velocity.x - stage.stageWidth / 2;
-			this.y -= camPosition.y - velocity.y - stage.stageHeight * 0.7;
+			gameEnvironment.mainDisplay.localToGlobal(camPosition, camPosition);
+			gameEnvironment.mainDisplay.x -= camPosition.x - velocity.x - stage.stageWidth / 2;
+			gameEnvironment.mainDisplay.y -= camPosition.y - velocity.y - stage.stageHeight * 0.7;
 			Pool.putPoint(camPosition);
 			velocity.dispose();
 			var parallaxRatio:Number = 0.5;
 			background.x = player.body.position.x - (player.body.position.x * parallaxRatio) % 512 - background.width / 2;
 			background.y = player.body.position.y - (player.body.position.y * parallaxRatio) % 512 - background.height / 2;
 			var joystickLocalPos:Point = Pool.getPoint();
-			this.globalToLocal(joystickPosition, joystickLocalPos);
+			gameEnvironment.mainDisplay.globalToLocal(joystickPosition, joystickLocalPos);
 			joystick.x = joystickLocalPos.x;
 			joystick.y = joystickLocalPos.y;
 			Pool.putPoint(joystickLocalPos);
-			joystick.scale = shootButton.scale = 1 / this.scale;
-			joystick.rotation = shootButton.rotation = -this.rotation;
+			joystick.scale = shootButton.scale = 1 / gameEnvironment.mainDisplay.scale;
+			joystick.rotation = shootButton.rotation = -gameEnvironment.mainDisplay.rotation;
 			var shootButtonPosition:Point = Pool.getPoint();
 			shootButtonPosition.copyFrom(joystickPosition);
 			var shootIconWidth:Number = shootButton.texture.width;
 			shootButtonPosition.x += stage.stageWidth - joystickRadios * 2 - shootIconWidth / 2 - 30;
 			shootButtonPosition.y -= shootIconWidth / 2 - 5;
-			this.globalToLocal(shootButtonPosition, shootButtonPosition);
+			gameEnvironment.mainDisplay.globalToLocal(shootButtonPosition, shootButtonPosition);
 			shootButton.x = shootButtonPosition.x;
 			shootButton.y = shootButtonPosition.y;
 			Pool.putPoint(shootButtonPosition);
