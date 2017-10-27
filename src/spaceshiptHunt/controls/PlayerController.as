@@ -37,7 +37,7 @@ package spaceshiptHunt.controls
 		protected static var fireKey:uint = Keyboard.SPACE;
 		protected static var alternativeFireKey:uint = Keyboard.Z;
 		
-		protected var analogStick:Mesh;
+		protected var leftAnalogStick:Mesh;
 		protected var crossTarget:Image;
 		protected var minCrossTargetDistance:Number;
 		protected var maxCrossTargetDistance:Number;
@@ -54,10 +54,10 @@ package spaceshiptHunt.controls
 		protected var _player:Player;
 		protected var xboxController:Xbox360Controller;
 		
-		public function PlayerController(playerToControl:Player, analogStick:Mesh, crossTarget:Image)
+		public function PlayerController(playerToControl:Player, leftAnalogStick:Mesh, crossTarget:Image)
 		{
 			this.crossTarget = crossTarget;
-			this.analogStick = analogStick;
+			this.leftAnalogStick = leftAnalogStick;
 			player = playerToControl;
 			crossTarget.alignPivot();
 			minCrossTargetDistance = 300.0;
@@ -125,8 +125,8 @@ package spaceshiptHunt.controls
 			}
 			var xAxis:Number;
 			var yAxis:Number;
-			xAxis = Math.min(1, analogStick.x / 160);
-			yAxis = Math.min(1, analogStick.y / 160);
+			xAxis = Math.min(1, leftAnalogStick.x / 160);
+			yAxis = Math.min(1, leftAnalogStick.y / 160);
 			if (xboxController)
 			{
 				if (xAxis == 0 && yAxis == 0)

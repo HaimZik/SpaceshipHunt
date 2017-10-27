@@ -48,7 +48,6 @@ package
 		private var background:Image;
 		private var touches:Vector.<Touch> = new Vector.<Touch>();
 		private var backgroundMusic:SoundChannel;
-		private var joystickPosition:Point;
 		private var joystickRadios:Number;
 		private var volume:Number = 0.08;
 		
@@ -62,10 +61,9 @@ package
 		public function init():void
 		{
 			var fakeReleaseMode:Boolean = false;
-			UIDisplay = new Sprite();
 			var gameArea:Sprite = new Sprite();
 			addChild(gameArea);
-			addChild(UIDisplay);
+			setupUI();
 			if (fakeReleaseMode || CONFIG::release)
 			{
 				gameEnvironment = new Environment(gameArea);
@@ -77,7 +75,6 @@ package
 					gameEnvironment = new LevelEditor(gameArea);
 				}
 			}
-			drawJoystick();
 			var atlaseNum:int = 1;
 			for (var i:int = 0; i < atlaseNum; i++)
 			{
@@ -96,9 +93,7 @@ package
 			shootButton = new Image(Environment.current.assetsLoader.getTexture("shootButton"));
 			UIDisplay.addChild(shootButton);
 			shootButton.alignPivot();
-			var shootIconWidth:Number = shootButton.texture.width;
-			shootButton.x = joystick.x + stage.stageWidth - joystickRadios * 2 - shootIconWidth / 2 - 30;
-			shootButton.y = joystick.y - shootIconWidth / 2 - 5;
+			resizeHUD();
 			background = new Image(Environment.current.assetsLoader.getTexture("stars"));
 			background.tileGrid = Pool.getRectangle();
 			gameEnvironment.mainDisplay.addChildAt(background, 0);
@@ -132,25 +127,29 @@ package
 			//	PhysicsParticle.fill.cache();
 		}
 		
+		protected function setupUI():void
+		{
+			UIDisplay = new Sprite();
+			joystick = new Sprite();
+			addChild(UIDisplay);
+			drawJoystick();
+			UIDisplay.addChild(joystick);
+			joystick.addEventListener(TouchEvent.TOUCH, onJoystickTouch);
+		}
+		
 		private function drawJoystick():void
 		{
-			joystick = new Sprite();
-			joystick.addEventListener(TouchEvent.TOUCH, onJoystickTouch);
 			joystickRadios = Math.min(550, Starling.current.stage.stageWidth, Starling.current.stage.stageHeight) / 4;
 			var joystickShape:Polygon = Polygon.createCircle(0, 0, joystickRadios);
-			joystickPosition = new Point(joystickRadios * 2.5, Starling.current.stage.stageHeight - 15);
 			var vertices:VertexData = new VertexData(null, joystickShape.numVertices);
 			joystickShape.copyToVertexData(vertices);
 			var joystickBase:Mesh = new Mesh(vertices, joystickShape.triangulate());
 			analogStick = new Mesh(vertices, joystickShape.triangulate());
 			analogStick.alpha = joystickBase.alpha = 0.3;
 			analogStick.color = joystickBase.color = Color.WHITE;
-			joystick.x = joystickPosition.x;
-			joystick.y = joystickPosition.y;
 			joystick.addChild(joystickBase);
 			analogStick.scale = 0.6;
 			joystick.addChild(analogStick);
-			UIDisplay.addChild(joystick);
 			joystick.pivotY = joystick.pivotX = joystickRadios;
 		}
 		
@@ -241,6 +240,17 @@ package
 			}
 		}
 		
+		protected function resizeHUD():void
+		{
+			joystick.width = joystick.height = joystickRadios * 2;
+			joystick.pivotX = joystick.pivotY = joystickRadios;
+			joystick.x = joystickRadios * 2 + 20;
+			joystick.y = stage.stageHeight - 15;
+			var shootIconWidth:Number = shootButton.texture.width;
+			shootButton.x = joystick.x + stage.stageWidth - joystickRadios * 2 - shootIconWidth / 2 - 30;
+			shootButton.y = joystick.y - shootIconWidth / 2 - 5;
+		}
+		
 		private function stageResize(e:ResizeEvent = null):void
 		{
 			stage.stageWidth = e.width;
@@ -248,13 +258,7 @@ package
 			Starling.current.viewPort.width = e.width;
 			Starling.current.viewPort.height = e.height;
 			joystickRadios = int(Math.min(800, e.width, e.height) / 5);
-			joystick.width = joystick.height = joystickRadios * 2;
-			joystick.pivotX = joystick.pivotY = joystickRadios;
-			joystick.x = joystickRadios * 2 + 20;
-			joystick.y = e.height - 15;
-			var shootIconWidth:Number = shootButton.texture.width;
-			shootButton.x = joystick.x + stage.stageWidth - joystickRadios * 2 - shootIconWidth / 2 - 30;
-			shootButton.y = joystick.y - shootIconWidth / 2 - 5;
+			resizeHUD();
 		}
 		
 //-----------------------------------------------------------------------------------------------------------------------------------------
