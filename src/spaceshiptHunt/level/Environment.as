@@ -61,6 +61,7 @@ package spaceshiptHunt.level
 		protected static const STATIC_OBSTACLES_FILTER:InteractionFilter = new InteractionFilter(2, ~8);
 		static private var currentEnvironment:Environment;
 		protected var _baseZoom:Number = 1.0;
+		protected const MAX_ZOOM_OUT:Number = 0.3;
 		protected var pathfinder:DDLSPathFinder;
 		protected var lastNavMeshUpdate:Number;
 		protected var commandQueue:Vector.<Function>;
@@ -128,6 +129,7 @@ package spaceshiptHunt.level
 			{
 				cameraPosition.x = Player.current.body.position.x;
 				cameraPosition.y = Player.current.body.position.y;
+				focusCam();
 				physicsSpace.step(passedTime);
 				light.x = Player.current.graphics.x;
 				light.y = Player.current.graphics.y + 400;
@@ -143,6 +145,21 @@ package spaceshiptHunt.level
 				lastNavMeshUpdate = Starling.juggler.elapsedTime;
 				meshNeedsUpdate = false;
 			}
+		}
+		
+		private function focusCam():void
+		{
+			var player:Player = Player.current;
+			mainDisplay.rotation -= (mainDisplay.rotation + player.body.rotation) - player.body.angularVel / 17;
+			var velocity:Vec2 = player.body.velocity.copy(true).rotate(mainDisplay.rotation).muleq(0.2);
+			var newScale:Number = baseZoom - Math.min(MAX_ZOOM_OUT * baseZoom, velocity.length * velocity.length / 30000);
+			mainDisplay.scale += (newScale - mainDisplay.scale) / 16;
+			var camPosition:Point = Pool.getPoint(cameraPosition.x, cameraPosition.y);
+			mainDisplay.localToGlobal(camPosition, camPosition);
+			mainDisplay.x -= camPosition.x - velocity.x - mainDisplay.stage.stageWidth / 2;
+			mainDisplay.y -= camPosition.y - velocity.y - mainDisplay.stage.stageHeight * 0.7;
+			Pool.putPoint(camPosition);
+			velocity.dispose();
 		}
 		
 		public function togglePaused():void

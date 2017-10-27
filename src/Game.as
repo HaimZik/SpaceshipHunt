@@ -51,7 +51,6 @@ package
 		private var joystickPosition:Point;
 		private var joystickRadios:Number;
 		private var volume:Number = 0.08;
-		private const MAX_ZOOM_OUT:Number = 0.3;
 		
 		public function Game()
 		{
@@ -90,6 +89,88 @@ package
 			gameEnvironment.loadLevel("Level1Test", onFinishLoading);
 		}
 		
+		private function onFinishLoading():void
+		{
+			Starling.current.stage.addEventListener(Event.RESIZE, stageResize);
+			player = Player.current;
+			shootButton = new Image(Environment.current.assetsLoader.getTexture("shootButton"));
+			UIDisplay.addChild(shootButton);
+			shootButton.alignPivot();
+			var shootIconWidth:Number = shootButton.texture.width;
+			shootButton.x = joystick.x + stage.stageWidth - joystickRadios * 2 - shootIconWidth / 2 - 30;
+			shootButton.y = joystick.y - shootIconWidth / 2 - 5;
+			background = new Image(Environment.current.assetsLoader.getTexture("stars"));
+			background.tileGrid = Pool.getRectangle();
+			gameEnvironment.mainDisplay.addChildAt(background, 0);
+			var backgroundRatio:Number = Math.ceil(Math.sqrt(stage.stageHeight * stage.stageHeight + stage.stageWidth * stage.stageWidth) / 512) * 2;
+			background.scale = backgroundRatio * 2;
+			gameEnvironment.mainDisplay.addChild(Environment.current.light);
+			crossTarget = new Image(Environment.current.assetsLoader.getTexture("crossTarget"));
+			gameEnvironment.mainDisplay.addChild(crossTarget);
+			Key.init(stage);
+			ControllerInput.initialize(Starling.current.nativeStage);
+			playerController = new PlayerController(Player.current, analogStick, crossTarget);
+			Starling.current.nativeStage.addEventListener(FullScreenEvent.FULL_SCREEN, onFullscreen);
+			if (SystemUtil.isDesktop && CONFIG::release)
+			{
+				toggleFullscreen();
+			}
+			Key.addKeyUpCallback(Keyboard.F11, toggleFullscreen);
+			Key.addKeyUpCallback(Keyboard.ESCAPE, toggleFullscreen);
+			addEventListener(Event.ENTER_FRAME, enterFrame);
+			addEventListener(TouchEvent.TOUCH, onTouch);
+			shootButton.addEventListener(TouchEvent.TOUCH, onShootButtonTouch);
+			gameEnvironment.assetsLoader.enqueueWithName("audio/Nihilore.mp3", "music");
+			gameEnvironment.assetsLoader.loadQueue(function onProgress(ratio:Number):void
+			{
+				if (ratio == 1.0)
+				{
+					backgroundMusic = Environment.current.assetsLoader.getSound("music").play(0, 7);
+					backgroundMusic.soundTransform = new SoundTransform(volume);
+				}
+			})
+			//	PhysicsParticle.fill.cache();
+		}
+		
+		private function drawJoystick():void
+		{
+			joystick = new Sprite();
+			joystick.addEventListener(TouchEvent.TOUCH, onJoystickTouch);
+			joystickRadios = Math.min(550, Starling.current.stage.stageWidth, Starling.current.stage.stageHeight) / 4;
+			var joystickShape:Polygon = Polygon.createCircle(0, 0, joystickRadios);
+			joystickPosition = new Point(joystickRadios * 2.5, Starling.current.stage.stageHeight - 15);
+			var vertices:VertexData = new VertexData(null, joystickShape.numVertices);
+			joystickShape.copyToVertexData(vertices);
+			var joystickBase:Mesh = new Mesh(vertices, joystickShape.triangulate());
+			analogStick = new Mesh(vertices, joystickShape.triangulate());
+			analogStick.alpha = joystickBase.alpha = 0.3;
+			analogStick.color = joystickBase.color = Color.WHITE;
+			joystick.x = joystickPosition.x;
+			joystick.y = joystickPosition.y;
+			joystick.addChild(joystickBase);
+			analogStick.scale = 0.6;
+			joystick.addChild(analogStick);
+			UIDisplay.addChild(joystick);
+			joystick.pivotY = joystick.pivotX = joystickRadios;
+		}
+		
+		protected function toggleFullscreen():void
+		{
+			var flashStage:Stage = Starling.current.nativeStage;
+			if (flashStage.displayState == StageDisplayState.NORMAL)
+			{
+				flashStage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
+				flashStage.mouseLock = true;
+			}
+			else
+			{
+				flashStage.displayState = StageDisplayState.NORMAL;
+			}
+		}
+		
+//-----------------------------------------------------------------------------------------------------------------------------------------
+		//event functions	
+		
 		protected function onFullscreen(e:FullScreenEvent):void
 		{
 			if (e.fullScreen)
@@ -108,128 +189,54 @@ package
 			playerController.onFocusReturn();
 		}
 		
-		private function onFinishLoading():void
-		{
-			Starling.current.stage.addEventListener(Event.RESIZE, stageResize);
-			player = Player.current;
-			shootButton = new Image(Environment.current.assetsLoader.getTexture("shootButton"));
-			gameEnvironment.mainDisplay.addChild(shootButton);
-			shootButton.alignPivot();
-			background = new Image(Environment.current.assetsLoader.getTexture("stars"));
-			background.tileGrid = Pool.getRectangle();
-			gameEnvironment.mainDisplay.addChildAt(background, 0);
-			var backgroundRatio:Number = Math.ceil(Math.sqrt(stage.stageHeight * stage.stageHeight + stage.stageWidth * stage.stageWidth) / 512) * 2;
-			background.scale = backgroundRatio * 2;
-			gameEnvironment.mainDisplay.addChild(Environment.current.light);
-			gameEnvironment.mainDisplay.setChildIndex(joystick, gameEnvironment.mainDisplay.numChildren);
-			crossTarget = new Image(Environment.current.assetsLoader.getTexture("crossTarget"));
-			gameEnvironment.mainDisplay.addChild(crossTarget);
-			Key.init(stage);
-			ControllerInput.initialize(Starling.current.nativeStage);
-			playerController = new PlayerController(Player.current, analogStick, crossTarget);
-			Starling.current.nativeStage.addEventListener(FullScreenEvent.FULL_SCREEN, onFullscreen);
-			if (SystemUtil.isDesktop && CONFIG::release)
-			{
-				toggleFullscreen();
-			}
-			Key.addKeyUpCallback(Keyboard.F11, toggleFullscreen);
-			Key.addKeyUpCallback(Keyboard.ESCAPE, toggleFullscreen);
-			addEventListener(Event.ENTER_FRAME, enterFrame);
-			addEventListener(TouchEvent.TOUCH, onTouch);
-			gameEnvironment.assetsLoader.enqueueWithName("audio/Nihilore.mp3", "music");
-			gameEnvironment.assetsLoader.loadQueue(function onProgress(ratio:Number):void
-			{
-				if (ratio == 1.0)
-				{
-					backgroundMusic = Environment.current.assetsLoader.getSound("music").play(0, 7);
-					backgroundMusic.soundTransform = new SoundTransform(volume);
-				}
-			})
-			//	PhysicsParticle.fill.cache();
-		}
-		
-		protected function toggleFullscreen():void
-		{
-			var flashStage:Stage = Starling.current.nativeStage;
-			if (flashStage.displayState == StageDisplayState.NORMAL)
-			{
-				flashStage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
-				flashStage.mouseLock = true;
-			}
-			else
-			{
-				flashStage.displayState = StageDisplayState.NORMAL;
-			}
-		}
-		
-		private function drawJoystick():void
-		{
-			joystick = new Sprite();
-			joystickRadios = Math.min(550, Starling.current.stage.stageWidth, Starling.current.stage.stageHeight) / 4;
-			var joystickShape:Polygon = Polygon.createCircle(0, 0, joystickRadios);
-			joystickPosition = new Point(joystickRadios * 2.5, Starling.current.stage.stageHeight - 15);
-			var vertices:VertexData = new VertexData(null, joystickShape.numVertices);
-			joystickShape.copyToVertexData(vertices);
-			var joystickBase:Mesh = new Mesh(vertices, joystickShape.triangulate());
-			analogStick = new Mesh(vertices, joystickShape.triangulate());
-			analogStick.alpha = joystickBase.alpha = 0.3;
-			analogStick.color = joystickBase.color = Color.WHITE;
-			joystick.x = joystickPosition.x;
-			joystick.y = joystickPosition.y;
-			joystick.addChild(joystickBase);
-			analogStick.scale = 0.6;
-			joystick.addChild(analogStick);
-			gameEnvironment.mainDisplay.addChild(joystick);
-			joystick.pivotY = joystick.pivotX = joystickRadios;
-		}
-		
-//-----------------------------------------------------------------------------------------------------------------------------------------
-		//event functions	
-		
 		private function onTouch(e:TouchEvent):void
 		{
 			e.getTouches(gameEnvironment.mainDisplay, null, touches);
 			while (touches.length > 0)
 			{
 				var touch:Touch = touches.pop();
-				if (touch.target.parent == joystick)
+				playerController.handleGameAreaTouch(touch);
+				gameEnvironment.handleGameAreaTouch(e);
+			}
+		}
+		
+		protected function onShootButtonTouch(e:TouchEvent):void
+		{
+			var touch:Touch = e.getTouch(shootButton);
+			if (touch)
+			{
+				if (touch.phase == TouchPhase.ENDED)
 				{
-					if (touch.phase == TouchPhase.MOVED || touch.phase == TouchPhase.BEGAN)
-					{
-						var position:Point = Pool.getPoint();
-						touch.getLocation(joystick, position);
-						if (position.length > joystickRadios * 1.2)
-						{
-							position.normalize(joystickRadios * 1.2);
-						}
-						analogStick.x = position.x;
-						analogStick.y = position.y;
-						Pool.putPoint(position);
-					}
-					else if (touch.phase == TouchPhase.ENDED)
-					{
-						analogStick.x = 0;
-						analogStick.y = 0;
-					}
+					player.stopShooting();
 				}
-				else if (touch.target == shootButton)
+				else if (touch.phase == TouchPhase.BEGAN)
 				{
-					if (!gameEnvironment.paused)
-					{
-						if (touch.phase == TouchPhase.ENDED)
-						{
-							player.stopShooting();
-						}
-						else if (touch.phase == TouchPhase.BEGAN)
-						{
-							player.startShooting();
-						}
-					}
+					player.startShooting();
 				}
-				else
+			}
+		}
+		
+		protected function onJoystickTouch(e:TouchEvent):void
+		{
+			var touch:Touch = e.getTouch(joystick);
+			if (touch)
+			{
+				if (touch.phase == TouchPhase.MOVED || touch.phase == TouchPhase.BEGAN)
 				{
-					playerController.handleGameAreaTouch(touch);
-					gameEnvironment.handleGameAreaTouch(e);
+					var position:Point = Pool.getPoint();
+					touch.getLocation(joystick, position);
+					if (position.length > joystickRadios * 1.2)
+					{
+						position.normalize(joystickRadios * 1.2);
+					}
+					analogStick.x = position.x;
+					analogStick.y = position.y;
+					Pool.putPoint(position);
+				}
+				else if (touch.phase == TouchPhase.ENDED)
+				{
+					analogStick.x = 0;
+					analogStick.y = 0;
 				}
 			}
 		}
@@ -243,7 +250,11 @@ package
 			joystickRadios = int(Math.min(800, e.width, e.height) / 5);
 			joystick.width = joystick.height = joystickRadios * 2;
 			joystick.pivotX = joystick.pivotY = joystickRadios;
-			joystickPosition.setTo(joystickRadios * 2 + 20, e.height - 15);
+			joystick.x = joystickRadios * 2 + 20;
+			joystick.y = e.height - 15;
+			var shootIconWidth:Number = shootButton.texture.width;
+			shootButton.x = joystick.x + stage.stageWidth - joystickRadios * 2 - shootIconWidth / 2 - 30;
+			shootButton.y = joystick.y - shootIconWidth / 2 - 5;
 		}
 		
 //-----------------------------------------------------------------------------------------------------------------------------------------
@@ -259,42 +270,16 @@ package
 				if (!gameEnvironment.paused)
 				{
 					playerController.update();
-					focusCam();
+					adjustParallaxBackground();
 				}
 			}
 		}
 		
-		private function focusCam():void
+		private function adjustParallaxBackground():void
 		{
-			gameEnvironment.mainDisplay.rotation -= (gameEnvironment.mainDisplay.rotation + player.body.rotation) - player.body.angularVel / 17;
-			var velocity:Vec2 = player.body.velocity.copy(true).rotate(rotation).muleq(0.2);
-			var newScale:Number = gameEnvironment.baseZoom - Math.min(MAX_ZOOM_OUT*gameEnvironment.baseZoom, velocity.length * velocity.length / 30000);
-			gameEnvironment.mainDisplay.scale += (newScale - gameEnvironment.mainDisplay.scale) / 16;
-			var camPosition:Point = Pool.getPoint(gameEnvironment.cameraPosition.x, gameEnvironment.cameraPosition.y);
-			gameEnvironment.mainDisplay.localToGlobal(camPosition, camPosition);
-			gameEnvironment.mainDisplay.x -= camPosition.x - velocity.x - stage.stageWidth / 2;
-			gameEnvironment.mainDisplay.y -= camPosition.y - velocity.y - stage.stageHeight * 0.7;
-			Pool.putPoint(camPosition);
-			velocity.dispose();
 			var parallaxRatio:Number = 0.5;
 			background.x = player.body.position.x - (player.body.position.x * parallaxRatio) % 512 - background.width / 2;
 			background.y = player.body.position.y - (player.body.position.y * parallaxRatio) % 512 - background.height / 2;
-			var joystickLocalPos:Point = Pool.getPoint();
-			gameEnvironment.mainDisplay.globalToLocal(joystickPosition, joystickLocalPos);
-			joystick.x = joystickLocalPos.x;
-			joystick.y = joystickLocalPos.y;
-			Pool.putPoint(joystickLocalPos);
-			joystick.scale = shootButton.scale = 1 / gameEnvironment.mainDisplay.scale;
-			joystick.rotation = shootButton.rotation = -gameEnvironment.mainDisplay.rotation;
-			var shootButtonPosition:Point = Pool.getPoint();
-			shootButtonPosition.copyFrom(joystickPosition);
-			var shootIconWidth:Number = shootButton.texture.width;
-			shootButtonPosition.x += stage.stageWidth - joystickRadios * 2 - shootIconWidth / 2 - 30;
-			shootButtonPosition.y -= shootIconWidth / 2 - 5;
-			gameEnvironment.mainDisplay.globalToLocal(shootButtonPosition, shootButtonPosition);
-			shootButton.x = shootButtonPosition.x;
-			shootButton.y = shootButtonPosition.y;
-			Pool.putPoint(shootButtonPosition);
 		}
 	
 	}
