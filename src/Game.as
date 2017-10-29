@@ -5,6 +5,7 @@ package
 	import flash.events.FullScreenEvent;
 	import flash.events.MouseEvent;
 	import flash.geom.Point;
+	import flash.geom.Rectangle;
 	import flash.media.SoundChannel;
 	import flash.media.SoundTransform;
 	import flash.ui.Keyboard;
@@ -12,6 +13,7 @@ package
 	import io.arkeus.ouya.ControllerInput;
 	import nape.geom.Vec2;
 	import spaceshiptHunt.controls.PlayerController;
+	import spaceshiptHunt.controls.TouchJoystick;
 	import spaceshiptHunt.entities.Player;
 	import spaceshiptHunt.level.Environment;
 	import starling.core.Starling;
@@ -41,14 +43,12 @@ package
 		private var player:Player;
 		private var playerController:PlayerController;
 		private var UIDisplay:Sprite;
-		private var joystick:Sprite;
-		private var analogStick:Mesh;
+		private var joystick:TouchJoystick;
 		private var crossTarget:Image;
 		private var shootButton:Image;
 		private var background:Image;
 		private var touches:Vector.<Touch> = new Vector.<Touch>();
 		private var backgroundMusic:SoundChannel;
-		private var joystickRadios:Number;
 		private var volume:Number = 0.08;
 		
 		public function Game()
@@ -90,12 +90,8 @@ package
 		{
 			Starling.current.stage.addEventListener(Event.RESIZE, stageResize);
 			player = Player.current;
-			shootButton = new Image(Environment.current.assetsLoader.getTexture("shootButton"));
-			UIDisplay.addChild(shootButton);
-			shootButton.alignPivot();
-			resizeHUD();
 			background = new Image(Environment.current.assetsLoader.getTexture("stars"));
-			background.tileGrid = Pool.getRectangle();
+			background.tileGrid = new Rectangle();
 			gameEnvironment.mainDisplay.addChildAt(background, 0);
 			var backgroundRatio:Number = Math.ceil(Math.sqrt(stage.stageHeight * stage.stageHeight + stage.stageWidth * stage.stageWidth) / 512) * 2;
 			background.scale = backgroundRatio * 2;
@@ -104,17 +100,21 @@ package
 			gameEnvironment.mainDisplay.addChild(crossTarget);
 			Key.init(stage);
 			ControllerInput.initialize(Starling.current.nativeStage);
-			playerController = new PlayerController(Player.current, analogStick, crossTarget);
+			playerController = new PlayerController(Player.current, joystick, crossTarget);
 			Starling.current.nativeStage.addEventListener(FullScreenEvent.FULL_SCREEN, onFullscreen);
 			if (SystemUtil.isDesktop && CONFIG::release)
 			{
 				toggleFullscreen();
 			}
+			shootButton = new Image(Environment.current.assetsLoader.getTexture("shootButton"));
+			shootButton.alignPivot();
+			UIDisplay.addChild(shootButton);
+			resizeHUD();
+			shootButton.addEventListener(TouchEvent.TOUCH, onShootButtonTouch);
+			gameEnvironment.mainDisplay.addEventListener(TouchEvent.TOUCH, onTouch);
+			addEventListener(Event.ENTER_FRAME, enterFrame);
 			Key.addKeyUpCallback(Keyboard.F11, toggleFullscreen);
 			Key.addKeyUpCallback(Keyboard.ESCAPE, toggleFullscreen);
-			addEventListener(Event.ENTER_FRAME, enterFrame);
-			addEventListener(TouchEvent.TOUCH, onTouch);
-			shootButton.addEventListener(TouchEvent.TOUCH, onShootButtonTouch);
 			gameEnvironment.assetsLoader.enqueueWithName("audio/Nihilore.mp3", "music");
 			gameEnvironment.assetsLoader.loadQueue(function onProgress(ratio:Number):void
 			{
@@ -130,27 +130,9 @@ package
 		protected function setupUI():void
 		{
 			UIDisplay = new Sprite();
-			joystick = new Sprite();
+			joystick = new TouchJoystick();
 			addChild(UIDisplay);
-			drawJoystick();
 			UIDisplay.addChild(joystick);
-			joystick.addEventListener(TouchEvent.TOUCH, onJoystickTouch);
-		}
-		
-		private function drawJoystick():void
-		{
-			joystickRadios = Math.min(550, Starling.current.stage.stageWidth, Starling.current.stage.stageHeight) / 4;
-			var joystickShape:Polygon = Polygon.createCircle(0, 0, joystickRadios);
-			var vertices:VertexData = new VertexData(null, joystickShape.numVertices);
-			joystickShape.copyToVertexData(vertices);
-			var joystickBase:Mesh = new Mesh(vertices, joystickShape.triangulate());
-			analogStick = new Mesh(vertices, joystickShape.triangulate());
-			analogStick.alpha = joystickBase.alpha = 0.3;
-			analogStick.color = joystickBase.color = Color.WHITE;
-			joystick.addChild(joystickBase);
-			analogStick.scale = 0.6;
-			joystick.addChild(analogStick);
-			joystick.pivotY = joystick.pivotX = joystickRadios;
 		}
 		
 		protected function toggleFullscreen():void
@@ -215,40 +197,13 @@ package
 			}
 		}
 		
-		protected function onJoystickTouch(e:TouchEvent):void
-		{
-			var touch:Touch = e.getTouch(joystick);
-			if (touch)
-			{
-				if (touch.phase == TouchPhase.MOVED || touch.phase == TouchPhase.BEGAN)
-				{
-					var position:Point = Pool.getPoint();
-					touch.getLocation(joystick, position);
-					if (position.length > joystickRadios * 1.2)
-					{
-						position.normalize(joystickRadios * 1.2);
-					}
-					analogStick.x = position.x;
-					analogStick.y = position.y;
-					Pool.putPoint(position);
-				}
-				else if (touch.phase == TouchPhase.ENDED)
-				{
-					analogStick.x = 0;
-					analogStick.y = 0;
-				}
-			}
-		}
-		
 		protected function resizeHUD():void
 		{
-			joystick.width = joystick.height = joystickRadios * 2;
-			joystick.pivotX = joystick.pivotY = joystickRadios;
-			joystick.x = joystickRadios * 2 + 20;
+			joystick.x = joystick.radios * 2 + 20;
 			joystick.y = stage.stageHeight - 15;
-			var shootIconWidth:Number = shootButton.texture.width;
-			shootButton.x = joystick.x + stage.stageWidth - joystickRadios * 2 - shootIconWidth / 2 - 30;
-			shootButton.y = joystick.y - shootIconWidth / 2 - 5;
+			var shootIconRadios:Number = shootButton.texture.width;
+			shootButton.x = stage.stageWidth- shootIconRadios / 2 - 30;
+			shootButton.y = stage.stageHeight - shootIconRadios / 2 - 20;
 		}
 		
 		private function stageResize(e:ResizeEvent = null):void
@@ -257,7 +212,7 @@ package
 			stage.stageHeight = e.height;
 			Starling.current.viewPort.width = e.width;
 			Starling.current.viewPort.height = e.height;
-			joystickRadios = int(Math.min(800, e.width, e.height) / 5);
+			joystick.radios = int(Math.min(800, e.width, e.height) / 5);
 			resizeHUD();
 		}
 		
