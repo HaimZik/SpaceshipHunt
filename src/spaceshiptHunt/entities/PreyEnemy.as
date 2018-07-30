@@ -108,15 +108,15 @@ package spaceshiptHunt.entities
 		
 		public function hide(rayAngle:Number = 0):void
 		{
-			rayPool.origin.x = Player.current.pathfindingAgent.x;
-			rayPool.origin.y = Player.current.pathfindingAgent.y;
-			rayPool.direction.setxy(pathfindingAgent.x - rayPool.origin.x, pathfindingAgent.y - rayPool.origin.y);
+			tempRay.origin.x = Player.current.pathfindingAgent.x;
+			tempRay.origin.y = Player.current.pathfindingAgent.y;
+			tempRay.direction.setxy(pathfindingAgent.x - tempRay.origin.x, pathfindingAgent.y - tempRay.origin.y);
 			if (rayAngle != 0)
 			{
-				rayPool.direction.rotate(rayAngle);
+				tempRay.direction.rotate(rayAngle);
 			}
-			rayPool.maxDistance = Vec2.distance(Player.current.body.position, body.position) + 2000;
-			body.space.rayMultiCast(rayPool, true, PLAYER_FILTER, rayList);
+			tempRay.maxDistance = Vec2.distance(Player.current.body.position, body.position) + 2000;
+			body.space.rayMultiCast(tempRay, true, PLAYER_FILTER, rayList);
 			var rayEnter:RayResult;
 			var rayExit:RayResult;
 			var hidingSpot:Vec2;
@@ -129,7 +129,7 @@ package spaceshiptHunt.entities
 					rayExit = rayList.shift();
 					if (rayExit.distance - rayEnter.distance > this.pathfindingAgent.radius)
 					{
-						hidingSpot = rayPool.at(rayEnter.distance + this.pathfindingAgent.radius + 10);
+						hidingSpot = tempRay.at(rayEnter.distance + this.pathfindingAgent.radius + 10);
 						goTo(hidingSpot.x, hidingSpot.y);
 						hidingSpot.dispose();
 					}
@@ -137,7 +137,7 @@ package spaceshiptHunt.entities
 				}
 				else
 				{
-					hidingSpot = rayPool.at(rayEnter.distance + this.pathfindingAgent.radius + 10);
+					hidingSpot = tempRay.at(rayEnter.distance + this.pathfindingAgent.radius + 10);
 					goTo(hidingSpot.x, hidingSpot.y);
 					hidingSpot.dispose();
 				}

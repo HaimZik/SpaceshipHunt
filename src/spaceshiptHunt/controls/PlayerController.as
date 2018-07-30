@@ -15,7 +15,6 @@ package spaceshiptHunt.controls
 	import spaceshiptHunt.utils.MathUtilities;
 	import starling.core.Starling;
 	import starling.display.Image;
-	import starling.display.Mesh;
 	import starling.events.Event;
 	import starling.events.Touch;
 	import starling.events.TouchPhase;
@@ -38,6 +37,7 @@ package spaceshiptHunt.controls
 		protected static var alternativeFireKey:uint = Keyboard.Z;
 		
 		protected var leftAnalogStick:TouchJoystick;
+		protected var rightJoystick:TouchJoystick;
 		protected var crossTarget:Image;
 		protected var minCrossTargetDistance:Number;
 		protected var maxCrossTargetDistance:Number;
@@ -54,10 +54,11 @@ package spaceshiptHunt.controls
 		protected var _player:Player;
 		protected var xboxController:Xbox360Controller;
 		
-		public function PlayerController(playerToControl:Player, leftJoystick:TouchJoystick, crossTarget:Image)
+		public function PlayerController(playerToControl:Player, leftJoystick:TouchJoystick, rightJoystick:TouchJoystick, crossTarget:Image)
 		{
 			this.crossTarget = crossTarget;
 			this.leftAnalogStick = leftJoystick;
+			this.rightJoystick = rightJoystick;
 			player = playerToControl;
 			crossTarget.alignPivot();
 			minCrossTargetDistance = 300.0;
@@ -88,7 +89,7 @@ package spaceshiptHunt.controls
 		
 		public function update():void
 		{
-			if (CONFIG::mobile == false)
+			if (SystemUtil.isDesktop)
 			{
 				handleKeyboardInput();
 			}
@@ -123,8 +124,14 @@ package spaceshiptHunt.controls
 			{
 				xboxController = null;
 			}
-			var xAxis:Number=leftAnalogStick.xAxis;
-			var yAxis:Number=leftAnalogStick.yAxis;
+			var xAxis:Number = leftAnalogStick.xAxis;
+			var yAxis:Number = leftAnalogStick.yAxis;
+			if (Math.abs(rightJoystick.xAxis) != 0)
+			{
+				rightStickAxis.x += rightJoystick.xAxis;
+				aimFriction = TOUCH_AIM_FRICTION;
+				aimAngularAcceleration = DEFAULT_AIM_ANGULAR_ACCELERATION;
+			}
 			if (xboxController)
 			{
 				if (xAxis == 0 && yAxis == 0)

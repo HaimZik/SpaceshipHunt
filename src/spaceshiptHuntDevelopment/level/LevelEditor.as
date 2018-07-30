@@ -96,6 +96,7 @@ package spaceshiptHuntDevelopment.level
 				dragEx = new DragAndDropArea(0, 0, stage.stageWidth, stage.stageHeight, onFileDrop);
 				Starling.current.nativeStage.addChild(dragEx);
 				Key.addKeyUpCallback(Keyboard.F1, saveLevel);
+				levelEditorMode = true;
 			}
 		}
 		
@@ -106,7 +107,7 @@ package spaceshiptHuntDevelopment.level
 			if (paused)
 			{
 				mainDisplay.scale = baseZoom;
-				var camPosition:Point = Pool.getPoint(cameraPosition.x,cameraPosition.y);
+				var camPosition:Point = Pool.getPoint(cameraPosition.x, cameraPosition.y);
 				mainDisplay.localToGlobal(camPosition, camPosition);
 				mainDisplay.x -= camPosition.x - mainDisplay.stage.stageWidth * 0.5;
 				mainDisplay.y -= camPosition.y - mainDisplay.stage.stageHeight * 0.5;
@@ -711,9 +712,23 @@ package spaceshiptHuntDevelopment.level
 				loader.load(urlReq);
 			}
 			
+			protected function dropFolder(x:Number, y:Number, file:File):void
+			{
+				var spwanLocation:Point = mainDisplay.globalToLocal(new Point(x, y));
+				spawnEntity(file.name, [spwanLocation.x,spwanLocation.y]);
+				if (paused)
+				{
+					syncGraphics();
+				}
+			}
+			
 			private function onFileDrop(x:Number, y:Number, file:File):void
 			{
-				if (file.type == ".json")
+				if (file.type == null)
+				{
+					dropFolder(x, y, file);
+				}
+				else if (file.type == ".json")
 				{
 					dropJSON(x, y, file);
 				}

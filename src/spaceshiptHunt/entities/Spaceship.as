@@ -15,6 +15,7 @@ package spaceshiptHunt.entities
 	import starling.display.DisplayObjectContainer;
 	import starling.display.Image;
 	import starling.textures.Texture;
+	import starling.utils.Color;
 	
 	public class Spaceship extends Entity
 	{
@@ -22,6 +23,7 @@ package spaceshiptHunt.entities
 		public var maxAngularAcceleration:Number;
 		public var engineLocation:Vec2;
 		public var armorDefance:Number = 8.0;
+		public var fireColor:uint = Color.WHITE;
 		protected var life:Number = 150;
 		protected var _gunType:String;
 		protected var fireType:String = "fireball";
@@ -169,11 +171,11 @@ package spaceshiptHunt.entities
 				//recoil
 				body.applyImpulse(bulletVelocity.mul(-0.3, true));
 				var bulletVelocityNormal:Vec2 = bulletVelocity.unit();
-				bulletVelocity.length += body.velocity.length * bulletVelocityNormal.dot(body.velocity.unit(true));
-				PhysicsParticle.spawn(fireType, position.copy(true).rotate(body.rotation).addeq(body.position), bulletVelocity);
+				bulletVelocity.length += Math.max(-bulletSpeed*0.5,body.velocity.length * bulletVelocityNormal.dot(body.velocity.unit(true)));
+				PhysicsParticle.spawn(fireType, position.copy(true).rotate(body.rotation).addeq(body.position), bulletVelocity,fireColor);
 				position.x = weaponLeft.x + weaponLeft.width / 2;
 				bulletVelocity.angle = body.rotation - Math.PI / 2 + Math.random() * 0.1 - 0.05;
-				PhysicsParticle.spawn(fireType, position.rotate(body.rotation).addeq(body.position), bulletVelocity);
+				PhysicsParticle.spawn(fireType, position.rotate(body.rotation).addeq(body.position), bulletVelocity,fireColor);
 				bulletVelocity.dispose();
 				position.dispose();
 			}

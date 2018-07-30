@@ -8,9 +8,9 @@
     <movie fps="60" />
     <movie width="1500" />
     <movie height="980" />
-    <movie version="25" />
+    <movie version="26" />
     <movie minorVersion="0" />
-    <movie platform="AIR" />
+    <movie platform="AIR Mobile" />
     <movie background="#000000" />
     <movie preferredSDK="AIR 26.0.0;26.0.0;" />
   </output>

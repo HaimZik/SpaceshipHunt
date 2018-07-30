@@ -8,6 +8,7 @@ package spaceshiptHunt.entities
 	import starling.core.*;
 	import starling.display.*;
 	import starling.textures.*;
+	import starling.utils.Color;
 	
 	/**
 	 * ...
@@ -45,11 +46,21 @@ package spaceshiptHunt.entities
 			//body.setShapeMaterials(material);
 		}
 		
-		public static function spawn(particleType:String, position:Vec2, impulse:Vec2):void
+		public function get color():uint 
 		{
-			var particleTexture:Texture = Environment.current.assetsLoader.getTexture(particleType)
+			return (graphics as Image).color;
+		}
+		
+		public function set color(value:uint):void 
+		{
+			(graphics as Image).color = value;
+		}
+		
+		public static function spawn(particleType:String, position:Vec2, impulse:Vec2, color:uint = Color.WHITE):void
+		{
 			if (particlePool.length == 0)
 			{
+				var particleTexture:Texture = Environment.current.assetsLoader.getTexture(particleType);
 				var circleShape:Circle = new Circle(particleTexture.width / 2);
 				circleShape.sensorEnabled = true;
 				for (var i:int = 0; i < poolGrowth; i++)
@@ -61,6 +72,7 @@ package spaceshiptHunt.entities
 				}
 			}
 			var particle:PhysicsParticle = particlePool.pop();
+			particle.color = color;
 			particle.body.position.set(position);
 			particle.body.rotation = impulse.angle;
 			particle.body.velocity = impulse;
@@ -88,7 +100,7 @@ package spaceshiptHunt.entities
 		{
 			despawn();
 		}
-	
+		
 	}
 
 }

@@ -131,13 +131,12 @@ package spaceshiptHunt.level
 				cameraPosition.y = Player.current.body.position.y;
 				focusCam();
 				physicsSpace.step(passedTime);
-				light.x = Player.current.graphics.x;
-				light.y = Player.current.graphics.y + 400;
-				var length:int = BodyInfo.list.length;
-				for (var i:int = 0; i < length; i++)
+				for (var i:int = 0; i < BodyInfo.list.length; i++)
 				{
 					BodyInfo.list[i].update();
 				}
+				light.x = Player.current.graphics.x;
+				light.y = Player.current.graphics.y + 400;
 			}
 			if (meshNeedsUpdate && Starling.juggler.elapsedTime - lastNavMeshUpdate > 1.0)
 			{
@@ -145,6 +144,23 @@ package spaceshiptHunt.level
 				lastNavMeshUpdate = Starling.juggler.elapsedTime;
 				meshNeedsUpdate = false;
 			}
+		}
+		
+		public function syncGraphics():void
+		{
+			for (var i:int = 0; i < BodyInfo.list.length; i++)
+			{
+				BodyInfo.list[i].syncGraphics();
+			}
+			light.x = Player.current.graphics.x;
+			light.y = Player.current.graphics.y + 400;
+			cameraPosition.x = Player.current.body.position.x;
+			cameraPosition.y = Player.current.body.position.y;
+			var camPosition:Point = Pool.getPoint(cameraPosition.x, cameraPosition.y);
+			mainDisplay.localToGlobal(camPosition, camPosition);
+			mainDisplay.x -= camPosition.x- mainDisplay.stage.stageWidth *0.5;
+			mainDisplay.y -= camPosition.y- mainDisplay.stage.stageHeight * 0.5;
+			Pool.putPoint(camPosition);
 		}
 		
 		private function focusCam():void
@@ -168,6 +184,28 @@ package spaceshiptHunt.level
 			{
 				paused = !paused;
 			}
+		}
+		
+		public function findPath(pathfindingAgent:DDLSEntityAI, x:Number, y:Number, outPath:Vector.<Number>):void
+		{
+			pathfinder.entity = pathfindingAgent;
+			pathfinder.findPath(x, y, outPath);
+		}
+		
+		public function hitTestLine(fromEntity:DDLSEntityAI, directionX:Number, directionY:Number):Boolean
+		{
+			rayHelper.origin.x = fromEntity.x;
+			rayHelper.origin.y = fromEntity.y;
+			rayHelper.direction.x = directionX;
+			rayHelper.direction.y = directionY;
+			rayHelper.maxDistance = rayHelper.direction.length;
+			var rayResult:RayResult = physicsSpace.rayCast(rayHelper, false, STATIC_OBSTACLES_FILTER);
+			if (rayResult)
+			{
+				rayResult.dispose();
+				return true;
+			}
+			return false;
 		}
 		
 		public function loadLevel(levelName:String, onFinish:Function = null):void
@@ -250,59 +288,44 @@ package spaceshiptHunt.level
 				}
 				else
 				{
-					var bodyDescription:Object = assetsLoader.getObject(infoFileName);
-					var EntityType:Class = LevelInfo.entityTypes["spaceshiptHunt.entities::" + bodyDescription.type];
-					var polygonArray:Array = assetsLoader.getObject(meshFileName) as Array;
-					for (var i:int = 0; i < fileInfo.cords.length; i++)
-					{
-						var bodyInfo:Entity;
-						if (EntityType == Player)
-						{
-							Player.current.body.position.setxy(fileInfo.cords[i], fileInfo.cords[++i]);
-							bodyInfo = Player.current;
-						}
-						else
-						{
-							bodyInfo = new EntityType(new Vec2(fileInfo.cords[i], fileInfo.cords[++i]));
-						}
-						bodyInfo.infoFileName = fileName;
-						for (var j:int = 0; j < polygonArray.length; j++)
-						{
-							addMesh(polygonArray[j], bodyInfo.body);
-						}
-						bodyInfo.init(bodyDescription);
-						if (bodyDescription.hasOwnProperty("engineLocation"))
-						{
-							var spcaeship:Spaceship = bodyInfo as Spaceship;
-							addFireParticle(spcaeship);
-						}
-						physicsSpace.bodies.add(bodyInfo.body);
-						mainDisplay.addChild(bodyInfo.graphics);
-					}
+					spawnEntity(fileName, fileInfo.cords);
 				}
 			});
 		}
 		
-		public function findPath(pathfindingAgent:DDLSEntityAI, x:Number, y:Number, outPath:Vector.<Number>):void
+		protected function spawnEntity(fileName:String, cords:Array):void
 		{
-			pathfinder.entity = pathfindingAgent;
-			pathfinder.findPath(x, y, outPath);
-		}
-		
-		public function hitTestLine(fromEntity:DDLSEntityAI, directionX:Number, directionY:Number):Boolean
-		{
-			rayHelper.origin.x = fromEntity.x;
-			rayHelper.origin.y = fromEntity.y;
-			rayHelper.direction.x = directionX;
-			rayHelper.direction.y = directionY;
-			rayHelper.maxDistance = rayHelper.direction.length;
-			var rayResult:RayResult = physicsSpace.rayCast(rayHelper, false, STATIC_OBSTACLES_FILTER);
-			if (rayResult)
+			var infoFileName:String = fileName + "Info";
+			var meshFileName:String = fileName + "Mesh";
+			var bodyDescription:Object = assetsLoader.getObject(infoFileName);
+			var EntityType:Class = LevelInfo.entityTypes["spaceshiptHunt.entities::" + bodyDescription.type];
+			var polygonArray:Array = assetsLoader.getObject(meshFileName) as Array;
+			for (var i:int = 0; i < cords.length; i++)
 			{
-				rayResult.dispose();
-				return true;
+				var bodyInfo:Entity;
+				if (EntityType == Player)
+				{
+					Player.current.body.position.setxy(cords[i], cords[++i]);
+					bodyInfo = Player.current;
+				}
+				else
+				{
+					bodyInfo = new EntityType(new Vec2(cords[i], cords[++i]));
+				}
+				bodyInfo.infoFileName = fileName;
+				for (var j:int = 0; j < polygonArray.length; j++)
+				{
+					addMesh(polygonArray[j], bodyInfo.body);
+				}
+				bodyInfo.init(bodyDescription);
+				if (bodyDescription.hasOwnProperty("engineLocation"))
+				{
+					var spcaeship:Spaceship = bodyInfo as Spaceship;
+					addFireParticle(spcaeship);
+				}
+				physicsSpace.bodies.add(bodyInfo.body);
+				mainDisplay.addChild(bodyInfo.graphics);
 			}
-			return false;
 		}
 		
 		protected function drawMesh(container:DisplayObjectContainer, polygon:starling.geom.Polygon, texture:Texture, normalMap:Texture = null):void

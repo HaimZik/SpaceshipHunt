@@ -3,6 +3,7 @@ package spaceshiptHunt.entities
 	import nape.geom.Vec2;
 	import spaceshiptHunt.level.Environment;
 	import spaceshiptHunt.entities.Spaceship;
+	import starling.utils.Color;
 	
 	/**
 	 * ...
@@ -23,6 +24,7 @@ package spaceshiptHunt.entities
 			impulse = Vec2.get(0, 0);
 			weaponsPlacement["fireCannon"] = Vec2.get(16, -37);
 			skewSpeed = 0.2;
+			fireColor = Color.AQUA;
 		}
 		
 		static public function get current():Player

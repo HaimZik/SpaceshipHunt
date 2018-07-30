@@ -4,7 +4,6 @@ package
 	import flash.display.StageDisplayState;
 	import flash.events.FullScreenEvent;
 	import flash.events.MouseEvent;
-	import flash.geom.Point;
 	import flash.geom.Rectangle;
 	import flash.media.SoundChannel;
 	import flash.media.SoundTransform;
@@ -18,13 +17,8 @@ package
 	import spaceshiptHunt.level.Environment;
 	import starling.core.Starling;
 	import starling.display.Image;
-	import starling.display.Mesh;
 	import starling.display.Sprite;
 	import starling.events.*;
-	import starling.geom.Polygon;
-	import starling.rendering.VertexData;
-	import starling.utils.Color;
-	import starling.utils.Pool;
 	import starling.utils.SystemUtil;
 	
 	CONFIG::debug
@@ -38,14 +32,13 @@ package
 	 */
 	public class Game extends Sprite
 	{
-		
+		private var isReleaseMode:Boolean;
 		private var gameEnvironment:Environment;
-		private var player:Player;
 		private var playerController:PlayerController;
 		private var UIDisplay:Sprite;
 		private var joystick:TouchJoystick;
 		private var crossTarget:Image;
-		private var shootButton:Image;
+		private var shootButton:TouchJoystick;
 		private var background:Image;
 		private var touches:Vector.<Touch> = new Vector.<Touch>();
 		private var backgroundMusic:SoundChannel;
@@ -61,16 +54,17 @@ package
 		public function init():void
 		{
 			var fakeReleaseMode:Boolean = false;
+			isReleaseMode = fakeReleaseMode || CONFIG::release;
 			var gameArea:Sprite = new Sprite();
 			addChild(gameArea);
-			setupUI();
-			if (fakeReleaseMode || CONFIG::release)
+			setupHUD();
+			if (isReleaseMode)
 			{
 				gameEnvironment = new Environment(gameArea);
 			}
 			CONFIG::debug
 			{
-				if (!fakeReleaseMode)
+				if (!isReleaseMode)
 				{
 					gameEnvironment = new LevelEditor(gameArea);
 				}
@@ -89,7 +83,6 @@ package
 		private function onFinishLoading():void
 		{
 			Starling.current.stage.addEventListener(Event.RESIZE, stageResize);
-			player = Player.current;
 			background = new Image(Environment.current.assetsLoader.getTexture("stars"));
 			background.tileGrid = new Rectangle();
 			gameEnvironment.mainDisplay.addChildAt(background, 0);
@@ -100,22 +93,32 @@ package
 			gameEnvironment.mainDisplay.addChild(crossTarget);
 			Key.init(stage);
 			ControllerInput.initialize(Starling.current.nativeStage);
-			playerController = new PlayerController(Player.current, joystick, crossTarget);
+			shootButton = new TouchJoystick();
+			UIDisplay.addChild(shootButton);
+			playerController = new PlayerController(Player.current, joystick, shootButton, crossTarget);
 			Starling.current.nativeStage.addEventListener(FullScreenEvent.FULL_SCREEN, onFullscreen);
-			if (SystemUtil.isDesktop && CONFIG::release)
+			if (SystemUtil.isDesktop && isReleaseMode)
 			{
 				toggleFullscreen();
 			}
-			shootButton = new Image(Environment.current.assetsLoader.getTexture("shootButton"));
-			shootButton.alignPivot();
-			UIDisplay.addChild(shootButton);
-			resizeHUD();
+			else
+			{
+				resizeHUD();
+			}
 			shootButton.addEventListener(TouchEvent.TOUCH, onShootButtonTouch);
 			gameEnvironment.mainDisplay.addEventListener(TouchEvent.TOUCH, onTouch);
 			addEventListener(Event.ENTER_FRAME, enterFrame);
 			Key.addKeyUpCallback(Keyboard.F11, toggleFullscreen);
 			Key.addKeyUpCallback(Keyboard.ESCAPE, toggleFullscreen);
 			gameEnvironment.assetsLoader.enqueueWithName("audio/Nihilore.mp3", "music");
+			if (!isReleaseMode)
+			{
+				gameEnvironment.paused = true;
+				if (gameEnvironment.paused)
+				{
+					gameEnvironment.syncGraphics();
+				}
+			}
 			gameEnvironment.assetsLoader.loadQueue(function onProgress(ratio:Number):void
 			{
 				if (ratio == 1.0)
@@ -127,26 +130,12 @@ package
 			//	PhysicsParticle.fill.cache();
 		}
 		
-		protected function setupUI():void
+		protected function setupHUD():void
 		{
 			UIDisplay = new Sprite();
 			joystick = new TouchJoystick();
 			addChild(UIDisplay);
 			UIDisplay.addChild(joystick);
-		}
-		
-		protected function toggleFullscreen():void
-		{
-			var flashStage:Stage = Starling.current.nativeStage;
-			if (flashStage.displayState == StageDisplayState.NORMAL)
-			{
-				flashStage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
-				flashStage.mouseLock = true;
-			}
-			else
-			{
-				flashStage.displayState = StageDisplayState.NORMAL;
-			}
 		}
 		
 //-----------------------------------------------------------------------------------------------------------------------------------------
@@ -161,6 +150,20 @@ package
 			else
 			{
 				Starling.current.nativeStage.removeEventListener(MouseEvent.MOUSE_MOVE, playerController.onMouseMove);
+			}
+		}
+		
+		protected function toggleFullscreen():void
+		{
+			var flashStage:Stage = Starling.current.nativeStage;
+			if (flashStage.displayState == StageDisplayState.NORMAL)
+			{
+				flashStage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
+				flashStage.mouseLock = true;
+			}
+			else
+			{
+				flashStage.displayState = StageDisplayState.NORMAL;
 			}
 		}
 		
@@ -188,11 +191,11 @@ package
 			{
 				if (touch.phase == TouchPhase.ENDED)
 				{
-					player.stopShooting();
+					Player.current.stopShooting();
 				}
 				else if (touch.phase == TouchPhase.BEGAN)
 				{
-					player.startShooting();
+					Player.current.startShooting();
 				}
 			}
 		}
@@ -201,9 +204,8 @@ package
 		{
 			joystick.x = joystick.radios * 2 + 20;
 			joystick.y = stage.stageHeight - 15;
-			var shootIconRadios:Number = shootButton.texture.width;
-			shootButton.x = stage.stageWidth- shootIconRadios / 2 - 30;
-			shootButton.y = stage.stageHeight - shootIconRadios / 2 - 20;
+			shootButton.x = stage.stageWidth - 20;
+			shootButton.y = stage.stageHeight - 15;
 		}
 		
 		private function stageResize(e:ResizeEvent = null):void
@@ -213,6 +215,7 @@ package
 			Starling.current.viewPort.width = e.width;
 			Starling.current.viewPort.height = e.height;
 			joystick.radios = int(Math.min(800, e.width, e.height) / 5);
+			shootButton.radios = int(Math.min(800, e.width, e.height) / 5);
 			resizeHUD();
 		}
 		
@@ -237,8 +240,9 @@ package
 		private function adjustParallaxBackground():void
 		{
 			var parallaxRatio:Number = 0.5;
-			background.x = player.body.position.x - (player.body.position.x * parallaxRatio) % 512 - background.width / 2;
-			background.y = player.body.position.y - (player.body.position.y * parallaxRatio) % 512 - background.height / 2;
+			var playerPos:Vec2 = Player.current.body.position;
+			background.x = playerPos.x - (playerPos.x * parallaxRatio) % 512 - background.width / 2;
+			background.y = playerPos.y - (playerPos.y * parallaxRatio) % 512 - background.height / 2;
 		}
 	
 	}

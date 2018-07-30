@@ -1,17 +1,14 @@
 package spaceshiptHunt.entities
 {
 	import DDLS.ai.DDLSEntityAI;
-	import spaceshiptHunt.level.Environment;
-	import spaceshiptHunt.entities.Spaceship;
-	import spaceshiptHunt.entities.Player;
 	import nape.dynamics.InteractionFilter;
 	import nape.geom.Ray;
 	import nape.geom.RayResult;
 	import nape.geom.RayResultList;
 	import nape.geom.Vec2;
-	import starling.core.Starling;
-	import starling.display.Image;
-	import starling.display.Sprite;
+	import spaceshiptHunt.entities.Player;
+	import spaceshiptHunt.entities.Spaceship;
+	import spaceshiptHunt.level.Environment;
 	
 	/**
 	 * ...
@@ -25,7 +22,7 @@ package spaceshiptHunt.entities
 		public static var lastSeenPlayerPos:Vec2;
 		protected static var enemiesSeePlayerCounter:uint = 0;
 		protected var _canViewPlayer:Boolean = false;
-		protected var rayPool:Ray;
+		protected var tempRay:Ray;
 		protected var rayList:RayResultList;
 		protected static const PLAYER_FILTER:InteractionFilter = new InteractionFilter(2, -1);
 		protected var pathCheckTime:int;
@@ -56,7 +53,7 @@ package spaceshiptHunt.entities
 				body.shapes.at(i).filter.collisionMask = ~2;
 				body.shapes.at(i).filter.collisionGroup = 8;
 			}
-			rayPool = Ray.fromSegment(this.body.position, Player.current.body.position);
+			tempRay = Ray.fromSegment(this.body.position, Player.current.body.position);
 		}
 		
 		public function get canViewPlayer():Boolean
@@ -140,16 +137,16 @@ package spaceshiptHunt.entities
 		
 		protected function checkPlayerVisible():void
 		{
-			rayPool.origin = this.body.position;
-			rayPool.direction.setxy(Player.current.body.position.x - rayPool.origin.x, Player.current.body.position.y - rayPool.origin.y);
-			rayPool.maxDistance = Vec2.distance(this.body.position, Player.current.body.position);
-			if (rayPool.maxDistance > 1300)
+			tempRay.origin = this.body.position;
+			tempRay.direction.setxy(Player.current.body.position.x - tempRay.origin.x, Player.current.body.position.y - tempRay.origin.y);
+			tempRay.maxDistance = Vec2.distance(this.body.position, Player.current.body.position);
+			if (tempRay.maxDistance > 1300)
 			{
 				canViewPlayer = false;
 			}
 			else
 			{
-				var rayResult:RayResult = body.space.rayCast(rayPool, false, PLAYER_FILTER);
+				var rayResult:RayResult = body.space.rayCast(tempRay, false, PLAYER_FILTER);
 				canViewPlayer = rayResult.shape.body == Player.current.body;
 				rayResult.dispose();
 			}
