@@ -6,8 +6,8 @@ Movment:
 PC-WASD or controller left joystick. 
 mobile-virtual joystick.    
 Rotate view/aim:  
-PC-mouse or controller right joystick.
-mobile-screen swipe or fire button 
+PC-mouse or controller right joystick.  
+mobile-screen swipe or fire button.   
 Fire:  
 PC-space key or right trigger with joystick.  
 mobile-fire button GUI.  
