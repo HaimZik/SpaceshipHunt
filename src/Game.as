@@ -113,7 +113,7 @@ package
 			gameEnvironment.assetsLoader.enqueueWithName("audio/Nihilore.mp3", "music");
 			if (!isReleaseMode)
 			{
-				gameEnvironment.paused = true;
+			//	gameEnvironment.paused = true;
 				if (gameEnvironment.paused)
 				{
 					gameEnvironment.syncGraphics();

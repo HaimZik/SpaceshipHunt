@@ -8,13 +8,18 @@ package spaceshiptHunt.entities
 	import DDLS.ai.DDLSEntityAI;
 	import spaceshiptHunt.level.Environment;
 	import spaceshiptHunt.entities.Entity;
+	import spaceshiptHunt.utils.BillboardNode;
 	import spaceshiptHunt.utils.MathUtilities;
 	import flash.utils.Dictionary;
 	import nape.geom.Vec2;
+	import spaceshiptHunt.utils.TransformNode;
 	import starling.core.Starling;
 	import starling.display.DisplayObjectContainer;
 	import starling.display.Image;
+	import starling.display.Quad;
+	import starling.display.Sprite;
 	import starling.textures.Texture;
+	import starling.utils.Align;
 	import starling.utils.Color;
 	
 	public class Spaceship extends Entity
@@ -24,7 +29,10 @@ package spaceshiptHunt.entities
 		public var engineLocation:Vec2;
 		public var armorDefance:Number = 8.0;
 		public var fireColor:uint = Color.WHITE;
-		protected var life:Number = 150;
+		protected var life:Number;
+		protected var maxLife:Number = 150;
+		protected var lifebarTransform:BillboardNode;
+		protected const lifebarOffset:Number = 20;
 		protected var _gunType:String;
 		protected var fireType:String = "fireball";
 		protected var weaponsPlacement:Dictionary;
@@ -33,6 +41,8 @@ package spaceshiptHunt.entities
 		protected var firingRate:Number = 0.1;
 		protected var bulletSpeed:Number = 80.0;
 		protected const rotateTowardThreshold:Number = 0.02;
+		protected var filledLife:Quad;
+		protected var lifebarBackground:Quad;
 		private var shootingCallId:uint;
 		
 		public function Spaceship(position:Vec2)
@@ -43,7 +53,17 @@ package spaceshiptHunt.entities
 		
 		override public function init(bodyDescription:Object):void
 		{
+			life = maxLife;
 			super.init(bodyDescription);
+			filledLife = new Quad(100, 10);
+			lifebarBackground = new Quad(filledLife.width,filledLife.height);
+			filledLife.color = Color.RED;
+			lifebarBackground.color = Color.GRAY;
+			Environment.current.mainDisplay.addChild(lifebarBackground);
+			Environment.current.mainDisplay.addChild(filledLife);
+			lifebarTransform = new BillboardNode(graphics, filledLife);
+			lifebarTransform.x = -filledLife.width * 0.5;
+			lifebarTransform.y = -Math.max(body.bounds.width, body.bounds.height) * 0.5 - lifebarOffset;	
 			engineLocation = Vec2.get(bodyDescription.engineLocation.x, bodyDescription.engineLocation.y);
 			maxAcceleration = body.mass * 8;
 			maxAngularAcceleration = body.mass * 180;
@@ -54,7 +74,19 @@ package spaceshiptHunt.entities
 			stopShooting();
 			Environment.current.navMesh.deleteObject(pathfindingAgent.approximateObject);
 			pathfindingAgent.dispose();
+			filledLife.removeFromParent(true);
+			lifebarBackground.removeFromParent(true);
 			super.dispose();
+		}
+		
+		override public function syncGraphics():void
+		{
+			super.syncGraphics();
+			lifebarTransform.update();
+			lifebarBackground.x = filledLife.x;
+			lifebarBackground.y = filledLife.y;
+			lifebarBackground.rotation = filledLife.rotation;
+			lifebarTransform.scaleX = life / maxLife;
 		}
 		
 		public function set gunType(gunType:String):void
@@ -171,11 +203,11 @@ package spaceshiptHunt.entities
 				//recoil
 				body.applyImpulse(bulletVelocity.mul(-0.3, true));
 				var bulletVelocityNormal:Vec2 = bulletVelocity.unit();
-				bulletVelocity.length += Math.max(-bulletSpeed*0.5,body.velocity.length * bulletVelocityNormal.dot(body.velocity.unit(true)));
-				PhysicsParticle.spawn(fireType, position.copy(true).rotate(body.rotation).addeq(body.position), bulletVelocity,fireColor);
+				bulletVelocity.length += Math.max(-bulletSpeed * 0.5, body.velocity.length * bulletVelocityNormal.dot(body.velocity.unit(true)));
+				PhysicsParticle.spawn(fireType, position.copy(true).rotate(body.rotation).addeq(body.position), bulletVelocity, fireColor);
 				position.x = weaponLeft.x + weaponLeft.width / 2;
 				bulletVelocity.angle = body.rotation - Math.PI / 2 + Math.random() * 0.1 - 0.05;
-				PhysicsParticle.spawn(fireType, position.rotate(body.rotation).addeq(body.position), bulletVelocity,fireColor);
+				PhysicsParticle.spawn(fireType, position.rotate(body.rotation).addeq(body.position), bulletVelocity, fireColor);
 				bulletVelocity.dispose();
 				position.dispose();
 			}

@@ -39,6 +39,7 @@ package spaceshiptHunt.entities
 		
 		override public function init(bodyDescription:Object):void
 		{
+			maxLife = 1000.0;
 			super.init(bodyDescription);
 			for (var i:int = 0; i < body.shapes.length; i++)
 			{
@@ -49,13 +50,12 @@ package spaceshiptHunt.entities
 			maxTurningAcceleration = body.mass * 5;
 			maxAngularAcceleration = body.mass * 220;
 			maxAcceleration = body.mass * 18.0;
-			life = 1000.0;
 		}
 		
 		override protected function onDeath():void 
 		{
 			super.onDeath();
-			Environment.current.paused = true;
+			Environment.current.resetLevel();
 		}
 		
 		override public function dispose():void

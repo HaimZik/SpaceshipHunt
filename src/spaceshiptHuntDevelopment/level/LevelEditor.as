@@ -71,7 +71,7 @@ package spaceshiptHuntDevelopment.level
 		{
 			private var dragEx:DragAndDropArea;
 		}
-		private var _levelEditorMode:Boolean = false;
+		private var _levelEditorMode:Boolean;
 		
 		public function LevelEditor(mainSprite:Sprite)
 		{
@@ -96,7 +96,7 @@ package spaceshiptHuntDevelopment.level
 				dragEx = new DragAndDropArea(0, 0, stage.stageWidth, stage.stageHeight, onFileDrop);
 				Starling.current.nativeStage.addChild(dragEx);
 				Key.addKeyUpCallback(Keyboard.F1, saveLevel);
-				levelEditorMode = true;
+				levelEditorMode = false;
 			}
 		}
 		

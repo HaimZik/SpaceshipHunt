@@ -91,7 +91,7 @@ package spaceshiptHunt.entities
 		override public function update():void
 		{
 			super.update();
-			if (body.space.timeStamp % 61 == 0)
+			if (body.space.timeStamp % 61 == 0 && Player.current.lifePoints!=0)
 			{
 				checkPlayerVisible();
 			}
