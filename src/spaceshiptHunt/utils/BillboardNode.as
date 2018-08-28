@@ -10,11 +10,9 @@ package spaceshiptHunt.utils
 	 * ...
 	 * @author Haim Shnitzer
 	 */
-	public class BillboardNode
+	public class BillboardNode extends Transform
 	{
 		
-		public var parent:DisplayObject;
-		public var child:DisplayObject;
 		protected var _x:Number = 0;
 		protected var _y:Number = 0;
 		
@@ -24,17 +22,26 @@ package spaceshiptHunt.utils
 			this.child = child;
 		}
 		
-		public function update():void
+		override public function update():void
 		{
-			//var newCords:Point = parent.localToGlobal(Pool.getPoint(_x, _y));
-			//child.x =  newCords.x;
-			//child.y = newCords.y;
-			//	child.transformationMatrix.copyFrom(parent.transformationMatrix);
-			//	child.transformationMatrix.
-			child.x = parent.x + Math.cos(-child.parent.rotation) * _x - Math.sin(-child.parent.rotation) * _y;
-			child.y = parent.y + Math.sin(-child.parent.rotation) * _x + Math.cos(-child.parent.rotation) * _y;
+			//if (parent.parent != child.parent)
+			//{
+			var newPos:Point = Pool.getPoint(0, 0);
+			parent.localToGlobal(newPos, newPos);
+			newPos.offset(_x, _y);
+			child.parent.globalToLocal(newPos, newPos);
+			child.x = newPos.x;
+			child.y = newPos.y;
 			child.rotation = -child.parent.rotation;
-			//	trace(child.parent.rotation);
+			Pool.putPoint(newPos);
+			//}
+			//else
+			//{
+			//child.x = parent.x + Math.cos(-child.parent.rotation) * _x - Math.sin(-child.parent.rotation) * _y;
+			//child.y = parent.y + Math.sin(-child.parent.rotation) * _x + Math.cos(-child.parent.rotation) * _y;
+			//child.rotation = -child.parent.rotation;
+			//}
+		
 		}
 		
 		public function get x():Number

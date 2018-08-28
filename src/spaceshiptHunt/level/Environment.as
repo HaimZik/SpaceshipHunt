@@ -36,7 +36,6 @@ package spaceshiptHunt.level
 	import starling.display.Mesh;
 	import starling.display.Sprite;
 	import starling.events.TouchEvent;
-	import starling.extensions.PDParticleSystem;
 	import starling.extensions.lighting.LightSource;
 	import starling.extensions.lighting.LightStyle;
 	import starling.geom.Polygon;
@@ -67,16 +66,14 @@ package spaceshiptHunt.level
 		protected var commandQueue:Vector.<Function>;
 		protected var navBody:DDLSObject;
 		protected var staticMeshRelativePath:String;
-		private var rayHelper:Ray;
-		[Embed(source = "JetFire.pex", mimeType = "application/octet-stream")]
-		protected static const JetFireConfig:Class;
 		protected var asteroidField:Sprite;
+		private var rayHelper:Ray;
 		
-		public function Environment(mainSprite:Sprite)
+		public function Environment()
 		{
 			staticMeshRelativePath = "physicsBodies/";
 			currentEnvironment = this;
-			mainDisplay = mainSprite;
+			mainDisplay = Game.spaceshipsLayer;
 			physicsSpace = new Space(new Vec2(0, 0));
 			physicsSpace.worldAngularDrag = 3.0;
 			physicsSpace.worldLinearDrag = 2;
@@ -159,7 +156,7 @@ package spaceshiptHunt.level
 			var camPosition:Point = Pool.getPoint(cameraPosition.x, cameraPosition.y);
 			mainDisplay.localToGlobal(camPosition, camPosition);
 			mainDisplay.x -= camPosition.x- mainDisplay.stage.stageWidth *0.5;
-			mainDisplay.y -= camPosition.y- mainDisplay.stage.stageHeight * 0.5;
+			mainDisplay.y -= camPosition.y - mainDisplay.stage.stageHeight * 0.5;
 			Pool.putPoint(camPosition);
 		}
 		
@@ -174,6 +171,12 @@ package spaceshiptHunt.level
 			mainDisplay.localToGlobal(camPosition, camPosition);
 			mainDisplay.x -= camPosition.x - velocity.x - mainDisplay.stage.stageWidth / 2;
 			mainDisplay.y -= camPosition.y - velocity.y - mainDisplay.stage.stageHeight * 0.7;
+			Game.aboveSpaceshipsLayer.transformationMatrix.copyFrom(mainDisplay.transformationMatrix);
+		//	Game.underSpaceshipsLayer.transformationMatrix.copyFrom(mainDisplay.transformationMatrix);	
+			Game.underSpaceshipsLayer.x = mainDisplay.x;
+			Game.underSpaceshipsLayer.y = mainDisplay.y;
+			Game.underSpaceshipsLayer.scale = mainDisplay.scale;
+			Game.underSpaceshipsLayer.rotation = mainDisplay.rotation;
 			Pool.putPoint(camPosition);
 			velocity.dispose();
 		}
@@ -318,11 +321,6 @@ package spaceshiptHunt.level
 					addMesh(polygonArray[j], bodyInfo.body);
 				}
 				bodyInfo.init(bodyDescription);
-				if (bodyDescription.hasOwnProperty("engineLocation"))
-				{
-					var spcaeship:Spaceship = bodyInfo as Spaceship;
-					addFireParticle(spcaeship);
-				}
 				physicsSpace.bodies.add(bodyInfo.body);
 				mainDisplay.addChild(bodyInfo.graphics);
 			}
@@ -387,32 +385,7 @@ package spaceshiptHunt.level
 			vec2List = null;
 		}
 		
-		protected function addFireParticle(bodyInfo:Spaceship):void
-		{
-			//if (!particleSystem)
-			//{
-			//	}
-			var particleSystem:PDParticleSystem = new PDParticleSystem(XML(new JetFireConfig()), assetsLoader.getTexture("fireball"));
-			particleSystem.batchable = true;
-			(bodyInfo.graphics as DisplayObjectContainer).addChild(particleSystem);
-			var particleSystem2:PDParticleSystem = new PDParticleSystem(XML(new JetFireConfig()), assetsLoader.getTexture("fireball"));
-			particleSystem2.batchable = true;
-			(bodyInfo.graphics as DisplayObjectContainer).addChild(particleSystem2);
-			Starling.juggler.add(particleSystem);
-			Starling.juggler.add(particleSystem2);
-			particleSystem.x = bodyInfo.engineLocation.x;
-			particleSystem.y = -bodyInfo.engineLocation.y;
-			particleSystem.gravityY = 100;
-			particleSystem2.x = -bodyInfo.engineLocation.x;
-			particleSystem2.y = -bodyInfo.engineLocation.y;
-			particleSystem2.gravityY = 100;
-			if (SystemUtil.isDesktop)
-			{
-				particleSystem.start();
-				particleSystem2.start();
-					//particleSystem.customFunction = bodyInfo.jetParticlePositioning;
-			}
-		}
+
 		
 		protected function createStaticMesh(infoFileName:String, meshFileName:String):void
 		{

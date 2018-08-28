@@ -73,9 +73,9 @@ package spaceshiptHuntDevelopment.level
 		}
 		private var _levelEditorMode:Boolean;
 		
-		public function LevelEditor(mainSprite:Sprite)
+		public function LevelEditor()
 		{
-			super(mainSprite);
+			super();
 			staticMeshRelativePath = "devPhysicsBodies/";
 			obstacleDisplay = new Dictionary();
 			obstacleBody = new Dictionary();

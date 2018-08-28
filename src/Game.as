@@ -32,10 +32,14 @@ package
 	 */
 	public class Game extends Sprite
 	{
+		public static var HUD:Sprite;
+		public static var spaceshipsLayer:Sprite;
+		public static var underSpaceshipsLayer:Sprite;
+		public static var aboveSpaceshipsLayer:Sprite;
+	    private var buttonsDisplay:Sprite;
 		private var isReleaseMode:Boolean;
 		private var gameEnvironment:Environment;
 		private var playerController:PlayerController;
-		private var UIDisplay:Sprite;
 		private var joystick:TouchJoystick;
 		private var crossTarget:Image;
 		private var shootButton:TouchJoystick;
@@ -55,18 +59,25 @@ package
 		{
 			var fakeReleaseMode:Boolean = false;
 			isReleaseMode = fakeReleaseMode || CONFIG::release;
-			var gameArea:Sprite = new Sprite();
-			addChild(gameArea);
+			aboveSpaceshipsLayer = new Sprite();
+			spaceshipsLayer = new Sprite();
+			underSpaceshipsLayer= new Sprite();
+			addChild(underSpaceshipsLayer);
+			addChild(spaceshipsLayer);
+			addChild(aboveSpaceshipsLayer);
+			underSpaceshipsLayer.touchable = false;
+			aboveSpaceshipsLayer.touchable = false;
 			setupHUD();
 			if (isReleaseMode)
 			{
-				gameEnvironment = new Environment(gameArea);
+				gameEnvironment = new Environment();
+			//	spaceshipsLayer.touchable = false;
 			}
 			CONFIG::debug
 			{
 				if (!isReleaseMode)
 				{
-					gameEnvironment = new LevelEditor(gameArea);
+					gameEnvironment = new LevelEditor();
 				}
 			}
 			var atlaseNum:int = 1;
@@ -94,7 +105,7 @@ package
 			Key.init(stage);
 			ControllerInput.initialize(Starling.current.nativeStage);
 			shootButton = new TouchJoystick();
-			UIDisplay.addChild(shootButton);
+			buttonsDisplay.addChild(shootButton);
 			playerController = new PlayerController(Player.current, joystick, shootButton, crossTarget);
 			Starling.current.nativeStage.addEventListener(FullScreenEvent.FULL_SCREEN, onFullscreen);
 			if (SystemUtil.isDesktop && isReleaseMode)
@@ -132,10 +143,13 @@ package
 		
 		protected function setupHUD():void
 		{
-			UIDisplay = new Sprite();
+			HUD = new Sprite();
+			buttonsDisplay = new Sprite();
 			joystick = new TouchJoystick();
-			addChild(UIDisplay);
-			UIDisplay.addChild(joystick);
+			HUD.touchable = false;
+			addChild(HUD);
+			addChild(buttonsDisplay);
+			buttonsDisplay.addChild(joystick);
 		}
 		
 //-----------------------------------------------------------------------------------------------------------------------------------------
