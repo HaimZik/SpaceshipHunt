@@ -213,7 +213,7 @@ package spaceshiptHunt.entities
 		{
 			if (!Environment.current.paused)
 			{
-				var position:Vec2 = Vec2.get(weaponRight.x + weaponLeft.child.width / 2, weaponRight.y - 5);
+				var position:Vec2 = Vec2.get(weaponRight.x + weaponLeft.child.width / 4, weaponRight.y - 5);
 				var bulletVelocity:Vec2 = Vec2.get(0, (bulletSpeed + Math.random() * bulletSpeed) * body.mass);
 				bulletVelocity.angle = body.rotation - Math.PI / 2 + Math.random() * 0.1 + 0.05;
 				//recoil
@@ -221,7 +221,7 @@ package spaceshiptHunt.entities
 				var bulletVelocityNormal:Vec2 = bulletVelocity.unit();
 				bulletVelocity.length += Math.max(-bulletSpeed * 0.5, body.velocity.length * bulletVelocityNormal.dot(body.velocity.unit(true)));
 				PhysicsParticle.spawn(fireType, position.copy(true).rotate(body.rotation).addeq(body.position), bulletVelocity, fireColor);
-				position.x = weaponLeft.x + weaponLeft.child.width / 2;
+				position.x = weaponLeft.x+ weaponLeft.child.width / 8;
 				bulletVelocity.angle = body.rotation - Math.PI / 2 + Math.random() * 0.1 - 0.05;
 				PhysicsParticle.spawn(fireType, position.rotate(body.rotation).addeq(body.position), bulletVelocity, fireColor);
 				bulletVelocity.dispose();

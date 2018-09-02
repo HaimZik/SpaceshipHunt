@@ -77,8 +77,7 @@ package spaceshiptHunt.entities
 			particle.body.rotation = impulse.angle;
 			particle.body.velocity = impulse;
 			particle.body.space = Environment.current.physicsSpace;
-			var otherBodyGrp:DisplayObject = BodyInfo.list[0].graphics;
-			otherBodyGrp.parent.addChildAt(particle.graphics, otherBodyGrp.parent.getChildIndex(otherBodyGrp));
+			Game.underSpaceshipsLayer.addChild(particle.graphics);
 			particle.syncGraphics();
 			BodyInfo.list.push(particle);
 			particle.currentCallId = Starling.juggler.delayCall(particle.despawn, 5);

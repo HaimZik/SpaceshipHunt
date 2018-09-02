@@ -27,6 +27,7 @@ package spaceshiptHunt.utils
 		{
 			child.transformationMatrix.copyFrom(transformationMatrix);
 			child.transformationMatrix.concat(parent.transformationMatrix);
+			child.transformationMatrix = child.transformationMatrix;
 		}
 		
 		public function get x():Number

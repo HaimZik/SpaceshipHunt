@@ -155,7 +155,7 @@ package spaceshiptHunt.level
 			cameraPosition.y = Player.current.body.position.y;
 			var camPosition:Point = Pool.getPoint(cameraPosition.x, cameraPosition.y);
 			mainDisplay.localToGlobal(camPosition, camPosition);
-			mainDisplay.x -= camPosition.x- mainDisplay.stage.stageWidth *0.5;
+			mainDisplay.x -= camPosition.x - mainDisplay.stage.stageWidth * 0.5;
 			mainDisplay.y -= camPosition.y - mainDisplay.stage.stageHeight * 0.5;
 			Pool.putPoint(camPosition);
 		}
@@ -163,20 +163,26 @@ package spaceshiptHunt.level
 		private function focusCam():void
 		{
 			var player:Player = Player.current;
-			mainDisplay.rotation -= (mainDisplay.rotation + player.body.rotation) - player.body.angularVel / 17;
+			var camAngularVelocity:Number = MathUtil.normalizeAngle(mainDisplay.rotation) - MathUtil.normalizeAngle(player.body.angularVel / 17 - player.body.rotation);
+			var rotationChangeThreshold:Number = 0.002;
+			if (!MathUtil.isEquivalent(camAngularVelocity, 0, rotationChangeThreshold))
+			{
+				mainDisplay.rotation -= camAngularVelocity;
+			}
 			var velocity:Vec2 = player.body.velocity.copy(true).rotate(mainDisplay.rotation).muleq(0.2);
 			var newScale:Number = baseZoom - Math.min(MAX_ZOOM_OUT * baseZoom, velocity.length * velocity.length / 30000);
-			mainDisplay.scale += (newScale - mainDisplay.scale) / 16;
 			var camPosition:Point = Pool.getPoint(cameraPosition.x, cameraPosition.y);
 			mainDisplay.localToGlobal(camPosition, camPosition);
-			mainDisplay.x -= camPosition.x - velocity.x - mainDisplay.stage.stageWidth / 2;
-			mainDisplay.y -= camPosition.y - velocity.y - mainDisplay.stage.stageHeight * 0.7;
-			Game.aboveSpaceshipsLayer.transformationMatrix.copyFrom(mainDisplay.transformationMatrix);
-		//	Game.underSpaceshipsLayer.transformationMatrix.copyFrom(mainDisplay.transformationMatrix);	
-			Game.underSpaceshipsLayer.x = mainDisplay.x;
-			Game.underSpaceshipsLayer.y = mainDisplay.y;
-			Game.underSpaceshipsLayer.scale = mainDisplay.scale;
-			Game.underSpaceshipsLayer.rotation = mainDisplay.rotation;
+			var camVelocityX:Number = camPosition.x - velocity.x - mainDisplay.stage.stageWidth / 2;
+			var camVelocityY:Number = camPosition.y - velocity.y - mainDisplay.stage.stageHeight * 0.7;
+			if (!(MathUtil.isEquivalent(camVelocityX, 0, 0.75) && MathUtil.isEquivalent(camVelocityY, 0, 0.75) && MathUtil.isEquivalent(camAngularVelocity, 0, rotationChangeThreshold) && MathUtil.isEquivalent(mainDisplay.scale-newScale,0,0.01)))
+			{
+				mainDisplay.scale += (newScale - mainDisplay.scale) / 16;
+				mainDisplay.x -= camVelocityX;
+				mainDisplay.y -= camVelocityY;
+				Game.aboveSpaceshipsLayer.transformationMatrix = mainDisplay.transformationMatrix;
+				Game.underSpaceshipsLayer.transformationMatrix = mainDisplay.transformationMatrix;
+			}
 			Pool.putPoint(camPosition);
 			velocity.dispose();
 		}
@@ -384,8 +390,6 @@ package spaceshiptHunt.level
 			vec2List.clear();
 			vec2List = null;
 		}
-		
-
 		
 		protected function createStaticMesh(infoFileName:String, meshFileName:String):void
 		{

@@ -65,7 +65,6 @@ package
 			addChild(underSpaceshipsLayer);
 			addChild(spaceshipsLayer);
 			addChild(aboveSpaceshipsLayer);
-			underSpaceshipsLayer.touchable = false;
 			aboveSpaceshipsLayer.touchable = false;
 			setupHUD();
 			if (isReleaseMode)
@@ -96,7 +95,7 @@ package
 			Starling.current.stage.addEventListener(Event.RESIZE, stageResize);
 			background = new Image(Environment.current.assetsLoader.getTexture("stars"));
 			background.tileGrid = new Rectangle();
-			gameEnvironment.mainDisplay.addChildAt(background, 0);
+			underSpaceshipsLayer.addChildAt(background, 0);
 			var backgroundRatio:Number = Math.ceil(Math.sqrt(stage.stageHeight * stage.stageHeight + stage.stageWidth * stage.stageWidth) / 512) * 2;
 			background.scale = backgroundRatio * 2;
 			gameEnvironment.mainDisplay.addChild(Environment.current.light);
@@ -117,14 +116,15 @@ package
 				resizeHUD();
 			}
 			shootButton.addEventListener(TouchEvent.TOUCH, onShootButtonTouch);
-			gameEnvironment.mainDisplay.addEventListener(TouchEvent.TOUCH, onTouch);
 			addEventListener(Event.ENTER_FRAME, enterFrame);
 			Key.addKeyUpCallback(Keyboard.F11, toggleFullscreen);
 			Key.addKeyUpCallback(Keyboard.ESCAPE, toggleFullscreen);
 			gameEnvironment.assetsLoader.enqueueWithName("audio/Nihilore.mp3", "music");
+			underSpaceshipsLayer.addEventListener(TouchEvent.TOUCH, onTouch);
 			if (!isReleaseMode)
 			{
 			//	gameEnvironment.paused = true;
+				spaceshipsLayer.addEventListener(TouchEvent.TOUCH, onTouch);
 				if (gameEnvironment.paused)
 				{
 					gameEnvironment.syncGraphics();
@@ -189,7 +189,7 @@ package
 		
 		private function onTouch(e:TouchEvent):void
 		{
-			e.getTouches(gameEnvironment.mainDisplay, null, touches);
+			e.getTouches(underSpaceshipsLayer, null, touches);
 			while (touches.length > 0)
 			{
 				var touch:Touch = touches.pop();
