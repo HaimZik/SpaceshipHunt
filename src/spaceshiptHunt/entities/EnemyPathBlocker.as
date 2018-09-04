@@ -1,8 +1,12 @@
 package spaceshiptHunt.entities
 {
+	import nape.geom.RayResult;
 	import nape.geom.Vec2;
 	import nape.phys.Body;
 	import spaceshiptHunt.entities.Enemy;
+	import spaceshiptHunt.level.Environment;
+	import starling.display.Sprite;
+	import starling.filters.GlowFilter;
 	
 	/**
 	 * ...
@@ -51,6 +55,10 @@ package spaceshiptHunt.entities
 			{
 				currentAction = attackPlayer;
 			}
+			if (isBackwardBlocked()) //isPathBlocked())
+			{
+				currentAction = goToPlayerPath;
+			}
 		}
 		
 		protected function playerPredictedPosition():Vec2
@@ -60,7 +68,7 @@ package spaceshiptHunt.entities
 		
 		protected function attackPlayer():void
 		{
-			if (isPlayerInRange(maxAttackRange))
+			if (isPlayerInRange(maxAttackRange) && !isBackwardBlocked())
 			{
 				var predictedPosition:Vec2 = playerPredictedPosition();
 				var angleToPlayer:Number = Math.abs(rotationDiffrenceToPoint(predictedPosition));
@@ -94,11 +102,36 @@ package spaceshiptHunt.entities
 		
 		}
 		
+		protected function isBackwardBlocked():Boolean
+		{
+			tempRay.origin = this.body.position;
+			var backwardDirVector:Vec2 = Vec2.fromPolar(1, body.rotation);
+			backwardDirVector.rotate(Math.PI / 2);
+			tempRay.direction.setxy(backwardDirVector.x, backwardDirVector.y);
+			backwardDirVector.dispose();
+			var minDisatnceFromWall:Number = 100;
+			tempRay.maxDistance = minDisatnceFromWall;
+			var rayResult:RayResult = body.space.rayCast(tempRay, false, Environment.STATIC_OBSTACLES_FILTER);
+			var isBlocked:Boolean = rayResult != null;
+			if (isBlocked)
+			{
+				rayResult.dispose();
+			}
+			return isBlocked;
+		}
+		
 		protected function goToPlayerPath():void
 		{
 			if (isPlayerInRange(minAttackRange))
 			{
-				currentAction = aimToPlayer;
+				if (isBackwardBlocked())
+				{
+					goToEntity(Player.current.pathfindingAgent);
+				}
+				else
+				{
+					currentAction = aimToPlayer;
+				}
 			}
 			else
 			{
@@ -127,7 +160,7 @@ package spaceshiptHunt.entities
 			}
 			else
 			{
-				if (isPlayerInRange(minAttackRange))
+				if (isPlayerInRange(minAttackRange) && !isBackwardBlocked())
 				{
 					currentAction = aimToPlayer;
 					chasingTarget = null;

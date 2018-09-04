@@ -57,7 +57,7 @@ package spaceshiptHunt.level
 		public var light:LightSource;
 		public var currentLevelName:String;
 		public var cameraPosition:Point = new Point();
-		protected static const STATIC_OBSTACLES_FILTER:InteractionFilter = new InteractionFilter(2, ~8);
+		public static const STATIC_OBSTACLES_FILTER:InteractionFilter = new InteractionFilter(2, ~8);
 		static private var currentEnvironment:Environment;
 		protected var _baseZoom:Number = 1.0;
 		protected const MAX_ZOOM_OUT:Number = 0.3;

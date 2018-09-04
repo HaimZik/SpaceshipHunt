@@ -48,6 +48,7 @@ package spaceshiptHunt.controls
 		protected var aimFriction:Number;
 		protected const DEFAULT_AIM_FRICTION:Number = 0.2;
 		protected const TOUCH_AIM_FRICTION:Number = 0.65;
+		protected const RIGHT_JOYSTICK_TOUCH_AIM_FRICTION:Number = 0.3;
 		protected const TOUCH_AIM_ANGULAR_ACCELERATION:Number = 0.050;
 		protected const DEFAULT_AIM_ANGULAR_ACCELERATION:Number = 0.028;
 		protected var lockDirectionDelay:Number = 1.5;
@@ -129,7 +130,7 @@ package spaceshiptHunt.controls
 			if (Math.abs(rightJoystick.xAxis) != 0)
 			{
 				rightStickAxis.x += rightJoystick.xAxis;
-				aimFriction = TOUCH_AIM_FRICTION;
+				aimFriction = RIGHT_JOYSTICK_TOUCH_AIM_FRICTION;
 				aimAngularAcceleration = DEFAULT_AIM_ANGULAR_ACCELERATION;
 			}
 			if (xboxController)
