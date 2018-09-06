@@ -18,6 +18,7 @@ package spaceshiptHunt.entities
 		protected var maxAttackRange:Number;
 		protected var attackTriggerRange:Number;
 		protected var aimAccuracy:Number;
+		protected var minDisatnceFromWall:Number;
 		
 		public function EnemyPathBlocker(position:Vec2)
 		{
@@ -30,6 +31,7 @@ package spaceshiptHunt.entities
 			super.init(bodyDescription);
 			this.gunType = "fireCannon";
 			minAttackRange = 500.0;
+			minDisatnceFromWall = 100.0;
 			maxAttackRange = minAttackRange * 1.3;
 			attackTriggerRange = minAttackRange * 3;
 			firingRate = 0.4;
@@ -55,7 +57,7 @@ package spaceshiptHunt.entities
 			{
 				currentAction = attackPlayer;
 			}
-			if (isBackwardBlocked()) //isPathBlocked())
+			if (!isPlayerInRange(minDisatnceFromWall*2) && isBackwardBlocked()) //isPathBlocked())
 			{
 				currentAction = goToPlayerPath;
 			}
@@ -68,7 +70,7 @@ package spaceshiptHunt.entities
 		
 		protected function attackPlayer():void
 		{
-			if (isPlayerInRange(maxAttackRange) && !isBackwardBlocked())
+			if (isPlayerInRange(maxAttackRange) && !(!isPlayerInRange(minDisatnceFromWall*2) && isBackwardBlocked()))
 			{
 				var predictedPosition:Vec2 = playerPredictedPosition();
 				var angleToPlayer:Number = Math.abs(rotationDiffrenceToPoint(predictedPosition));
@@ -109,7 +111,6 @@ package spaceshiptHunt.entities
 			backwardDirVector.rotate(Math.PI / 2);
 			tempRay.direction.setxy(backwardDirVector.x, backwardDirVector.y);
 			backwardDirVector.dispose();
-			var minDisatnceFromWall:Number = 100;
 			tempRay.maxDistance = minDisatnceFromWall;
 			var rayResult:RayResult = body.space.rayCast(tempRay, false, Environment.STATIC_OBSTACLES_FILTER);
 			var isBlocked:Boolean = rayResult != null;
@@ -160,7 +161,7 @@ package spaceshiptHunt.entities
 			}
 			else
 			{
-				if (isPlayerInRange(minAttackRange) && !isBackwardBlocked())
+				if (isPlayerInRange(minAttackRange) && !(!isPlayerInRange(minDisatnceFromWall*2) && isBackwardBlocked()))
 				{
 					currentAction = aimToPlayer;
 					chasingTarget = null;
