@@ -58,7 +58,7 @@ package spaceshiptHunt.controls
 		private function drawJoystick():void
 		{
 			radios = Math.min(550, Starling.current.stage.stageWidth, Starling.current.stage.stageHeight) / 4;
-			var joystickShape:Polygon = Polygon.createCircle(0, 0, radios);
+			var joystickShape:Polygon = Polygon.createCircle(0, 0, radios,13);
 			var vertices:VertexData = new VertexData(null, joystickShape.numVertices);
 			joystickShape.copyToVertexData(vertices);
 			var joystickBase:Mesh = new Mesh(vertices, joystickShape.triangulate());

@@ -98,9 +98,9 @@ package
 			underSpaceshipsLayer.addChildAt(background, 0);
 			var backgroundRatio:Number = Math.ceil(Math.sqrt(stage.stageHeight * stage.stageHeight + stage.stageWidth * stage.stageWidth) / 512) * 2;
 			background.scale = backgroundRatio * 2;
-			gameEnvironment.mainDisplay.addChild(Environment.current.light);
+			spaceshipsLayer.addChild(Environment.current.light);
 			crossTarget = new Image(Environment.current.assetsLoader.getTexture("crossTarget"));
-			gameEnvironment.mainDisplay.addChild(crossTarget);
+			underSpaceshipsLayer.addChild(crossTarget);
 			Key.init(stage);
 			ControllerInput.initialize(Starling.current.nativeStage);
 			shootButton = new TouchJoystick();

@@ -74,7 +74,10 @@ package spaceshiptHunt.entities
 			engineLocation = Vec2.get(bodyDescription.engineLocation.x, bodyDescription.engineLocation.y);
 			maxAcceleration = body.mass * 8;
 			maxAngularAcceleration = body.mass * 180;
-			addFireParticle();
+			if (SystemUtil.isDesktop)
+			{
+				addFireParticle();
+			}
 		}
 		
 		override public function dispose():void
@@ -221,7 +224,7 @@ package spaceshiptHunt.entities
 				var bulletVelocityNormal:Vec2 = bulletVelocity.unit();
 				bulletVelocity.length += Math.max(-bulletSpeed * 0.5, body.velocity.length * bulletVelocityNormal.dot(body.velocity.unit(true)));
 				PhysicsParticle.spawn(fireType, position.copy(true).rotate(body.rotation).addeq(body.position), bulletVelocity, fireColor);
-				position.x = weaponLeft.x+ weaponLeft.child.width / 8;
+				position.x = weaponLeft.x + weaponLeft.child.width / 8;
 				bulletVelocity.angle = body.rotation - Math.PI / 2 + Math.random() * 0.1 - 0.05;
 				PhysicsParticle.spawn(fireType, position.rotate(body.rotation).addeq(body.position), bulletVelocity, fireColor);
 				bulletVelocity.dispose();

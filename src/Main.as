@@ -6,6 +6,7 @@ package
 	import flash.events.Event;
 	import input.Key;
 	import starling.core.Starling;
+	import starling.utils.SystemUtil;
 	
 	/**
 	 * ...
@@ -30,11 +31,14 @@ package
 			this.stage.scaleMode = StageScaleMode.NO_SCALE;
 			this.stage.align = StageAlign.TOP_LEFT;
 			gameEngine = new Starling(Game, stage, null, null, "auto", "baselineExtended");
-			if (CONFIG::release)
+			if (SystemUtil.isDesktop)
 			{
-			gameEngine.antiAliasing = 4;
+				gameEngine.showStats = true;
+				if (CONFIG::release)
+				{
+					gameEngine.antiAliasing = 4;
+				}
 			}
-			gameEngine.showStats = true;
 			gameEngine.start();
 			stage.addEventListener(Event.ACTIVATE, function(e:Event):void
 			{
@@ -42,7 +46,7 @@ package
 				gameEngine.start();
 				if (gameEngine.root)
 				{
-				(gameEngine.root as Game).onFocusReturn();
+					(gameEngine.root as Game).onFocusReturn();
 				}
 			});
 			stage.addEventListener(Event.DEACTIVATE, function(e:Event):void

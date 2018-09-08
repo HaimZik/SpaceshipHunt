@@ -404,7 +404,7 @@ package spaceshiptHunt.level
 				addMesh(polygonArray[k], body);
 				drawMesh(asteroidField, new starling.geom.Polygon(polygonArray[k]), texture, normalMap);
 			}
-			mainDisplay.addChild(asteroidField);
+			Game.underSpaceshipsLayer.addChildAt(asteroidField,0);
 			physicsSpace.bodies.add(body);
 		}
 		

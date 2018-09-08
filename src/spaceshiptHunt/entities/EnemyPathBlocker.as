@@ -5,6 +5,7 @@ package spaceshiptHunt.entities
 	import nape.phys.Body;
 	import spaceshiptHunt.entities.Enemy;
 	import spaceshiptHunt.level.Environment;
+	import starling.core.Starling;
 	import starling.display.Sprite;
 	import starling.filters.GlowFilter;
 	
@@ -19,6 +20,9 @@ package spaceshiptHunt.entities
 		protected var attackTriggerRange:Number;
 		protected var aimAccuracy:Number;
 		protected var minDisatnceFromWall:Number;
+		protected var lastBackwardBlockedCheck:Number;
+		protected var _isBackwardBlocked:Boolean=false;
+		protected var backwardBlockedCheckRate:Number;
 		
 		public function EnemyPathBlocker(position:Vec2)
 		{
@@ -36,6 +40,8 @@ package spaceshiptHunt.entities
 			attackTriggerRange = minAttackRange * 3;
 			firingRate = 0.4;
 			aimAccuracy = Math.PI / 6; //4.0;
+			lastBackwardBlockedCheck = Starling.juggler.elapsedTime;
+			backwardBlockedCheckRate = 0.8;
 		}
 		
 		override protected function decideNextAction():void
@@ -106,6 +112,11 @@ package spaceshiptHunt.entities
 		
 		protected function isBackwardBlocked():Boolean
 		{
+			if (Starling.juggler.elapsedTime-lastBackwardBlockedCheck < backwardBlockedCheckRate)
+			{
+				return _isBackwardBlocked;
+			}
+			lastBackwardBlockedCheck = Starling.juggler.elapsedTime;
 			tempRay.origin = this.body.position;
 			var backwardDirVector:Vec2 = Vec2.fromPolar(1, body.rotation);
 			backwardDirVector.rotate(Math.PI / 2);
@@ -113,12 +124,12 @@ package spaceshiptHunt.entities
 			backwardDirVector.dispose();
 			tempRay.maxDistance = minDisatnceFromWall;
 			var rayResult:RayResult = body.space.rayCast(tempRay, false, Environment.STATIC_OBSTACLES_FILTER);
-			var isBlocked:Boolean = rayResult != null;
-			if (isBlocked)
+			_isBackwardBlocked = rayResult != null;
+			if (_isBackwardBlocked)
 			{
 				rayResult.dispose();
 			}
-			return isBlocked;
+			return _isBackwardBlocked;
 		}
 		
 		protected function goToPlayerPath():void

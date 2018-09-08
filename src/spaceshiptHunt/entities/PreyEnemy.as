@@ -33,8 +33,7 @@ package spaceshiptHunt.entities
 		{
 			super.init(bodyDescription);
 			pointingArrow = new Image(Environment.current.assetsLoader.getTexture("arrow"));
-			var mainDisplay:Sprite = Environment.current.mainDisplay;
-			mainDisplay.addChildAt(pointingArrow, 0);
+			Game.underSpaceshipsLayer.addChildAt(pointingArrow, 0);
 		}
 		
 		override public function dispose():void 
