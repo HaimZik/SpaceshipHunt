@@ -104,10 +104,10 @@ package spaceshiptHunt.entities
 			{
 				attachedTransforms[i].update();
 			}
+			lifebarTransform.scaleX = life / maxLife;
+			lifebarBackground.rotation = filledLife.rotation;
 			lifebarBackground.x = filledLife.x;
 			lifebarBackground.y = filledLife.y;
-			lifebarBackground.rotation = filledLife.rotation;
-			lifebarTransform.scaleX = life / maxLife;
 		}
 		
 		public function set gunType(gunType:String):void
@@ -182,6 +182,7 @@ package spaceshiptHunt.entities
 		
 		public function findPathToEntity(entity:DDLSEntityAI, outPath:Vector.<Number>):void
 		{
+			trace("findPathTo Entity "+entity.approximateObject.id+" from entity "+pathfindingAgent.approximateObject.id);
 			var diraction:Vec2 = Vec2.weak(entity.x - _pathfindingAgent.x, entity.y - _pathfindingAgent.y);
 			diraction.length = pathfindingAgent.radius + entity.radius + pathfindingAgentSafeDistance * 2 + 2;
 			findPathTo(entity.x - diraction.x, entity.y - diraction.y, outPath);
@@ -190,16 +191,19 @@ package spaceshiptHunt.entities
 				if (outPath.length == 0)
 				{
 					diraction.set(diraction.perp(true));
+					trace("findPathToEntity "+i);
 					findPathTo(entity.x - diraction.x, entity.y - diraction.y, outPath);
 				}
 				else
 				{
 					diraction.dispose();
+					trace("findPathToEntity end");
 					return;
 				}
 			}
 			diraction.dispose();
 			Environment.current.meshNeedsUpdate = true;
+			trace("findPathToEntity end");
 		}
 		
 		public function onBulletHit(impactForce:Number):void

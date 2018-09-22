@@ -10,6 +10,7 @@ package spaceshiptHunt.entities
 	import nape.phys.BodyType;
 	import starling.display.DisplayObject;
 	import starling.display.DisplayObjectContainer;
+	import starling.utils.MathUtil;
 	
 	public class BodyInfo
 	{
@@ -34,9 +35,15 @@ package spaceshiptHunt.entities
 		
 		public function syncGraphics():void
 		{
-			graphics.x = body.position.x;
-			graphics.y = body.position.y;
 			graphics.rotation = body.rotation;
+			//if (!MathUtil.isEquivalent(body.position.x, graphics.x,0.075))
+			//{
+				graphics.x = body.position.x;
+			//}
+			//if (!MathUtil.isEquivalent(body.position.y, graphics.y,0.075))
+			//{
+				graphics.y = body.position.y;
+		//	}
 		}
 		
 		public function init(bodyDescription:Object):void

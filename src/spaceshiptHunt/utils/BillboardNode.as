@@ -4,6 +4,7 @@ package spaceshiptHunt.utils
 	import starling.display.DisplayObject;
 	import starling.display.DisplayObjectContainer;
 	import starling.display.Sprite;
+	import starling.utils.MathUtil;
 	import starling.utils.Pool;
 	
 	/**
@@ -24,15 +25,19 @@ package spaceshiptHunt.utils
 		
 		override public function update():void
 		{
+			child.rotation = -child.parent.rotation;
 			//if (parent.parent != child.parent)
 			//{
 			var newPos:Point = Pool.getPoint(0, 0);
 			parent.localToGlobal(newPos, newPos);
-			newPos.offset(_x, _y);
+			newPos.offset(_x*parent.parent.scaleX ,_y*parent.parent.scaleY);
 			child.parent.globalToLocal(newPos, newPos);
-			child.x = newPos.x;
-			child.y = newPos.y;
-			child.rotation = -child.parent.rotation;
+			if (!(MathUtil.isEquivalent(child.x, newPos.x, 0.075) && MathUtil.isEquivalent(child.y, newPos.y,0.075)))
+			{
+			child.x -= (child.x-newPos.x)*0.9;
+			child.y -= (child.y-newPos.y)*0.9;
+			}
+			//		child.scale = 1.0/child.parent.scale;
 			Pool.putPoint(newPos);
 			//}
 			//else

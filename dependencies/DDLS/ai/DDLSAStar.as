@@ -87,16 +87,16 @@ package DDLS.ai
 		public function findPath(fromX:Number, fromY:Number, toX:Number, toY:Number, resultListFaces:Vector.<DDLSFace>, resultListEdges:Vector.<DDLSEdge>):void
 		{
 			//trace("findPath");
-			__closedFaces = new Dictionary();
 			__sortedOpenedFaces.length = 0;
-			__openedFaces = new Dictionary();
-			__entryEdges = new Dictionary();
-			__entryX = new Dictionary();
-			__entryY = new Dictionary();
-			__scoreF = new Dictionary();
-			__scoreG = new Dictionary();
-			__scoreH = new Dictionary();
-			__predecessor = new Dictionary();
+			__closedFaces = new Dictionary(true);
+			__openedFaces = new Dictionary(true);
+			__entryEdges = new Dictionary(true);
+			__entryX = new Dictionary(true);
+			__entryY = new Dictionary(true);
+			__scoreF = new Dictionary(true);
+			__scoreG = new Dictionary(true);
+			__scoreH = new Dictionary(true);
+			__predecessor = new Dictionary(true);
 			
 			var loc:Object;
 			var locEdge:DDLSEdge;
@@ -297,7 +297,7 @@ package DDLS.ai
 					// if so, we check if there are any elements left in the right vector;
 					// if so, we compare them. Otherwise, we know that the merge must
 					// take the element from the left vector. */
-					if (l < startIndex + halfLength && (r == endIndex || sortingFaces(__sortedOpenedFaces[l], __sortedOpenedFaces[r]) <= 0))
+					if (l < startIndex + halfLength && (r == endIndex || __scoreF[__sortedOpenedFaces[l]] >= __scoreF[__sortedOpenedFaces[r]]))
 					{
 						sortBuffer[i] = __sortedOpenedFaces[l];
 						l++;

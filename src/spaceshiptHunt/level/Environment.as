@@ -59,8 +59,9 @@ package spaceshiptHunt.level
 		public var cameraPosition:Point = new Point();
 		public static const STATIC_OBSTACLES_FILTER:InteractionFilter = new InteractionFilter(2, ~8);
 		static private var currentEnvironment:Environment;
-		protected var _baseZoom:Number = 1.0;
 		protected const MAX_ZOOM_OUT:Number = 0.3;
+		protected var _baseZoom:Number = 1.0;
+		protected var navMeshUpdateRate:Number = 1.0;
 		protected var pathfinder:DDLSPathFinder;
 		protected var lastNavMeshUpdate:Number;
 		protected var commandQueue:Vector.<Function>;
@@ -122,11 +123,16 @@ package spaceshiptHunt.level
 		
 		public function update(passedTime:Number):void
 		{
+			var didNavMeshUpdated:Boolean = false;
+			navMeshUpdateRate = 1.0;
+			if (meshNeedsUpdate && Starling.juggler.elapsedTime - lastNavMeshUpdate > navMeshUpdateRate)
+			{
+				navMesh.updateObjects();
+				lastNavMeshUpdate = Starling.juggler.elapsedTime;
+				didNavMeshUpdated = true;
+			}
 			if (!paused)
 			{
-				cameraPosition.x = Player.current.body.position.x;
-				cameraPosition.y = Player.current.body.position.y;
-				focusCam();
 				physicsSpace.step(passedTime);
 				for (var i:int = 0; i < BodyInfo.list.length; i++)
 				{
@@ -134,11 +140,12 @@ package spaceshiptHunt.level
 				}
 				light.x = Player.current.graphics.x;
 				light.y = Player.current.graphics.y + 400;
+				cameraPosition.x = Player.current.body.position.x;
+				cameraPosition.y = Player.current.body.position.y;
+				focusCam();
 			}
-			if (meshNeedsUpdate && Starling.juggler.elapsedTime - lastNavMeshUpdate > 1.0)
+			if (didNavMeshUpdated)
 			{
-				navMesh.updateObjects();
-				lastNavMeshUpdate = Starling.juggler.elapsedTime;
 				meshNeedsUpdate = false;
 			}
 		}
@@ -165,21 +172,35 @@ package spaceshiptHunt.level
 			var player:Player = Player.current;
 			var camAngularVelocity:Number = MathUtil.normalizeAngle(mainDisplay.rotation) - MathUtil.normalizeAngle(player.body.angularVel / 17 - player.body.rotation);
 			var rotationChangeThreshold:Number = 0.002;
+			var didChange:Boolean = false;
 			if (!MathUtil.isEquivalent(camAngularVelocity, 0, rotationChangeThreshold))
 			{
+				//mainDisplay.pivotX = cameraPosition.x;
+				//mainDisplay.pivotY = cameraPosition.y;
 				mainDisplay.rotation -= camAngularVelocity;
+				didChange = true;
 			}
 			var velocity:Vec2 = player.body.velocity.copy(true).rotate(mainDisplay.rotation).muleq(0.2);
 			var newScale:Number = baseZoom - Math.min(MAX_ZOOM_OUT * baseZoom, velocity.length * velocity.length / 30000);
-			var camPosition:Point = Pool.getPoint(cameraPosition.x, cameraPosition.y);
-			mainDisplay.localToGlobal(camPosition, camPosition);
-			var camVelocityX:Number = camPosition.x - velocity.x - mainDisplay.stage.stageWidth / 2;
-			var camVelocityY:Number = camPosition.y - velocity.y - mainDisplay.stage.stageHeight * 0.7;
-			if (!(MathUtil.isEquivalent(camVelocityX, 0, 0.75) && MathUtil.isEquivalent(camVelocityY, 0, 0.75) && MathUtil.isEquivalent(camAngularVelocity, 0, rotationChangeThreshold) && MathUtil.isEquivalent(mainDisplay.scale-newScale,0,0.01)))
+			if (!MathUtil.isEquivalent(mainDisplay.scale, newScale, 0.01))
 			{
 				mainDisplay.scale += (newScale - mainDisplay.scale) / 16;
-				mainDisplay.x -= camVelocityX;
-				mainDisplay.y -= camVelocityY;
+				didChange = true;
+			}
+			var camPosition:Point = Pool.getPoint(cameraPosition.x, cameraPosition.y);
+			mainDisplay.localToGlobal(camPosition, camPosition);
+			velocity.x = 0;
+			velocity.y = 0;
+			var camVelocityX:Number = camPosition.x - velocity.x - mainDisplay.stage.stageWidth / 2;
+			var camVelocityY:Number = camPosition.y - velocity.y - mainDisplay.stage.stageHeight * 0.7;
+			if (!(MathUtil.isEquivalent(camVelocityX, 0, 0.75) && MathUtil.isEquivalent(camVelocityY, 0, 0.75)))
+			{
+				mainDisplay.x -= camVelocityX * 1.0;
+				mainDisplay.y -= camVelocityY * 1.0;
+				didChange = true;
+			}
+			if (didChange)
+			{
 				Game.aboveSpaceshipsLayer.transformationMatrix = mainDisplay.transformationMatrix;
 				Game.underSpaceshipsLayer.transformationMatrix = mainDisplay.transformationMatrix;
 			}
@@ -198,6 +219,7 @@ package spaceshiptHunt.level
 		public function findPath(pathfindingAgent:DDLSEntityAI, x:Number, y:Number, outPath:Vector.<Number>):void
 		{
 			pathfinder.entity = pathfindingAgent;
+			trace(pathfindingAgent.approximateObject.id);
 			pathfinder.findPath(x, y, outPath);
 		}
 		
@@ -404,7 +426,7 @@ package spaceshiptHunt.level
 				addMesh(polygonArray[k], body);
 				drawMesh(asteroidField, new starling.geom.Polygon(polygonArray[k]), texture, normalMap);
 			}
-			Game.underSpaceshipsLayer.addChildAt(asteroidField,0);
+			Game.underSpaceshipsLayer.addChildAt(asteroidField, 0);
 			physicsSpace.bodies.add(body);
 		}
 		

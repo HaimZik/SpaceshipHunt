@@ -1,5 +1,6 @@
 package spaceshiptHunt.entities
 {
+	import flash.utils.Dictionary;
 	import nape.callbacks.*;
 	import nape.geom.*;
 	import nape.shape.*;
@@ -17,7 +18,7 @@ package spaceshiptHunt.entities
 	public class PhysicsParticle extends BodyInfo
 	{
 		
-		internal static var particlePool:Vector.<PhysicsParticle> = new Vector.<PhysicsParticle>();
+		internal static var particlePool:Dictionary = new Dictionary();
 		protected static const poolGrowth:int = 10;
 		protected var currentCallId:uint;
 		public static const INTERACTION_TYPE:CbType = new CbType();
@@ -58,21 +59,26 @@ package spaceshiptHunt.entities
 		
 		public static function spawn(particleType:String, position:Vec2, impulse:Vec2, color:uint = Color.WHITE):void
 		{
-			if (particlePool.length == 0)
+			if (particlePool[color] == null)
+			{
+				particlePool[color] = new Vector.<PhysicsParticle>();
+			}
+			var particleArray:Vector.<PhysicsParticle> = particlePool[color];
+			if (particleArray.length == 0)
 			{
 				var particleTexture:Texture = Environment.current.assetsLoader.getTexture(particleType);
 				var circleShape:Circle = new Circle(particleTexture.width / 2);
 				circleShape.sensorEnabled = true;
 				for (var i:int = 0; i < poolGrowth; i++)
 				{
-					particlePool.push(new PhysicsParticle(particleTexture));
+					particleArray.push(new PhysicsParticle(particleTexture));
 					circleShape.filter.collisionMask = ~2; //in order for the raytracing to ignore it
-					particlePool[i].body.shapes.add(circleShape.copy());
-					particlePool[i].body.mass /= 3;
+					particleArray[i].body.shapes.add(circleShape.copy());
+					particleArray[i].body.mass /= 3;
+					particleArray[i].color = color;
 				}
 			}
-			var particle:PhysicsParticle = particlePool.pop();
-			particle.color = color;
+			var particle:PhysicsParticle = particleArray.pop();
 			particle.body.position.set(position);
 			particle.body.rotation = impulse.angle;
 			particle.body.velocity = impulse;
@@ -91,7 +97,7 @@ package spaceshiptHunt.entities
 				graphics.removeFromParent();
 				body.space = null;
 				BodyInfo.list.removeAt(BodyInfo.list.indexOf(this));
-				particlePool.push(this);
+				(particlePool[this.color] as Vector.<PhysicsParticle>).push(this);
 			}
 		}
 		
