@@ -15,15 +15,15 @@ package DDLS.ai
 		
 		private var _mesh:DDLSMesh;
 		
-		private var __closedFaces:Dictionary;
-		private var __openedFaces:Dictionary;
-		private var __entryEdges:Dictionary;
-		private var __entryX:Dictionary;
-		private var __entryY:Dictionary;
-		private var __scoreF:Dictionary;
-		private var __scoreG:Dictionary;
-		private var __scoreH:Dictionary;
-		private var __predecessor:Dictionary;
+		private var __closedFaces:Dictionary = new Dictionary(true);
+		private var __openedFaces:Dictionary = new Dictionary(true);
+		private var __entryEdges:Dictionary = new Dictionary(true);
+		private var __entryX:Dictionary = new Dictionary(true);
+		private var __entryY:Dictionary = new Dictionary(true);
+		private var __scoreF:Dictionary = new Dictionary(true);
+		private var __scoreG:Dictionary = new Dictionary(true);
+		private var __scoreH:Dictionary = new Dictionary(true);
+		private var __predecessor:Dictionary = new Dictionary(true);
 		
 		private var __iterEdge:IteratorFromFaceToInnerEdges;
 		
@@ -88,15 +88,6 @@ package DDLS.ai
 		{
 			//trace("findPath");
 			__sortedOpenedFaces.length = 0;
-			__closedFaces = new Dictionary(true);
-			__openedFaces = new Dictionary(true);
-			__entryEdges = new Dictionary(true);
-			__entryX = new Dictionary(true);
-			__entryY = new Dictionary(true);
-			__scoreF = new Dictionary(true);
-			__scoreG = new Dictionary(true);
-			__scoreH = new Dictionary(true);
-			__predecessor = new Dictionary(true);
 			
 			var loc:Object;
 			var locEdge:DDLSEdge;
@@ -243,11 +234,48 @@ package DDLS.ai
 				sortBuffer.length = __sortedOpenedFaces.length;
 				sortfaces(0, __sortedOpenedFaces.length);
 			}
-			
+			var key:DDLSFace;
+			for (key in __closedFaces)
+			{
+				delete __closedFaces[key];
+			}
+			for (key in __openedFaces)
+			{
+				delete __openedFaces[key];
+			}
+			for (key in __entryX)
+			{
+				delete __entryX[key];
+			}
+			for (key in __entryY)
+			{
+				delete __entryY[key];
+			}
+			for (key in __scoreF)
+			{
+				delete __scoreF[key];
+			}
+			for (key in __scoreG)
+			{
+				delete __scoreG[key];
+			}
+			for (key in __scoreH)
+			{
+				delete __scoreH[key];
+			}
 			// if we didn't find a path
 			if (!__curFace)
+			{
+				for (key in __predecessor)
+				{
+					delete __predecessor[key];
+				}
+				for (key in __entryEdges)
+				{
+					delete __entryEdges[key];
+				}
 				return;
-			
+			}
 			// else we build the path
 			resultListFaces.push(__curFace);
 			//__curFace.colorDebug = 0x0000FF;
@@ -259,6 +287,14 @@ package DDLS.ai
 				__curFace = __predecessor[__curFace];
 				//__curFace.colorDebug = 0x0000FF;
 				resultListFaces.unshift(__curFace);
+			}
+			for (key in __predecessor)
+			{
+				delete __predecessor[key];
+			}
+			for (key in __entryEdges)
+			{
+				delete __entryEdges[key];
 			}
 		}
 		

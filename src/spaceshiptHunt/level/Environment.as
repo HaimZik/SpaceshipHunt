@@ -61,7 +61,7 @@ package spaceshiptHunt.level
 		static private var currentEnvironment:Environment;
 		protected const MAX_ZOOM_OUT:Number = 0.3;
 		protected var _baseZoom:Number = 1.0;
-		protected var navMeshUpdateRate:Number = 1.0;
+		protected var navMeshUpdateRate:Number = 1.2;
 		protected var pathfinder:DDLSPathFinder;
 		protected var lastNavMeshUpdate:Number;
 		protected var commandQueue:Vector.<Function>;
@@ -124,7 +124,6 @@ package spaceshiptHunt.level
 		public function update(passedTime:Number):void
 		{
 			var didNavMeshUpdated:Boolean = false;
-			navMeshUpdateRate = 1.0;
 			if (meshNeedsUpdate && Starling.juggler.elapsedTime - lastNavMeshUpdate > navMeshUpdateRate)
 			{
 				navMesh.updateObjects();
@@ -140,9 +139,13 @@ package spaceshiptHunt.level
 				}
 				light.x = Player.current.graphics.x;
 				light.y = Player.current.graphics.y + 400;
-				cameraPosition.x = Player.current.body.position.x;
-				cameraPosition.y = Player.current.body.position.y;
+				cameraPosition.x = Player.current.graphics.x;
+				cameraPosition.y = Player.current.graphics.y;
 				focusCam();
+				for (var j:int = 0; j < BodyInfo.list.length; j++)
+				{
+					BodyInfo.list[j].lateSyncGraphics();
+				}
 			}
 			if (didNavMeshUpdated)
 			{
@@ -189,8 +192,8 @@ package spaceshiptHunt.level
 			}
 			var camPosition:Point = Pool.getPoint(cameraPosition.x, cameraPosition.y);
 			mainDisplay.localToGlobal(camPosition, camPosition);
-			velocity.x = 0;
-			velocity.y = 0;
+			//velocity.x = 0;
+			//velocity.y = 0;
 			var camVelocityX:Number = camPosition.x - velocity.x - mainDisplay.stage.stageWidth / 2;
 			var camVelocityY:Number = camPosition.y - velocity.y - mainDisplay.stage.stageHeight * 0.7;
 			if (!(MathUtil.isEquivalent(camVelocityX, 0, 0.75) && MathUtil.isEquivalent(camVelocityY, 0, 0.75)))

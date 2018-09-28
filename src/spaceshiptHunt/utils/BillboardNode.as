@@ -19,8 +19,7 @@ package spaceshiptHunt.utils
 		
 		public function BillboardNode(transformParent:DisplayObject, child:DisplayObject)
 		{
-			parent = transformParent;
-			this.child = child;
+			super(transformParent, child);
 		}
 		
 		override public function update():void
@@ -30,12 +29,12 @@ package spaceshiptHunt.utils
 			//{
 			var newPos:Point = Pool.getPoint(0, 0);
 			parent.localToGlobal(newPos, newPos);
-			newPos.offset(_x*parent.parent.scaleX ,_y*parent.parent.scaleY);
+			newPos.offset(_x * parent.parent.scaleX, _y * parent.parent.scaleY);
 			child.parent.globalToLocal(newPos, newPos);
-			if (!(MathUtil.isEquivalent(child.x, newPos.x, 0.075) && MathUtil.isEquivalent(child.y, newPos.y,0.075)))
+			if (!(MathUtil.isEquivalent(child.x, newPos.x, 0.075) && MathUtil.isEquivalent(child.y, newPos.y, 0.075)))
 			{
-			child.x -= (child.x-newPos.x)*0.9;
-			child.y -= (child.y-newPos.y)*0.9;
+				child.x -= (child.x - newPos.x) * 0.9;
+				child.y -= (child.y - newPos.y) * 0.9;
 			}
 			//		child.scale = 1.0/child.parent.scale;
 			Pool.putPoint(newPos);

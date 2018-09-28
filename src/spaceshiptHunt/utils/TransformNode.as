@@ -15,9 +15,8 @@ package spaceshiptHunt.utils
 		
 		public function TransformNode(transformParent:DisplayObject, child:DisplayObject)
 		{
-			parent = transformParent;
+			super(transformParent, child);
 			transformationMatrix = new Matrix();
-			this.child = child;
 			//		child.alignPivot();
 		}
 		

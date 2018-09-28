@@ -37,7 +37,7 @@ package spaceshiptHunt.entities
 		protected var maxLife:Number = 150;
 		protected var lifebarTransform:BillboardNode;
 		protected var attachedTransforms:Vector.<Transform>;
-		protected const lifebarOffset:Number = 20;
+		protected const lifebarOffset:Number = 25;
 		protected var _gunType:String;
 		protected var fireType:String = "fireball";
 		protected var weaponsPlacement:Dictionary;
@@ -60,7 +60,7 @@ package spaceshiptHunt.entities
 		{
 			life = maxLife;
 			super.init(bodyDescription);
-			filledLife = new Quad(100, 10);
+			filledLife = new Quad(80, 10);
 			lifebarBackground = new Quad(filledLife.width, filledLife.height);
 			filledLife.color = Color.RED;
 			lifebarBackground.color = Color.GRAY;
@@ -68,7 +68,6 @@ package spaceshiptHunt.entities
 			Game.HUD.addChild(filledLife);
 			lifebarTransform = new BillboardNode(graphics, filledLife);
 			attachedTransforms = new Vector.<Transform>();
-			attachedTransforms.push(lifebarTransform);
 			lifebarTransform.x = -filledLife.width * 0.5;
 			lifebarTransform.y = -Math.max(body.bounds.width, body.bounds.height) * 0.5 - lifebarOffset;
 			engineLocation = Vec2.get(bodyDescription.engineLocation.x, bodyDescription.engineLocation.y);
@@ -88,10 +87,9 @@ package spaceshiptHunt.entities
 			lifebarBackground.removeFromParent(true);
 			for (var i:int = 0; i < attachedTransforms.length; i++)
 			{
-				attachedTransforms[i].child.removeFromParent(true);
-				attachedTransforms[i].child = null;
-				attachedTransforms[i].parent = null;
+				attachedTransforms[i].dispose();
 			}
+			lifebarTransform.dispose();
 			attachedTransforms = null;
 			weaponRight = weaponLeft = null;
 			super.dispose();
@@ -104,6 +102,11 @@ package spaceshiptHunt.entities
 			{
 				attachedTransforms[i].update();
 			}
+		}
+		
+		override public function lateSyncGraphics():void
+		{
+			lifebarTransform.update();
 			lifebarTransform.scaleX = life / maxLife;
 			lifebarBackground.rotation = filledLife.rotation;
 			lifebarBackground.x = filledLife.x;
@@ -182,7 +185,7 @@ package spaceshiptHunt.entities
 		
 		public function findPathToEntity(entity:DDLSEntityAI, outPath:Vector.<Number>):void
 		{
-			trace("findPathTo Entity "+entity.approximateObject.id+" from entity "+pathfindingAgent.approximateObject.id);
+			trace("findPathTo Entity " + entity.approximateObject.id + " from entity " + pathfindingAgent.approximateObject.id);
 			var diraction:Vec2 = Vec2.weak(entity.x - _pathfindingAgent.x, entity.y - _pathfindingAgent.y);
 			diraction.length = pathfindingAgent.radius + entity.radius + pathfindingAgentSafeDistance * 2 + 2;
 			findPathTo(entity.x - diraction.x, entity.y - diraction.y, outPath);
@@ -191,7 +194,7 @@ package spaceshiptHunt.entities
 				if (outPath.length == 0)
 				{
 					diraction.set(diraction.perp(true));
-					trace("findPathToEntity "+i);
+					trace("findPathToEntity " + i);
 					findPathTo(entity.x - diraction.x, entity.y - diraction.y, outPath);
 				}
 				else

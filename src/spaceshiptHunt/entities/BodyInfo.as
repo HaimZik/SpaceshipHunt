@@ -38,12 +38,17 @@ package spaceshiptHunt.entities
 			graphics.rotation = body.rotation;
 			//if (!MathUtil.isEquivalent(body.position.x, graphics.x,0.075))
 			//{
-				graphics.x = body.position.x;
+			graphics.x = body.position.x;
 			//}
 			//if (!MathUtil.isEquivalent(body.position.y, graphics.y,0.075))
 			//{
-				graphics.y = body.position.y;
-		//	}
+			graphics.y = body.position.y;
+			//	}
+		}
+		
+		public function lateSyncGraphics():void
+		{
+		
 		}
 		
 		public function init(bodyDescription:Object):void

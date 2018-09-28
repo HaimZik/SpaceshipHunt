@@ -74,6 +74,8 @@ package spaceshiptHunt.entities
 					particleArray.push(new PhysicsParticle(particleTexture));
 					circleShape.filter.collisionMask = ~2; //in order for the raytracing to ignore it
 					particleArray[i].body.shapes.add(circleShape.copy());
+					particleArray[i].body.disableCCD = true;
+					
 					particleArray[i].body.mass /= 3;
 					particleArray[i].color = color;
 				}
