@@ -14,13 +14,21 @@ package DDLS.ai
 	public class DDLSFunnel
 	{
 		
+		public var debugSurface:Sprite;
 		private var _radius:Number = 0;
 		private var _radiusSquared:Number = 0;
 		private var _numSamplesCircle:int = 16;
 		private var _sampleCircle:Vector.<Vec2>;
 		private var _sampleCircleDistanceSquared:Number;
 		
-		public var debugSurface:Sprite;
+		//.....reuse helpers....
+		// useful to keep track of done vertices and compare the sides
+		private var verticesDoneSide:Dictionary = new Dictionary(true);
+		private var pointSidesDic:Dictionary = new Dictionary(true);
+		private var pathSides:Dictionary= new Dictionary(true);
+		// we keep the successor relation in a dictionnary
+		private var pointSuccessorDic:Dictionary = new Dictionary(true);
+		
 		
 		public function DDLSFunnel()
 		{
@@ -72,7 +80,7 @@ package DDLS.ai
 		
 		public function set radius(value:Number):void
 		{
-			if (_sampleCircle.length>0)
+			if (_sampleCircle.length > 0)
 			{
 				dispose();
 			}
@@ -177,6 +185,7 @@ package DDLS.ai
 				resultPath.push(startPoint.x);
 				resultPath.push(startPoint.y);
 				resultPath.push(endPoint.x);
+				resultPath.push(endPoint.x);
 				resultPath.push(endPoint.y);
 				return;
 			}
@@ -204,16 +213,10 @@ package DDLS.ai
 			var funnelLeft:Vector.<DDLSPoint2D> = new <DDLSPoint2D>[startPoint];
 			var funnelRight:Vector.<DDLSPoint2D> = new <DDLSPoint2D>[startPoint];
 			
-			// useful to keep track of done vertices and compare the sides
-			var verticesDoneSide:Dictionary = new Dictionary();
-			
 			// we extract the vertices positions and sides from the edges list
 			var pointsList:Vector.<DDLSPoint2D> = new Vector.<DDLSPoint2D>();
-			var pointSides:Dictionary = new Dictionary();
-			// we keep the successor relation in a dictionnary
-			var pointSuccessor:Dictionary = new Dictionary();
 			//
-			pointSides[startPoint] = 0;
+			pointSidesDic[startPoint] = 0;
 			// we begin with the vertices in first edge
 			currEdge = listEdges[0];
 			var relativPos:int = DDLSGeom2D.getRelativePosition2(fromX, fromY, currEdge);
@@ -224,20 +227,20 @@ package DDLS.ai
 			newPointB = getCopyPoint(currEdge.originVertex.pos);
 			pointsList.push(newPointA);
 			pointsList.push(newPointB);
-			pointSuccessor[startPoint] = newPointA;
-			pointSuccessor[newPointA] = newPointB;
+			pointSuccessorDic[startPoint] = newPointA;
+			pointSuccessorDic[newPointA] = newPointB;
 			prevPoint = newPointB;
 			if (relativPos == 1)
 			{
-				pointSides[newPointA] = 1;
-				pointSides[newPointB] = -1;
+				pointSidesDic[newPointA] = 1;
+				pointSidesDic[newPointB] = -1;
 				verticesDoneSide[currEdge.destinationVertex] = 1;
 				verticesDoneSide[currEdge.originVertex] = -1;
 			}
 			else if (relativPos == -1)
 			{
-				pointSides[newPointA] = -1;
-				pointSides[newPointB] = 1;
+				pointSidesDic[newPointA] = -1;
+				pointSidesDic[newPointB] = 1;
 				verticesDoneSide[currEdge.destinationVertex] = -1;
 				verticesDoneSide[currEdge.originVertex] = 1;
 			}
@@ -275,16 +278,21 @@ package DDLS.ai
 				newPointA = getCopyPoint(currVertex.pos);
 				pointsList.push(newPointA);
 				direction = -verticesDoneSide[fromVertex];
-				pointSides[newPointA] = direction;
-				pointSuccessor[prevPoint] = newPointA;
+				pointSidesDic[newPointA] = direction;
+				pointSuccessorDic[prevPoint] = newPointA;
 				verticesDoneSide[currVertex] = direction;
 				prevPoint = newPointA;
 				fromFromVertex = fromVertex;
 				fromVertex = currVertex;
 			}
+			
+			for (var key:DDLSVertex in verticesDoneSide)
+			{
+				delete verticesDoneSide[key];
+			}
 			// we then we add the end point
-			pointSuccessor[prevPoint] = endPoint;
-			pointSides[endPoint] = 0;
+			pointSuccessorDic[prevPoint] = endPoint;
+			pointSidesDic[endPoint] = 0;
 			
 			/*
 			   debugSurface.graphics.clear();
@@ -310,7 +318,6 @@ package DDLS.ai
 			
 			// we will keep the points and funnel sides of the optimized path
 			var pathPoints:Vector.<DDLSPoint2D> = new Vector.<DDLSPoint2D>();
-			var pathSides:Dictionary = new Dictionary();
 			pathPoints.push(startPoint);
 			pathSides[startPoint] = 0;
 			
@@ -321,7 +328,7 @@ package DDLS.ai
 				currPos = pointsList[i];
 				
 				// we identify the current vertex funnel's position by the position of his origin vertex
-				if (pointSides[currPos] == -1)
+				if (pointSidesDic[currPos] == -1)
 				{
 					// current vertex is at right
 					//trace("current vertex is at right");
@@ -341,9 +348,9 @@ package DDLS.ai
 							}
 							pathPoints.push(funnelLeft[0]);
 							pathSides[funnelLeft[0]] = 1;
-							funnelRight.length=2;
+							funnelRight.length = 2;
 							funnelRight[0] = funnelLeft[0];
-							funnelRight[1]=currPos;
+							funnelRight[1] = currPos;
 							break;
 							continue;
 						}
@@ -378,7 +385,7 @@ package DDLS.ai
 							}
 							pathPoints.push(funnelRight[0]);
 							pathSides[funnelRight[0]] = -1;
-							funnelLeft.length=2;
+							funnelLeft.length = 2;
 							funnelLeft[0] = funnelRight[0];
 							funnelLeft[1] = currPos;
 							break;
@@ -469,45 +476,58 @@ package DDLS.ai
 				
 				if (pathPoints.length == 2)
 				{
-					adjustWithTangents(pathPoints[0], false, pathPoints[1], false, pointSides, pointSuccessor, newPath, adjustedPoints);
+					adjustWithTangents(pathPoints[0], false, pathPoints[1], false, pointSidesDic, pointSuccessorDic, newPath, adjustedPoints);
 				}
 				else if (pathPoints.length > 2)
 				{
 					// tangent from start point to 2nd point
-					adjustWithTangents(pathPoints[0], false, pathPoints[1], true, pointSides, pointSuccessor, newPath, adjustedPoints);
+					adjustWithTangents(pathPoints[0], false, pathPoints[1], true, pointSidesDic, pointSuccessorDic, newPath, adjustedPoints);
 					
 					// tangents for intermediate points
 					if (pathPoints.length > 3)
 					{
 						for (i = 1; i <= pathPoints.length - 3; i++)
 						{
-							adjustWithTangents(pathPoints[i], true, pathPoints[i + 1], true, pointSides, pointSuccessor, newPath, adjustedPoints);
+							adjustWithTangents(pathPoints[i], true, pathPoints[i + 1], true, pointSidesDic, pointSuccessorDic, newPath, adjustedPoints);
 						}
 					}
 					
 					// tangent from last-1 point to end point
 					var pathLength:int = pathPoints.length;
-					adjustWithTangents(pathPoints[pathLength - 2], true, pathPoints[pathLength - 1], false, pointSides, pointSuccessor, newPath, adjustedPoints);
+					adjustWithTangents(pathPoints[pathLength - 2], true, pathPoints[pathLength - 1], false, pointSidesDic, pointSuccessorDic, newPath, adjustedPoints);
 				}
 				
 				newPath.push(endPoint);
 				
 				// adjusted path can have useless tangents, we check it
-				checkAdjustedPath(newPath, adjustedPoints, pointSides);
+				checkAdjustedPath(newPath, adjustedPoints, pointSidesDic);
 				
 				var smoothPoints:Vector.<DDLSPoint2D> = new Vector.<DDLSPoint2D>();
 				for (i = newPath.length - 2; i >= 1; i--)
 				{
-					smoothAngle(adjustedPoints[i * 2 - 1], newPath[i], adjustedPoints[i * 2], pointSides[newPath[i]], smoothPoints);
+					smoothAngle(adjustedPoints[i * 2 - 1], newPath[i], adjustedPoints[i * 2], pointSidesDic[newPath[i]], smoothPoints);
 					while (smoothPoints.length)
 					{
-						adjustedPoints.insertAt(i * 2,smoothPoints.pop());
+						adjustedPoints.insertAt(i * 2, smoothPoints.pop());
 					}
 				}
 			}
 			else
 			{
 				adjustedPoints = pathPoints;
+			}
+			var dicKey:DDLSPoint2D;
+			for (dicKey in pointSidesDic)
+			{
+				delete pointSidesDic[dicKey];
+			}
+			for (dicKey in pointSuccessorDic)
+			{
+				delete pointSuccessorDic[dicKey];
+			}
+			for (dicKey in pathSides)
+			{
+				delete pathSides[dicKey];
 			}
 			
 			// extract coordinates
@@ -831,13 +851,13 @@ package DDLS.ai
 								}
 							}
 							adjustedPoints[(i - 2) * 2] = pTangent1;
-							adjustedPoints[i * 2 - 1]=pTangent2;
+							adjustedPoints[i * 2 - 1] = pTangent2;
 							
 							// delete useless point
 							newPath.removeAt(i - 1);
 							adjustedPoints.removeAt((i - 1) * 2 - 1);
 							adjustedPoints.removeAt((i - 1) * 2 - 1);
-							tangentsResult.length=0;
+							tangentsResult.length = 0;
 							i--;
 						}
 					}
@@ -914,7 +934,7 @@ package DDLS.ai
 				}
 				if (pointInArea)
 				{
-					encirclePoints.insertAt(index,new DDLSPoint2D(xToCheck, yToCheck));
+					encirclePoints.insertAt(index, new DDLSPoint2D(xToCheck, yToCheck));
 					index++;
 				}
 				else

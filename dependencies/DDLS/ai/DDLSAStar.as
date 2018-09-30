@@ -154,9 +154,12 @@ package DDLS.ai
 			var f:Number;
 			var g:Number;
 			var h:Number;
-			var fromPoint:DDLSPoint2D = new DDLSPoint2D();
-			var entryPoint:DDLSPoint2D = new DDLSPoint2D();
-			var distancePoint:DDLSPoint2D = new DDLSPoint2D();
+			var fromPointX:Number;
+			var fromPointY:Number;
+			var entryPointX:Number;
+			var entryPointY:Number;
+			var distancePointX:Number;
+			var distancePointY:Number;
 			var fillDatas:Boolean;
 			while (true)
 			{
@@ -194,16 +197,16 @@ package DDLS.ai
 							continue;
 						}
 						
-						fromPoint.x = __entryX[__curFace];
-						fromPoint.y = __entryY[__curFace];
-						entryPoint.x = (innerEdge.originVertex.pos.x + innerEdge.destinationVertex.pos.x) / 2;
-						entryPoint.y = (innerEdge.originVertex.pos.y + innerEdge.destinationVertex.pos.y) / 2;
-						distancePoint.x = entryPoint.x - toX;
-						distancePoint.y = entryPoint.y - toY;
-						h = distancePoint.length;
-						distancePoint.x = fromPoint.x - entryPoint.x;
-						distancePoint.y = fromPoint.y - entryPoint.y;
-						g = __scoreG[__curFace] + distancePoint.length;
+						fromPointX = __entryX[__curFace];
+						fromPointY = __entryY[__curFace];
+						entryPointX = (innerEdge.originVertex.pos.x + innerEdge.destinationVertex.pos.x) / 2;
+						entryPointY = (innerEdge.originVertex.pos.y + innerEdge.destinationVertex.pos.y) / 2;
+						distancePointX = entryPointX - toX;
+						distancePointY = entryPointY - toY;
+						h = Math.sqrt(distancePointX*distancePointX + distancePointY*distancePointY);
+						distancePointX = fromPointX - entryPointX;
+						distancePointY = fromPointY - entryPointY;
+						g = __scoreG[__curFace] + Math.sqrt(distancePointX*distancePointX + distancePointY*distancePointY);
 						f = h + g;
 						fillDatas = false;
 						if (!__openedFaces[neighbourFace])
@@ -219,8 +222,8 @@ package DDLS.ai
 						if (fillDatas)
 						{
 							__entryEdges[neighbourFace] = innerEdge;
-							__entryX[neighbourFace] = entryPoint.x;
-							__entryY[neighbourFace] = entryPoint.y;
+							__entryX[neighbourFace] = entryPointX;
+							__entryY[neighbourFace] = entryPointY;
 							__scoreF[neighbourFace] = f;
 							__scoreG[neighbourFace] = g;
 							__scoreH[neighbourFace] = h;

@@ -29,6 +29,9 @@ package DDLS.data
 		private var __centerVertex:DDLSVertex;
 		private var __edgesToCheck:Vector.<DDLSEdge>;
 		
+		private var outgoingEdges:Vector.<DDLSEdge> = new Vector.<DDLSEdge>();
+		private var boundTemp:Vector.<DDLSEdge>=new Vector.<DDLSEdge>();
+		
 		public function DDLSMesh(width:Number, height:Number)
 		{
 			_id = INC;
@@ -938,14 +941,14 @@ package DDLS.data
 			// remove the old TOP-BOTTOM and BOTTOM-TOP edges
 			eBot_Top.dispose();
 			eTop_Bot.dispose();
-			_edges.removeAt(_edges.indexOf(eBot_Top));
-			_edges.removeAt(_edges.indexOf(eTop_Bot));
+			_edges.removeAt(_edges.lastIndexOf(eBot_Top));
+			_edges.removeAt(_edges.lastIndexOf(eTop_Bot));
 			
 			// remove the old LEFT and RIGHT faces
 			fLeft.dispose();
 			fRight.dispose();
-			_faces.removeAt(_faces.indexOf(fLeft));
-			_faces.removeAt(_faces.indexOf(fRight));
+			_faces.removeAt(_faces.lastIndexOf(fLeft));
+			_faces.removeAt(_faces.lastIndexOf(fRight));
 			
 			return eRight_Left;
 		}
@@ -1241,20 +1244,18 @@ package DDLS.data
 			iterEdges.fromVertex = vertex;
 			iterEdges.realEdgesOnly = false;
 			var edge:DDLSEdge;
-			var outgoingEdges:Vector.<DDLSEdge> = new Vector.<DDLSEdge>();
 			
 			freeOfConstraint = vertex.fromConstraintSegments.length == 0;
 			
 			//trace("  -> freeOfConstraint", freeOfConstraint);
 			
-			var bound:Vector.<DDLSEdge> = new Vector.<DDLSEdge>();
 			if (freeOfConstraint)
 			{
 				edge = iterEdges.next()
 				while (edge)
 				{
 					outgoingEdges.push(edge);
-					bound.push(edge.nextLeftEdge);
+					boundTemp.push(edge.nextLeftEdge);
 					edge = iterEdges.next()
 				}
 			}
@@ -1284,6 +1285,7 @@ package DDLS.data
 						count++;
 						if (count > 2)
 						{
+							outgoingEdges.length = 0;
 							//trace("  -> count of adjacent constrained edges", count);
 							return false;
 						}
@@ -1293,8 +1295,8 @@ package DDLS.data
 				
 				// if not disqualified, then we can process
 				//trace("process vertex deletion");
-				var boundA:Vector.<DDLSEdge> = new Vector.<DDLSEdge>();
-				var boundB:Vector.<DDLSEdge> = new Vector.<DDLSEdge>();
+				var boundA:Vector.<DDLSEdge> = new <DDLSEdge>[];
+				var boundB:Vector.<DDLSEdge> = new <DDLSEdge>[];
 				var constrainedEdgeA:DDLSEdge;
 				var constrainedEdgeB:DDLSEdge;
 				var edgeA:DDLSEdge = new DDLSEdge();
@@ -1354,7 +1356,7 @@ package DDLS.data
 				for (i = 0; i < vertex.fromConstraintSegments.length; i++)
 				{
 					edges = vertex.fromConstraintSegments[i].edges;
-					index = edges.indexOf(constrainedEdgeA);
+					index = edges.lastIndexOf(constrainedEdgeA);
 					if (index != -1)
 					{
 						edges.removeAt(index - 1);
@@ -1380,7 +1382,7 @@ package DDLS.data
 				edge = outgoingEdges[i];
 				
 				faceToDelete = edge.leftFace;
-				_faces.removeAt(_faces.indexOf(faceToDelete));
+				_faces.removeAt(_faces.lastIndexOf(faceToDelete));
 				faceToDelete.dispose();
 				
 				edge.destinationVertex.edge = edge.nextLeftEdge;
@@ -1402,14 +1404,15 @@ package DDLS.data
 				edge.oppositeEdge.dispose();
 				edge.dispose();
 			}
-			_vertices.removeAt(_vertices.indexOf(vertex));
+			outgoingEdges.length = 0;
+			_vertices.removeAt(_vertices.lastIndexOf(vertex));
 			vertex.dispose();
 			
 			// finally we triangulate
 			if (freeOfConstraint)
 			{
 				//trace("trigger single hole triangulation");
-				triangulate(bound, true);
+				triangulate(boundTemp, true);
 			}
 			else
 			{
@@ -1417,7 +1420,7 @@ package DDLS.data
 				triangulate(boundA, realA);
 				triangulate(boundB, realB);
 			}
-			
+			boundTemp.length = 0;
 			//check();
 			return true;
 		}
@@ -1507,10 +1510,10 @@ package DDLS.data
 			else // if more than 3 edges, we process recursively:
 			{
 				//trace("the hole has", bound.length, "edges");
-				for (i = 0; i < bound.length; i++)
-				{
+				//for (i = 0; i < bound.length; i++)
+				//{
 					//trace("  - edge", i, ":", bound[i].originVertex.id, "->", bound[i].destinationVertex.id);
-				}
+			//	}
 				
 				var baseEdge:DDLSEdge = bound[0];
 				var vertexA:DDLSVertex = baseEdge.originVertex;

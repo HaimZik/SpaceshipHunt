@@ -69,7 +69,7 @@ package DDLS.data
 			_id = INC;
 			INC++;
 			
-			_fromConstraintSegments = new Vector.<DDLSConstraintSegment>();
+			_fromConstraintSegments = new <DDLSConstraintSegment>[];
 		}
 		
 		public function get id():int
