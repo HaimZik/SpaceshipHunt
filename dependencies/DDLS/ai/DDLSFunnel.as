@@ -185,7 +185,6 @@ package DDLS.ai
 				resultPath.push(startPoint.x);
 				resultPath.push(startPoint.y);
 				resultPath.push(endPoint.x);
-				resultPath.push(endPoint.x);
 				resultPath.push(endPoint.y);
 				return;
 			}

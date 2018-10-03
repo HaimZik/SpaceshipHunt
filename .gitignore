@@ -2,7 +2,7 @@
 bin-debug/
 bin-release/
 batMobile/
-dependencies/
+dependencies/starling
 # Other files and folders
 .settings/
 

@@ -7,6 +7,7 @@ package DDLS.data
 	import flash.geom.Point;
 	import flash.utils.Dictionary;
 	import starling.utils.Pool;
+	import DDLS.factories.DDLSPool;
 	
 	public class DDLSMesh
 	{
@@ -30,7 +31,7 @@ package DDLS.data
 		private var __edgesToCheck:Vector.<DDLSEdge>;
 		
 		private var outgoingEdges:Vector.<DDLSEdge> = new Vector.<DDLSEdge>();
-		private var boundTemp:Vector.<DDLSEdge>=new Vector.<DDLSEdge>();
+		private var boundTemp:Vector.<DDLSEdge> = new Vector.<DDLSEdge>();
 		
 		public function DDLSMesh(width:Number, height:Number)
 		{
@@ -903,8 +904,8 @@ package DDLS.data
 			
 			var fLeft:DDLSFace = eBot_Top.leftFace;
 			var fRight:DDLSFace = eTop_Bot.leftFace;
-			var fBot:DDLSFace = new DDLSFace();
-			var fTop:DDLSFace = new DDLSFace();
+			var fBot:DDLSFace = DDLSPool.getDDLSFace();
+			var fTop:DDLSFace = DDLSPool.getDDLSFace();
 			
 			// add the new edges
 			_edges.push(eLeft_Right);
@@ -945,8 +946,8 @@ package DDLS.data
 			_edges.removeAt(_edges.lastIndexOf(eTop_Bot));
 			
 			// remove the old LEFT and RIGHT faces
-			fLeft.dispose();
-			fRight.dispose();
+			DDLSPool.putDDLSFace(fLeft);
+			DDLSPool.putDDLSFace(fRight);
 			_faces.removeAt(_faces.lastIndexOf(fLeft));
 			_faces.removeAt(_faces.lastIndexOf(fRight));
 			
@@ -993,10 +994,10 @@ package DDLS.data
 			var eRight_Center:DDLSEdge = new DDLSEdge();
 			var eCenter_Right:DDLSEdge = new DDLSEdge();
 			
-			var fTopLeft:DDLSFace = new DDLSFace();
-			var fBotLeft:DDLSFace = new DDLSFace();
-			var fBotRight:DDLSFace = new DDLSFace();
-			var fTopRight:DDLSFace = new DDLSFace();
+			var fTopLeft:DDLSFace = DDLSPool.getDDLSFace();
+			var fBotLeft:DDLSFace = DDLSPool.getDDLSFace();
+			var fBotRight:DDLSFace = DDLSPool.getDDLSFace();
+			var fTopRight:DDLSFace = DDLSPool.getDDLSFace();
 			
 			// add the new vertex
 			_vertices.push(vCenter);
@@ -1110,8 +1111,8 @@ package DDLS.data
 			_edges.removeAt(_edges.indexOf(eRight_Left));
 			
 			// remove the old TOP and BOTTOM faces
-			fTop.dispose();
-			fBot.dispose();
+			DDLSPool.putDDLSFace(fTop);
+			DDLSPool.putDDLSFace(fBot);
 			_faces.removeAt(_faces.indexOf(fTop));
 			_faces.removeAt(_faces.indexOf(fBot));
 			
@@ -1149,9 +1150,9 @@ package DDLS.data
 			var eRight_Center:DDLSEdge = new DDLSEdge();
 			var eCenter_Right:DDLSEdge = new DDLSEdge();
 			
-			var fTopLeft:DDLSFace = new DDLSFace();
-			var fBot:DDLSFace = new DDLSFace();
-			var fTopRight:DDLSFace = new DDLSFace();
+			var fTopLeft:DDLSFace = DDLSPool.getDDLSFace();
+			var fBot:DDLSFace = DDLSPool.getDDLSFace();
+			var fTopRight:DDLSFace = DDLSPool.getDDLSFace();
 			
 			// add the new vertex
 			_vertices.push(vCenter);
@@ -1196,7 +1197,7 @@ package DDLS.data
 			eRight_Top.leftFace = fTopRight;
 			
 			// we remove the old face
-			face.dispose();
+			DDLSPool.putDDLSFace(face);
 			_faces.removeAt(_faces.indexOf(face));
 			
 			// add new bounds references for Delaunay restoring
@@ -1383,11 +1384,12 @@ package DDLS.data
 				
 				faceToDelete = edge.leftFace;
 				_faces.removeAt(_faces.lastIndexOf(faceToDelete));
-				faceToDelete.dispose();
+				DDLSPool.putDDLSFace(faceToDelete);
 				
 				edge.destinationVertex.edge = edge.nextLeftEdge;
 				var j:int = -1;
-				while (_edges[++j] != edge && _edges[j] != edge.oppositeEdge);
+				while (_edges[++j] != edge && _edges[j] != edge.oppositeEdge)
+					;
 				if (_edges[j] == edge)
 				{
 					_edges.removeAt(j);
@@ -1397,10 +1399,10 @@ package DDLS.data
 				else
 				{
 					_edges.removeAt(j);
-						while (_edges[j++] != edge)
+					while (_edges[j++] != edge)
 						;
 				}
-				_edges.removeAt(j-1);
+				_edges.removeAt(j - 1);
 				edge.oppositeEdge.dispose();
 				edge.dispose();
 			}
@@ -1452,11 +1454,11 @@ package DDLS.data
 				}
 				//
 				_faces.removeAt(_faces.indexOf(currEdge.leftFace));
-				currEdge.leftFace.dispose();
+				DDLSPool.putDDLSFace(currEdge.leftFace);
 				if (i == edgesList.length - 1)
 				{
 					_faces.removeAt(_faces.indexOf(currEdge.rightFace));
-					currEdge.rightFace.dispose();
+					DDLSPool.putDDLSFace(currEdge.rightFace);
 				}
 					//
 			}
@@ -1497,7 +1499,7 @@ package DDLS.data
 				   trace("  - edge0:", bound[0].originVertex.id, "->", bound[0].destinationVertex.id);
 				   trace("  - edge1:", bound[1].originVertex.id, "->", bound[1].destinationVertex.id);
 				   trace("  - edge2:", bound[2].originVertex.id, "->", bound[2].destinationVertex.id);*/
-				var f:DDLSFace = new DDLSFace();
+				var f:DDLSFace = DDLSPool.getDDLSFace();
 				f.setDatas(bound[0], isReal);
 				_faces.push(f);
 				bound[0].leftFace = f;
@@ -1512,8 +1514,8 @@ package DDLS.data
 				//trace("the hole has", bound.length, "edges");
 				//for (i = 0; i < bound.length; i++)
 				//{
-					//trace("  - edge", i, ":", bound[i].originVertex.id, "->", bound[i].destinationVertex.id);
-			//	}
+				//trace("  - edge", i, ":", bound[i].originVertex.id, "->", bound[i].destinationVertex.id);
+				//	}
 				
 				var baseEdge:DDLSEdge = bound[0];
 				var vertexA:DDLSVertex = baseEdge.originVertex;

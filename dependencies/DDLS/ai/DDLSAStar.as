@@ -17,13 +17,13 @@ package DDLS.ai
 		
 		private var __closedFaces:Dictionary = new Dictionary(true);
 		private var __openedFaces:Dictionary = new Dictionary(true);
-		private var __entryEdges:Dictionary = new Dictionary(true);
-		private var __entryX:Dictionary = new Dictionary(true);
-		private var __entryY:Dictionary = new Dictionary(true);
-		private var __scoreF:Dictionary = new Dictionary(true);
-		private var __scoreG:Dictionary = new Dictionary(true);
-		private var __scoreH:Dictionary = new Dictionary(true);
-		private var __predecessor:Dictionary = new Dictionary(true);
+		private var __entryEdges:Array = [];
+		private var __entryX:Array = [];
+		private var __entryY:Array = [];
+		private var __scoreF:Array = [];
+		private var __scoreG:Array = [];
+		private var __scoreH:Array = [];
+		private var __predecessor:Array = [];
 		
 		private var __iterEdge:IteratorFromFaceToInnerEdges;
 		
@@ -140,14 +140,14 @@ package DDLS.ai
 			   __toFace.colorDebug = 0xFF0000;
 			   trace( "from face:", __fromFace );
 			   trace( "to face:", __toFace );*/
-			
+			var fromFaceId:int = __fromFace.id;
 			__sortedOpenedFaces.push(__fromFace);
-			__entryEdges[__fromFace] = null;
-			__entryX[__fromFace] = fromX;
-			__entryY[__fromFace] = fromY;
-			__scoreG[__fromFace] = 0;
-			__scoreH[__fromFace] = Math.sqrt((toX - fromX) * (toX - fromX) + (toY - fromY) * (toY - fromY));
-			__scoreF[__fromFace] = __scoreH[__fromFace] + __scoreG[__fromFace];
+			__entryEdges[fromFaceId] = null;
+			__entryX[fromFaceId] = fromX;
+			__entryY[fromFaceId] = fromY;
+			__scoreG[fromFaceId] = 0;
+			__scoreH[fromFaceId] = Math.sqrt((toX - fromX) * (toX - fromX) + (toY - fromY) * (toY - fromY));
+			__scoreF[fromFaceId] = __scoreH[fromFaceId] + __scoreG[fromFaceId];
 			
 			var innerEdge:DDLSEdge;
 			var neighbourFace:DDLSFace;
@@ -180,6 +180,7 @@ package DDLS.ai
 				
 				// we continue the search
 				__iterEdge.fromFace = __curFace;
+				var currentFaceID:int = __curFace.id;
 				while ((innerEdge = __iterEdge.next()) != null)
 				{
 					if (innerEdge.isConstrained)
@@ -188,7 +189,7 @@ package DDLS.ai
 					neighbourFace = innerEdge.rightFace;
 					if (!__closedFaces[neighbourFace])
 					{
-						if (__curFace != __fromFace && _radius > 0 && !isWalkableByRadius(__entryEdges[__curFace], __curFace, innerEdge))
+						if (currentFaceID != fromFaceId && _radius > 0 && !isWalkableByRadius(__entryEdges[currentFaceID], __curFace, innerEdge))
 						{
 //							trace("- NOT WALKABLE -");
 //							trace( "from", DDLSEdge(__entryEdges[__curFace]).originVertex.id, DDLSEdge(__entryEdges[__curFace]).destinationVertex.id );
@@ -196,38 +197,38 @@ package DDLS.ai
 //							trace("----------------");
 							continue;
 						}
-						
-						fromPointX = __entryX[__curFace];
-						fromPointY = __entryY[__curFace];
+						fromPointX = __entryX[currentFaceID];
+						fromPointY = __entryY[currentFaceID];
 						entryPointX = (innerEdge.originVertex.pos.x + innerEdge.destinationVertex.pos.x) / 2;
 						entryPointY = (innerEdge.originVertex.pos.y + innerEdge.destinationVertex.pos.y) / 2;
 						distancePointX = entryPointX - toX;
 						distancePointY = entryPointY - toY;
-						h = Math.sqrt(distancePointX*distancePointX + distancePointY*distancePointY);
+						h = Math.sqrt(distancePointX * distancePointX + distancePointY * distancePointY);
 						distancePointX = fromPointX - entryPointX;
 						distancePointY = fromPointY - entryPointY;
-						g = __scoreG[__curFace] + Math.sqrt(distancePointX*distancePointX + distancePointY*distancePointY);
+						g = __scoreG[currentFaceID] + Math.sqrt(distancePointX * distancePointX + distancePointY * distancePointY);
 						f = h + g;
 						fillDatas = false;
+						var neighbourFaceId:int = neighbourFace.id;
 						if (!__openedFaces[neighbourFace])
 						{
 							__sortedOpenedFaces.push(neighbourFace);
 							__openedFaces[neighbourFace] = true;
 							fillDatas = true;
 						}
-						else if (__scoreF[neighbourFace] > f)
+						else if (__scoreF[neighbourFaceId] > f)
 						{
 							fillDatas = true;
 						}
 						if (fillDatas)
 						{
-							__entryEdges[neighbourFace] = innerEdge;
-							__entryX[neighbourFace] = entryPointX;
-							__entryY[neighbourFace] = entryPointY;
-							__scoreF[neighbourFace] = f;
-							__scoreG[neighbourFace] = g;
-							__scoreH[neighbourFace] = h;
-							__predecessor[neighbourFace] = __curFace;
+							__entryEdges[neighbourFaceId] = innerEdge;
+							__entryX[neighbourFaceId] = entryPointX;
+							__entryY[neighbourFaceId] = entryPointY;
+							__scoreF[neighbourFaceId] = f;
+							__scoreG[neighbourFaceId] = g;
+							__scoreH[neighbourFaceId] = h;
+							__predecessor[neighbourFaceId] = __curFace;
 						}
 					}
 				}
@@ -246,37 +247,10 @@ package DDLS.ai
 			{
 				delete __openedFaces[key];
 			}
-			for (key in __entryX)
-			{
-				delete __entryX[key];
-			}
-			for (key in __entryY)
-			{
-				delete __entryY[key];
-			}
-			for (key in __scoreF)
-			{
-				delete __scoreF[key];
-			}
-			for (key in __scoreG)
-			{
-				delete __scoreG[key];
-			}
-			for (key in __scoreH)
-			{
-				delete __scoreH[key];
-			}
 			// if we didn't find a path
 			if (!__curFace)
 			{
-				for (key in __predecessor)
-				{
-					delete __predecessor[key];
-				}
-				for (key in __entryEdges)
-				{
-					delete __entryEdges[key];
-				}
+				clearTemps();
 				return;
 			}
 			// else we build the path
@@ -284,33 +258,26 @@ package DDLS.ai
 			//__curFace.colorDebug = 0x0000FF;
 			while (__curFace != __fromFace)
 			{
-				resultListEdges.unshift(__entryEdges[__curFace]);
+				resultListEdges.unshift(__entryEdges[__curFace.id]);
 				//__entryEdges[__curFace].colorDebug = 0xFFFF00;
 				//__entryEdges[__curFace].oppositeEdge.colorDebug = 0xFFFF00;
-				__curFace = __predecessor[__curFace];
+				__curFace = __predecessor[__curFace.id];
 				//__curFace.colorDebug = 0x0000FF;
 				resultListFaces.unshift(__curFace);
 			}
-			for (key in __predecessor)
-			{
-				delete __predecessor[key];
-			}
-			for (key in __entryEdges)
-			{
-				delete __entryEdges[key];
-			}
+			clearTemps();
 		}
 		
 		// faces with low distance value are at the end of the array
-		private function sortingFaces(a:DDLSFace, b:DDLSFace):Number
-		{
-			if (__scoreF[a] == __scoreF[b])
-				return 0;
-			else if (__scoreF[a] < __scoreF[b])
-				return 1;
-			else
-				return -1;
-		}
+		//private function sortingFaces(a:DDLSFace, b:DDLSFace):Number
+		//{
+		//if (__scoreF[a] == __scoreF[b])
+		//return 0;
+		//else if (__scoreF[a] < __scoreF[b])
+		//return 1;
+		//else
+		//return -1;
+		//}
 		
 		private function sortfaces(startIndex:int, length:int):void
 		{
@@ -336,7 +303,7 @@ package DDLS.ai
 					// if so, we check if there are any elements left in the right vector;
 					// if so, we compare them. Otherwise, we know that the merge must
 					// take the element from the left vector. */
-					if (l < startIndex + halfLength && (r == endIndex || __scoreF[__sortedOpenedFaces[l]] >= __scoreF[__sortedOpenedFaces[r]]))
+					if (l < startIndex + halfLength && (r == endIndex || __scoreF[__sortedOpenedFaces[l].id] >= __scoreF[__sortedOpenedFaces[r].id]))
 					{
 						sortBuffer[i] = __sortedOpenedFaces[l];
 						l++;
@@ -542,6 +509,24 @@ package DDLS.ai
 			}
 			
 			return true;
+		}
+		
+		private function clearTemps():void
+		{
+			var length:int = __entryX.length;
+			for (var i:int = 0; i < length; i++)
+			{
+				if (__entryX[i])
+				{
+				__entryX[i] = undefined;
+				__entryY[i] = undefined;
+				__scoreF[i] = undefined;
+				__scoreG[i] = undefined;
+				__scoreH[i] = undefined;
+				__predecessor[i] = undefined;
+				__entryEdges[i] = undefined;
+				}
+			}
 		}
 	
 	}
