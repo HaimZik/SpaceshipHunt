@@ -504,8 +504,8 @@ package DDLS.data
 			// the new constraint segment
 			var segment:DDLSConstraintSegment = new DDLSConstraintSegment();
 			
-			var tempEdgeDownUp:DDLSEdge = new DDLSEdge();
-			var tempSdgeUpDown:DDLSEdge = new DDLSEdge();
+			var tempEdgeDownUp:DDLSEdge = DDLSPool.getDDLSEdge();
+			var tempSdgeUpDown:DDLSEdge = DDLSPool.getDDLSEdge();
 			tempEdgeDownUp.setDatas(vertexDown, tempSdgeUpDown, null, null, true, true);
 			tempSdgeUpDown.setDatas(vertexUp, tempEdgeDownUp, null, null, true, true);
 			
@@ -559,6 +559,8 @@ package DDLS.data
 							vertexDown.addFromConstraintSegment(segment);
 							vertexUp.addFromConstraintSegment(segment);
 							segment.addEdge(currEdge);
+							DDLSPool.putDDLSEdge(tempEdgeDownUp);
+							DDLSPool.putDDLSEdge(tempSdgeUpDown);
 							return segment;
 						}
 						// if we meet a vertex
@@ -642,14 +644,15 @@ package DDLS.data
 						leftBoundingEdges.unshift(edgeLeft.nextLeftEdge);
 						rightBoundingEdges.push(edgeLeft);
 						
-						newEdgeDownUp = new DDLSEdge();
-						newEdgeUpDown = new DDLSEdge();
+						newEdgeDownUp = DDLSPool.getDDLSEdge();
+						newEdgeUpDown = DDLSPool.getDDLSEdge();
 						newEdgeDownUp.setDatas(vertexDown, newEdgeUpDown, null, null, true, true);
 						newEdgeUpDown.setDatas(vertexUp, newEdgeDownUp, null, null, true, true);
 						leftBoundingEdges.push(newEdgeDownUp);
 						rightBoundingEdges.push(newEdgeUpDown);
 						insertNewConstrainedEdge(segment, newEdgeDownUp, intersectedEdges, leftBoundingEdges, rightBoundingEdges);
-						
+						DDLSPool.putDDLSEdge(tempEdgeDownUp);
+						DDLSPool.putDDLSEdge(tempSdgeUpDown);
 						return segment;
 					}
 					else if (DDLSGeom2D.distanceSquaredVertexToEdge(edgeLeft.destinationVertex, tempEdgeDownUp) <= DDLSConstants.EPSILON_SQUARED)
@@ -658,8 +661,8 @@ package DDLS.data
 						leftBoundingEdges.unshift(edgeLeft.nextLeftEdge);
 						rightBoundingEdges.push(edgeLeft);
 						
-						newEdgeDownUp = new DDLSEdge();
-						newEdgeUpDown = new DDLSEdge();
+						newEdgeDownUp = DDLSPool.getDDLSEdge();
+						newEdgeUpDown = DDLSPool.getDDLSEdge();
 						newEdgeDownUp.setDatas(vertexDown, newEdgeUpDown, null, null, true, true);
 						newEdgeUpDown.setDatas(edgeLeft.destinationVertex, newEdgeDownUp, null, null, true, true);
 						leftBoundingEdges.push(newEdgeDownUp);
@@ -699,8 +702,8 @@ package DDLS.data
 									currEdge = iterVertexToOutEdges.next()
 								}
 								
-								newEdgeDownUp = new DDLSEdge();
-								newEdgeUpDown = new DDLSEdge();
+								newEdgeDownUp = DDLSPool.getDDLSEdge();
+								newEdgeUpDown = DDLSPool.getDDLSEdge();
 								newEdgeDownUp.setDatas(vertexDown, newEdgeUpDown, null, null, true, true);
 								newEdgeUpDown.setDatas(currVertex, newEdgeDownUp, null, null, true, true);
 								leftBoundingEdges.push(newEdgeDownUp);
@@ -748,8 +751,8 @@ package DDLS.data
 									currEdge = iterVertexToOutEdges.next();
 								}
 								
-								newEdgeDownUp = new DDLSEdge();
-								newEdgeUpDown = new DDLSEdge();
+								newEdgeDownUp = DDLSPool.getDDLSEdge();
+								newEdgeUpDown = DDLSPool.getDDLSEdge();
 								newEdgeDownUp.setDatas(vertexDown, newEdgeUpDown, null, null, true, true);
 								newEdgeUpDown.setDatas(currVertex, newEdgeDownUp, null, null, true, true);
 								leftBoundingEdges.push(newEdgeDownUp);
@@ -775,7 +778,8 @@ package DDLS.data
 					}
 				}
 			}
-			
+			DDLSPool.putDDLSEdge(tempEdgeDownUp);
+			DDLSPool.putDDLSEdge(tempSdgeUpDown);
 			return segment;
 		}
 		
@@ -890,8 +894,8 @@ package DDLS.data
 			// retrieve and create useful objets
 			var eBot_Top:DDLSEdge = edge;
 			var eTop_Bot:DDLSEdge = edge.oppositeEdge;
-			var eLeft_Right:DDLSEdge = new DDLSEdge();
-			var eRight_Left:DDLSEdge = new DDLSEdge();
+			var eLeft_Right:DDLSEdge = DDLSPool.getDDLSEdge();
+			var eRight_Left:DDLSEdge = DDLSPool.getDDLSEdge();
 			var eTop_Left:DDLSEdge = eBot_Top.nextLeftEdge;
 			var eLeft_Bot:DDLSEdge = eTop_Left.nextLeftEdge;
 			var eBot_Right:DDLSEdge = eTop_Bot.nextLeftEdge;
@@ -940,8 +944,8 @@ package DDLS.data
 			eRight_Top.leftFace = fTop;
 			
 			// remove the old TOP-BOTTOM and BOTTOM-TOP edges
-			eBot_Top.dispose();
-			eTop_Bot.dispose();
+			DDLSPool.putDDLSEdge(eBot_Top);
+			DDLSPool.putDDLSEdge(eTop_Bot);
 			_edges.removeAt(_edges.lastIndexOf(eBot_Top));
 			_edges.removeAt(_edges.lastIndexOf(eTop_Bot));
 			
@@ -984,15 +988,15 @@ package DDLS.data
 			// create new objects
 			var vCenter:DDLSVertex = new DDLSVertex();
 			
-			var eTop_Center:DDLSEdge = new DDLSEdge();
-			var eCenter_Top:DDLSEdge = new DDLSEdge();
-			var eBot_Center:DDLSEdge = new DDLSEdge();
-			var eCenter_Bot:DDLSEdge = new DDLSEdge();
+			var eTop_Center:DDLSEdge = DDLSPool.getDDLSEdge();
+			var eCenter_Top:DDLSEdge = DDLSPool.getDDLSEdge();
+			var eBot_Center:DDLSEdge = DDLSPool.getDDLSEdge();
+			var eCenter_Bot:DDLSEdge = DDLSPool.getDDLSEdge();
 			
-			var eLeft_Center:DDLSEdge = new DDLSEdge();
-			var eCenter_Left:DDLSEdge = new DDLSEdge();
-			var eRight_Center:DDLSEdge = new DDLSEdge();
-			var eCenter_Right:DDLSEdge = new DDLSEdge();
+			var eLeft_Center:DDLSEdge = DDLSPool.getDDLSEdge();
+			var eCenter_Left:DDLSEdge = DDLSPool.getDDLSEdge();
+			var eRight_Center:DDLSEdge = DDLSPool.getDDLSEdge();
+			var eCenter_Right:DDLSEdge = DDLSPool.getDDLSEdge();
 			
 			var fTopLeft:DDLSFace = DDLSPool.getDDLSFace();
 			var fBotLeft:DDLSFace = DDLSPool.getDDLSFace();
@@ -1105,8 +1109,8 @@ package DDLS.data
 			}
 			
 			// remove the old LEFT-RIGHT and RIGHT-LEFT edges
-			eLeft_Right.dispose();
-			eRight_Left.dispose();
+			DDLSPool.putDDLSEdge(eLeft_Right);
+			DDLSPool.putDDLSEdge(eRight_Left);
 			_edges.removeAt(_edges.indexOf(eLeft_Right));
 			_edges.removeAt(_edges.indexOf(eRight_Left));
 			
@@ -1143,12 +1147,12 @@ package DDLS.data
 			// create new objects
 			var vCenter:DDLSVertex = new DDLSVertex();
 			
-			var eTop_Center:DDLSEdge = new DDLSEdge();
-			var eCenter_Top:DDLSEdge = new DDLSEdge();
-			var eLeft_Center:DDLSEdge = new DDLSEdge();
-			var eCenter_Left:DDLSEdge = new DDLSEdge();
-			var eRight_Center:DDLSEdge = new DDLSEdge();
-			var eCenter_Right:DDLSEdge = new DDLSEdge();
+			var eTop_Center:DDLSEdge = DDLSPool.getDDLSEdge();
+			var eCenter_Top:DDLSEdge = DDLSPool.getDDLSEdge();
+			var eLeft_Center:DDLSEdge = DDLSPool.getDDLSEdge();
+			var eCenter_Left:DDLSEdge = DDLSPool.getDDLSEdge();
+			var eRight_Center:DDLSEdge = DDLSPool.getDDLSEdge();
+			var eCenter_Right:DDLSEdge = DDLSPool.getDDLSEdge();
 			
 			var fTopLeft:DDLSFace = DDLSPool.getDDLSFace();
 			var fBot:DDLSFace = DDLSPool.getDDLSFace();
@@ -1300,8 +1304,8 @@ package DDLS.data
 				var boundB:Vector.<DDLSEdge> = new <DDLSEdge>[];
 				var constrainedEdgeA:DDLSEdge;
 				var constrainedEdgeB:DDLSEdge;
-				var edgeA:DDLSEdge = new DDLSEdge();
-				var edgeB:DDLSEdge = new DDLSEdge();
+				var edgeA:DDLSEdge = DDLSPool.getDDLSEdge();
+				var edgeB:DDLSEdge = DDLSPool.getDDLSEdge();
 				var realA:Boolean;
 				var realB:Boolean;
 				_edges.push(edgeA);
@@ -1403,8 +1407,8 @@ package DDLS.data
 						;
 				}
 				_edges.removeAt(j - 1);
-				edge.oppositeEdge.dispose();
-				edge.dispose();
+				DDLSPool.putDDLSEdge(edge.oppositeEdge);
+				DDLSPool.putDDLSEdge(edge);
 			}
 			outgoingEdges.length = 0;
 			_vertices.removeAt(_vertices.lastIndexOf(vertex));
@@ -1469,8 +1473,8 @@ package DDLS.data
 				currEdge = edgesList[i];
 				_edges.removeAt(_edges.indexOf(currEdge.oppositeEdge));
 				_edges.removeAt(_edges.indexOf(currEdge));
-				currEdge.oppositeEdge.dispose();
-				currEdge.dispose();
+				DDLSPool.putDDLSEdge(currEdge.oppositeEdge);
+				DDLSPool.putDDLSEdge(currEdge);
 			}
 		}
 		
@@ -1586,8 +1590,8 @@ package DDLS.data
 				
 				if (index < (bound.length - 1))
 				{
-					edgeA = new DDLSEdge();
-					edgeAopp = new DDLSEdge();
+					edgeA = DDLSPool.getDDLSEdge();
+					edgeAopp = DDLSPool.getDDLSEdge();
 					_edges.push(edgeA, edgeAopp);
 					edgeA.setDatas(vertexA, edgeAopp, null, null, isReal, false);
 					edgeAopp.setDatas(bound[index].originVertex, edgeA, null, null, isReal, false);
@@ -1598,8 +1602,8 @@ package DDLS.data
 				
 				if (index > 2)
 				{
-					edgeB = new DDLSEdge();
-					edgeBopp = new DDLSEdge();
+					edgeB = DDLSPool.getDDLSEdge();
+					edgeBopp = DDLSPool.getDDLSEdge();
 					_edges.push(edgeB, edgeBopp);
 					edgeB.setDatas(bound[1].originVertex, edgeBopp, null, null, isReal, false);
 					edgeBopp.setDatas(bound[index].originVertex, edgeB, null, null, isReal, false);

@@ -141,7 +141,7 @@ package DDLS.data
 			oppositeEdge = null;
 			_nextLeftEdge = null;
 			_leftFace = null;
-			_fromConstraintSegments = null;
+			_fromConstraintSegments.length=0;
 		}
 		
 		public function toString():String

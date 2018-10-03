@@ -10,6 +10,7 @@
 
 package DDLS.factories
 {
+	import DDLS.data.DDLSEdge;
 	import DDLS.data.DDLSFace;
 	import DDLS.data.math.DDLSPoint2D;
 	import flash.errors.IllegalOperationError;
@@ -28,6 +29,7 @@ package DDLS.factories
 	{
 		private static var sPoints:Vector.<DDLSPoint2D> = new <DDLSPoint2D>[];
 		private static var sDDLSFaces:Vector.<DDLSFace> = new <DDLSFace>[];
+		private static var sDDLSEdges:Vector.<DDLSEdge> = new <DDLSEdge>[];
 		
 		/** @private */
 		public function DDLSPool()
@@ -73,6 +75,25 @@ package DDLS.factories
 		{
 			face.dispose();
 			sDDLSFaces[sDDLSFaces.length] = face;
+		}
+		
+		public static function getDDLSEdge():DDLSEdge
+		{
+			if (sDDLSEdges.length == 0)
+				return new DDLSEdge();
+			else
+			{
+				var edge:DDLSEdge= sDDLSEdges.pop();
+				return edge;
+			}
+		}
+		
+		/** Stores a Point instance in the pool.
+		 *  Don't keep any references to the object after moving it to the pool! */
+		public static function putDDLSEdge(edge:DDLSEdge):void
+		{
+			edge.dispose();
+			sDDLSEdges[sDDLSEdges.length] = edge;
 		}
 	
 	}

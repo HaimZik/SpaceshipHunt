@@ -27,6 +27,8 @@ package DDLS.data.math
 		// YOU SHOULD USE THIS FUNCTION ONLY FOR COORDINATES INSIDE SAFE AREA
 		static private var __samples:Vector.<DDLSVertex> = new Vector.<DDLSVertex>();
 		static private var __circumcenter:Point = new Point();
+		static private var iterFace:IteratorFromVertexToHoldingFaces = new IteratorFromVertexToHoldingFaces();
+		static private var iterEdge:IteratorFromFaceToInnerEdges = new IteratorFromFaceToInnerEdges();
 		static protected var edgesToCheckHelper:Vector.<DDLSEdge>=new Vector.<DDLSEdge>();
 		
 		
@@ -64,20 +66,15 @@ package DDLS.data.math
 			}
 			
 			var currFace:DDLSFace;
-			var iterFace:IteratorFromVertexToHoldingFaces = new IteratorFromVertexToHoldingFaces();
 			iterFace.fromVertex = closedVertex;
 			currFace = iterFace.next();
 			
-			var faceVisited:Dictionary = new Dictionary();
 			var currEdge:DDLSEdge;
-			var iterEdge:IteratorFromFaceToInnerEdges = new IteratorFromFaceToInnerEdges();
 			var objectContainer:Object;
 			var relativPos:int;
 			var numIter:int = 0;
-			while (faceVisited[currFace] || !((objectContainer = isInFace(x, y, currFace)) != null))
-			{
-				faceVisited[currFace];
-				
+			while ((objectContainer = isInFace(x, y, currFace)) == null)
+			{			
 				numIter++;
 				if (numIter == 50)
 				{
