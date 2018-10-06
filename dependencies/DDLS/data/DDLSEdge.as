@@ -4,7 +4,8 @@ package DDLS.data
 	
 	public class DDLSEdge
 	{
-		public function get destinationVertex():DDLSVertex
+		[Inline]
+		public final function get destinationVertex():DDLSVertex
 		{
 			return oppositeEdge.originVertex;
 		}

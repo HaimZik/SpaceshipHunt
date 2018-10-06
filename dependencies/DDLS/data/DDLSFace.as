@@ -17,7 +17,8 @@ package DDLS.data
 			INC++;
 		}
 		
-		public function get id():int
+		[Inline]
+		public final function get id():int
 		{
 			return _id;
 		}

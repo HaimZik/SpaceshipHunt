@@ -12,6 +12,7 @@ package DDLS.factories
 {
 	import DDLS.data.DDLSEdge;
 	import DDLS.data.DDLSFace;
+	import DDLS.data.DDLSVertex;
 	import DDLS.data.math.DDLSPoint2D;
 	import flash.errors.IllegalOperationError;
 	
@@ -30,6 +31,8 @@ package DDLS.factories
 		private static var sPoints:Vector.<DDLSPoint2D> = new <DDLSPoint2D>[];
 		private static var sDDLSFaces:Vector.<DDLSFace> = new <DDLSFace>[];
 		private static var sDDLSEdges:Vector.<DDLSEdge> = new <DDLSEdge>[];
+		private static var sDDLSVertex:Vector.<DDLSVertex> = new <DDLSVertex>[];
+		private static var sDDLSEdgeVector:Vector.<Vector.<DDLSEdge>> = new <Vector.<DDLSEdge>>[];
 		
 		/** @private */
 		public function DDLSPool()
@@ -69,12 +72,27 @@ package DDLS.factories
 			}
 		}
 		
-		/** Stores a Point instance in the pool.
-		 *  Don't keep any references to the object after moving it to the pool! */
 		public static function putDDLSFace(face:DDLSFace):void
 		{
 			face.dispose();
 			sDDLSFaces[sDDLSFaces.length] = face;
+		}
+		
+		public static function getDDLSVertex():DDLSVertex
+		{
+			if (sDDLSVertex.length == 0)
+				return new DDLSVertex();
+			else
+			{
+				var vertex:DDLSVertex = sDDLSVertex.pop();
+				return vertex;
+			}
+		}
+		
+		public static function putDDLSVertex(vertex:DDLSVertex):void
+		{
+			vertex.dispose();
+			sDDLSVertex[sDDLSVertex.length] = vertex;
 		}
 		
 		public static function getDDLSEdge():DDLSEdge
@@ -83,17 +101,53 @@ package DDLS.factories
 				return new DDLSEdge();
 			else
 			{
-				var edge:DDLSEdge= sDDLSEdges.pop();
+				var edge:DDLSEdge = sDDLSEdges.pop();
 				return edge;
 			}
 		}
 		
-		/** Stores a Point instance in the pool.
-		 *  Don't keep any references to the object after moving it to the pool! */
 		public static function putDDLSEdge(edge:DDLSEdge):void
 		{
 			edge.dispose();
 			sDDLSEdges[sDDLSEdges.length] = edge;
+		}
+		
+		public static function getDDLSEdgeVector(length:int = 0):Vector.<DDLSEdge>
+		{
+			if (sDDLSEdgeVector.length == 0)
+				return new Vector.<DDLSEdge>(length);
+			else
+			{
+				var edgeVector:Vector.<DDLSEdge> = sDDLSEdgeVector.pop();
+				edgeVector.length = length;
+				return edgeVector;
+			}
+		}
+		
+		public static function sliceDDLSEdgeVector(clonedVector:Vector.<DDLSEdge>, fromIndex:int = 0, toIndex:int = 16777215):Vector.<DDLSEdge>
+		{
+			var edgeVector:Vector.<DDLSEdge>;
+			var clonedVectorLength:int = Math.min(clonedVector.length, toIndex);
+			if (sDDLSEdgeVector.length == 0)
+			{
+				edgeVector = new Vector.<DDLSEdge>(clonedVectorLength - fromIndex);
+			}
+			else
+			{
+				edgeVector = sDDLSEdgeVector.pop();
+				edgeVector.length = clonedVectorLength - fromIndex;
+			}
+			for (var i:int = fromIndex; i < clonedVectorLength; i++)
+			{
+				edgeVector[i - fromIndex] = clonedVector[i];
+			}
+			return edgeVector;
+		}
+		
+		public static function putDDLSEdgeVector(edgeVector:Vector.<DDLSEdge>):void
+		{
+			edgeVector.length = 0;
+			sDDLSEdgeVector[sDDLSEdgeVector.length] = edgeVector;
 		}
 	
 	}

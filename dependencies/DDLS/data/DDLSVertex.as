@@ -68,9 +68,8 @@ package DDLS.data
 		
 		public function dispose():void
 		{
-			pos = null;
 			_edge = null;
-			_fromConstraintSegments = null;
+			_fromConstraintSegments.length=0;
 		}
 		
 		public function get edge():DDLSEdge

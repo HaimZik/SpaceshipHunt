@@ -33,6 +33,8 @@ package DDLS.data
 		private var outgoingEdges:Vector.<DDLSEdge> = new Vector.<DDLSEdge>();
 		private var boundTemp:Vector.<DDLSEdge> = new Vector.<DDLSEdge>();
 		
+		private var iterEdges:IteratorFromVertexToOutgoingEdges = new IteratorFromVertexToOutgoingEdges();
+		
 		public function DDLSMesh(width:Number, height:Number)
 		{
 			_id = INC;
@@ -98,7 +100,8 @@ package DDLS.data
 			__centerVertex = null;
 		}
 		
-		public function get __vertices():Vector.<DDLSVertex>
+		[Inline]
+		public final function get __vertices():Vector.<DDLSVertex>
 		{
 			return _vertices;
 		}
@@ -495,8 +498,6 @@ package DDLS.data
 			
 			//trace("vertices", vertexDown.id, vertexUp.id)
 			
-			// useful
-			var iterVertexToOutEdges:IteratorFromVertexToOutgoingEdges = new IteratorFromVertexToOutgoingEdges();
 			var currVertex:DDLSVertex;
 			var currEdge:DDLSEdge;
 			var i:int;
@@ -509,12 +510,12 @@ package DDLS.data
 			tempEdgeDownUp.setDatas(vertexDown, tempSdgeUpDown, null, null, true, true);
 			tempSdgeUpDown.setDatas(vertexUp, tempEdgeDownUp, null, null, true, true);
 			
-			var intersectedEdges:Vector.<DDLSEdge> = new Vector.<DDLSEdge>();
-			var leftBoundingEdges:Vector.<DDLSEdge> = new Vector.<DDLSEdge>();
-			var rightBoundingEdges:Vector.<DDLSEdge> = new Vector.<DDLSEdge>();
+			var intersectedEdges:Vector.<DDLSEdge> = DDLSPool.getDDLSEdgeVector();
+			var leftBoundingEdges:Vector.<DDLSEdge> = DDLSPool.getDDLSEdgeVector();
+			var rightBoundingEdges:Vector.<DDLSEdge> = DDLSPool.getDDLSEdgeVector();
 			
 			var currObjet:Object;
-			var pIntersect:DDLSPoint2D = new DDLSPoint2D();
+			var pIntersect:DDLSPoint2D = DDLSPool.getPoint();
 			var edgeLeft:DDLSEdge;
 			var newEdgeDownUp:DDLSEdge;
 			var newEdgeUpDown:DDLSEdge;
@@ -541,8 +542,8 @@ package DDLS.data
 						trace("currVertex.edge was null");
 						return null;
 					}
-					iterVertexToOutEdges.fromVertex = currVertex;
-					currEdge = iterVertexToOutEdges.next();
+					iterEdges.fromVertex = currVertex;
+					currEdge = iterEdges.next();
 					while (currEdge)
 					{
 						// if we meet directly the end vertex
@@ -561,6 +562,11 @@ package DDLS.data
 							segment.addEdge(currEdge);
 							DDLSPool.putDDLSEdge(tempEdgeDownUp);
 							DDLSPool.putDDLSEdge(tempSdgeUpDown);
+							DDLSPool.putPoint(pIntersect);
+							DDLSPool.putPoint(pIntersect);
+	                        DDLSPool.putDDLSEdgeVector(intersectedEdges);
+	                        DDLSPool.putDDLSEdgeVector(leftBoundingEdges);
+	                        DDLSPool.putDDLSEdgeVector(rightBoundingEdges);
 							return segment;
 						}
 						// if we meet a vertex
@@ -583,14 +589,14 @@ package DDLS.data
 							done = true;
 							break;
 						}
-						currEdge = iterVertexToOutEdges.next();
+						currEdge = iterEdges.next();
 					}
 					
 					if (done)
 						continue;
 					
-					iterVertexToOutEdges.fromVertex = currVertex;
-					currEdge = iterVertexToOutEdges.next()
+					iterEdges.fromVertex = currVertex;
+					currEdge = iterEdges.next()
 					while (currEdge)
 					{
 						currEdge = currEdge.nextLeftEdge;
@@ -601,8 +607,8 @@ package DDLS.data
 							{
 								//trace("edge is constrained");
 								vertexDown = splitEdge(currEdge, pIntersect.x, pIntersect.y);
-								iterVertexToOutEdges.fromVertex = currVertex;
-								currEdge = iterVertexToOutEdges.next()
+								iterEdges.fromVertex = currVertex;
+								currEdge = iterEdges.next()
 								while (currEdge)
 								{
 									if (currEdge.destinationVertex == vertexDown)
@@ -614,7 +620,7 @@ package DDLS.data
 										segment.addEdge(currEdge);
 										break;
 									}
-									currEdge = iterVertexToOutEdges.next();
+									currEdge = iterEdges.next();
 								}
 								currVertex.addFromConstraintSegment(segment);
 								tempEdgeDownUp.originVertex = vertexDown;
@@ -631,7 +637,7 @@ package DDLS.data
 							}
 							break;
 						}
-						currEdge = iterVertexToOutEdges.next()
+						currEdge = iterEdges.next()
 					}
 				}
 				else if ((currEdge = currObjet as DDLSEdge))
@@ -653,6 +659,10 @@ package DDLS.data
 						insertNewConstrainedEdge(segment, newEdgeDownUp, intersectedEdges, leftBoundingEdges, rightBoundingEdges);
 						DDLSPool.putDDLSEdge(tempEdgeDownUp);
 						DDLSPool.putDDLSEdge(tempSdgeUpDown);
+						DDLSPool.putPoint(pIntersect);
+						DDLSPool.putDDLSEdgeVector(intersectedEdges);
+						DDLSPool.putDDLSEdgeVector(leftBoundingEdges);
+						DDLSPool.putDDLSEdgeVector(rightBoundingEdges);
 						return segment;
 					}
 					else if (DDLSGeom2D.distanceSquaredVertexToEdge(edgeLeft.destinationVertex, tempEdgeDownUp) <= DDLSConstants.EPSILON_SQUARED)
@@ -687,8 +697,8 @@ package DDLS.data
 								//trace("edge is constrained");
 								currVertex = splitEdge(edgeLeft, pIntersect.x, pIntersect.y);
 								
-								iterVertexToOutEdges.fromVertex = currVertex;
-								currEdge = iterVertexToOutEdges.next()
+								iterEdges.fromVertex = currVertex;
+								currEdge = iterEdges.next()
 								while (currEdge)
 								{
 									if (currEdge.destinationVertex == leftBoundingEdges[0].originVertex)
@@ -699,7 +709,7 @@ package DDLS.data
 									{
 										rightBoundingEdges.push(currEdge.oppositeEdge);
 									}
-									currEdge = iterVertexToOutEdges.next()
+									currEdge = iterEdges.next()
 								}
 								
 								newEdgeDownUp = DDLSPool.getDDLSEdge();
@@ -736,8 +746,8 @@ package DDLS.data
 								//trace("edge is constrained");
 								currVertex = splitEdge(edgeLeft, pIntersect.x, pIntersect.y);
 								
-								iterVertexToOutEdges.fromVertex = currVertex;
-								currEdge = iterVertexToOutEdges.next();
+								iterEdges.fromVertex = currVertex;
+								currEdge = iterEdges.next();
 								while (currEdge)
 								{
 									if (currEdge.destinationVertex == leftBoundingEdges[0].originVertex)
@@ -748,7 +758,7 @@ package DDLS.data
 									{
 										rightBoundingEdges.push(currEdge.oppositeEdge);
 									}
-									currEdge = iterVertexToOutEdges.next();
+									currEdge = iterEdges.next();
 								}
 								
 								newEdgeDownUp = DDLSPool.getDDLSEdge();
@@ -780,6 +790,10 @@ package DDLS.data
 			}
 			DDLSPool.putDDLSEdge(tempEdgeDownUp);
 			DDLSPool.putDDLSEdge(tempSdgeUpDown);
+			DDLSPool.putPoint(pIntersect);
+			DDLSPool.putDDLSEdgeVector(intersectedEdges);
+			DDLSPool.putDDLSEdgeVector(leftBoundingEdges);
+			DDLSPool.putDDLSEdgeVector(rightBoundingEdges);
 			return segment;
 		}
 		
@@ -985,8 +999,8 @@ package DDLS.data
 			if ((vRight.pos.x - x) * (vRight.pos.x - x) + (vRight.pos.y - y) * (vRight.pos.y - y) <= DDLSConstants.EPSILON_SQUARED)
 				return vRight;
 			
-			// create new objects
-			var vCenter:DDLSVertex = new DDLSVertex();
+			// new objects
+			var vCenter:DDLSVertex = DDLSPool.getDDLSVertex();
 			
 			var eTop_Center:DDLSEdge = DDLSPool.getDDLSEdge();
 			var eCenter_Top:DDLSEdge = DDLSPool.getDDLSEdge();
@@ -1145,7 +1159,7 @@ package DDLS.data
 			var vRight:DDLSVertex = eRight_Top.originVertex;
 			
 			// create new objects
-			var vCenter:DDLSVertex = new DDLSVertex();
+			var vCenter:DDLSVertex = DDLSPool.getDDLSVertex();
 			
 			var eTop_Center:DDLSEdge = DDLSPool.getDDLSEdge();
 			var eCenter_Top:DDLSEdge = DDLSPool.getDDLSEdge();
@@ -1245,7 +1259,6 @@ package DDLS.data
 			//trace("tryToDeleteVertex id", vertex.id);
 			var i:int;
 			var freeOfConstraint:Boolean;
-			var iterEdges:IteratorFromVertexToOutgoingEdges = new IteratorFromVertexToOutgoingEdges();
 			iterEdges.fromVertex = vertex;
 			iterEdges.realEdgesOnly = false;
 			var edge:DDLSEdge;
@@ -1253,14 +1266,15 @@ package DDLS.data
 			freeOfConstraint = vertex.fromConstraintSegments.length == 0;
 			
 			//trace("  -> freeOfConstraint", freeOfConstraint);
-			
+			var outgoingEdgesLength:int = outgoingEdges.length;		
 			if (freeOfConstraint)
 			{
-				edge = iterEdges.next()
+				edge = iterEdges.next();
+				var boundTempLength:int = 0;
 				while (edge)
 				{
-					outgoingEdges.push(edge);
-					boundTemp.push(edge.nextLeftEdge);
+					outgoingEdges[outgoingEdgesLength++]=edge;
+					boundTemp[boundTempLength++]=edge.nextLeftEdge;
 					edge = iterEdges.next()
 				}
 			}
@@ -1283,7 +1297,7 @@ package DDLS.data
 				edge = iterEdges.next();
 				while (edge)
 				{
-					outgoingEdges.push(edge);
+					outgoingEdges[outgoingEdgesLength++]=edge;
 					
 					if (edge.isConstrained)
 					{
@@ -1300,8 +1314,8 @@ package DDLS.data
 				
 				// if not disqualified, then we can process
 				//trace("process vertex deletion");
-				var boundA:Vector.<DDLSEdge> = new <DDLSEdge>[];
-				var boundB:Vector.<DDLSEdge> = new <DDLSEdge>[];
+				var boundA:Vector.<DDLSEdge> = DDLSPool.getDDLSEdgeVector();
+				var boundB:Vector.<DDLSEdge> = DDLSPool.getDDLSEdgeVector();
 				var constrainedEdgeA:DDLSEdge;
 				var constrainedEdgeB:DDLSEdge;
 				var edgeA:DDLSEdge = DDLSPool.getDDLSEdge();
@@ -1310,7 +1324,7 @@ package DDLS.data
 				var realB:Boolean;
 				_edges.push(edgeA);
 				_edges.push(edgeB);
-				for (i = 0; i < outgoingEdges.length; i++)
+				for (i = 0; i < outgoingEdgesLength; i++)
 				{
 					edge = outgoingEdges[i];
 					if (edge.isConstrained)
@@ -1379,10 +1393,9 @@ package DDLS.data
 					}
 				}
 			}
-			
 			// Deletion of old faces and edges
 			var faceToDelete:DDLSFace;
-			for (i = 0; i < outgoingEdges.length; i++)
+			for (i = 0; i < outgoingEdgesLength; i++)
 			{
 				edge = outgoingEdges[i];
 				
@@ -1412,21 +1425,23 @@ package DDLS.data
 			}
 			outgoingEdges.length = 0;
 			_vertices.removeAt(_vertices.lastIndexOf(vertex));
-			vertex.dispose();
+			DDLSPool.putDDLSVertex(vertex);
 			
 			// finally we triangulate
 			if (freeOfConstraint)
 			{
 				//trace("trigger single hole triangulation");
 				triangulate(boundTemp, true);
+				boundTemp.length = 0;
 			}
 			else
 			{
 				//trace("trigger dual holes triangulation");
 				triangulate(boundA, realA);
 				triangulate(boundB, realB);
+				DDLSPool.putDDLSEdgeVector(boundA);
+				DDLSPool.putDDLSEdgeVector(boundB);
 			}
-			boundTemp.length = 0;
 			//check();
 			return true;
 		}
@@ -1595,9 +1610,10 @@ package DDLS.data
 					_edges.push(edgeA, edgeAopp);
 					edgeA.setDatas(vertexA, edgeAopp, null, null, isReal, false);
 					edgeAopp.setDatas(bound[index].originVertex, edgeA, null, null, isReal, false);
-					boundA = bound.slice(index);
+					boundA = DDLSPool.sliceDDLSEdgeVector(bound, index);
 					boundA.push(edgeA);
 					triangulate(boundA, isReal);
+					DDLSPool.putDDLSEdgeVector(boundA);
 				}
 				
 				if (index > 2)
@@ -1607,12 +1623,13 @@ package DDLS.data
 					_edges.push(edgeB, edgeBopp);
 					edgeB.setDatas(bound[1].originVertex, edgeBopp, null, null, isReal, false);
 					edgeBopp.setDatas(bound[index].originVertex, edgeB, null, null, isReal, false);
-					boundB = bound.slice(1, index);
+					boundB = DDLSPool.sliceDDLSEdgeVector(bound, 1, index);
 					boundB.push(edgeBopp);
 					triangulate(boundB, isReal);
+					DDLSPool.putDDLSEdgeVector(boundB);
 				}
 				
-				boundM = new Vector.<DDLSEdge>();
+				boundM = DDLSPool.getDDLSEdgeVector();
 				if (index == 2)
 					boundM.push(baseEdge, bound[1], edgeAopp);
 				else if (index == (bound.length - 1))
@@ -1620,6 +1637,7 @@ package DDLS.data
 				else
 					boundM.push(baseEdge, edgeB, edgeAopp);
 				triangulate(boundM, isReal);
+				DDLSPool.putDDLSEdgeVector(boundM);
 			}
 		}
 		
