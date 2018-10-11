@@ -15,8 +15,8 @@ package DDLS.ai
 		
 		private var _mesh:DDLSMesh;
 		
-		private var __closedFaces:Dictionary = new Dictionary(true);
-		private var __openedFaces:Dictionary = new Dictionary(true);
+		private var __closedFaces:Array = [];
+		private var __openedFaces:Array = [];
 		private var __entryEdges:Array = [];
 		private var __entryX:Array = [];
 		private var __entryY:Array = [];
@@ -187,7 +187,8 @@ package DDLS.ai
 						continue;
 					
 					neighbourFace = innerEdge.rightFace;
-					if (!__closedFaces[neighbourFace])
+					var neighbourFaceId:int = neighbourFace.id;
+					if (!__closedFaces[neighbourFaceId])
 					{
 						if (currentFaceID != fromFaceId && _radius > 0 && !isWalkableByRadius(__entryEdges[currentFaceID], __curFace, innerEdge))
 						{
@@ -209,11 +210,10 @@ package DDLS.ai
 						g = __scoreG[currentFaceID] + Math.sqrt(distancePointX * distancePointX + distancePointY * distancePointY);
 						f = h + g;
 						fillDatas = false;
-						var neighbourFaceId:int = neighbourFace.id;
-						if (!__openedFaces[neighbourFace])
+						if (!__openedFaces[neighbourFaceId])
 						{
 							__sortedOpenedFaces.push(neighbourFace);
-							__openedFaces[neighbourFace] = true;
+							__openedFaces[neighbourFaceId] = true;
 							fillDatas = true;
 						}
 						else if (__scoreF[neighbourFaceId] > f)
@@ -233,20 +233,12 @@ package DDLS.ai
 					}
 				}
 				//
-				__openedFaces[__curFace] = null;
-				__closedFaces[__curFace] = true;
+				__openedFaces[currentFaceID] = null;
+				__closedFaces[currentFaceID] = true;
 				sortBuffer.length = __sortedOpenedFaces.length;
 				sortfaces(0, __sortedOpenedFaces.length);
 			}
-			var key:DDLSFace;
-			for (key in __closedFaces)
-			{
-				delete __closedFaces[key];
-			}
-			for (key in __openedFaces)
-			{
-				delete __openedFaces[key];
-			}
+			
 			// if we didn't find a path
 			if (!__curFace)
 			{
@@ -518,14 +510,24 @@ package DDLS.ai
 			{
 				if (__entryX[i])
 				{
-				__entryX[i] = undefined;
-				__entryY[i] = undefined;
-				__scoreF[i] = undefined;
-				__scoreG[i] = undefined;
-				__scoreH[i] = undefined;
-				__predecessor[i] = undefined;
-				__entryEdges[i] = undefined;
+					__entryX[i] = undefined;
+					__entryY[i] = undefined;
+					__scoreF[i] = undefined;
+					__scoreG[i] = undefined;
+					__scoreH[i] = undefined;
+					__predecessor[i] = undefined;
+					__entryEdges[i] = undefined;
 				}
+			}
+			length = __closedFaces.length;
+			for (var j:int = 0; j < length; j++)
+			{
+				if (__closedFaces[j])
+				{
+					__closedFaces[j] = null;
+				}
+				else if (__openedFaces[j])
+					__openedFaces[j] = null;
 			}
 		}
 	

@@ -12,6 +12,7 @@ package spaceshiptHunt.level
 	import DDLS.data.HitTestable;
 	import DDLS.factories.DDLSRectMeshFactory;
 	import flash.geom.Point;
+	import flash.geom.Rectangle;
 	import flash.system.Capabilities;
 	import flash.system.TouchscreenType;
 	import flash.ui.Keyboard;
@@ -32,6 +33,7 @@ package spaceshiptHunt.level
 	import nape.space.Space;
 	import spaceshiptHunt.entities.*;
 	import starling.core.Starling;
+	import starling.display.DisplayObject;
 	import starling.display.DisplayObjectContainer;
 	import starling.display.Mesh;
 	import starling.display.Sprite;
@@ -43,6 +45,7 @@ package spaceshiptHunt.level
 	import starling.textures.Texture;
 	import starling.utils.AssetManager;
 	import starling.utils.MathUtil;
+	import starling.utils.MeshUtil;
 	import starling.utils.Pool;
 	import starling.utils.SystemUtil;
 	
@@ -62,6 +65,7 @@ package spaceshiptHunt.level
 		protected const MAX_ZOOM_OUT:Number = 0.3;
 		protected var _baseZoom:Number = 1.0;
 		protected var navMeshUpdateRate:Number = 1.2;
+		protected var viewDistance:Number = 2048.0;
 		protected var pathfinder:DDLSPathFinder;
 		protected var lastNavMeshUpdate:Number;
 		protected var commandQueue:Vector.<Function>;
@@ -140,7 +144,8 @@ package spaceshiptHunt.level
 				light.x = Player.current.graphics.x;
 				light.y = Player.current.graphics.y + 400;
 				cameraPosition.x = Player.current.graphics.x;
-				cameraPosition.y = Player.current.graphics.y;
+				cameraPosition.y = Player.current.graphics.y;	
+				cullAsteroidField();
 				focusCam();
 				for (var j:int = 0; j < BodyInfo.list.length; j++)
 				{
@@ -371,6 +376,12 @@ package spaceshiptHunt.level
 			}
 			mesh.textureRepeat = true;
 			applyUV(mesh);
+			var bounds:Rectangle = mesh.getBounds(mesh, Pool.getRectangle());
+			vertexPos.translatePoints("position", -(bounds.x + bounds.width / 2.0), -(bounds.y + bounds.height / 2.0));
+			mesh.x = bounds.x + bounds.width / 2.0;
+			mesh.y = bounds.y + bounds.height / 2.0;
+			Pool.putRectangle(bounds);
+			mesh.touchable = false;
 			container.addChild(mesh);
 		}
 		
@@ -431,6 +442,22 @@ package spaceshiptHunt.level
 			}
 			Game.underSpaceshipsLayer.addChildAt(asteroidField, 0);
 			physicsSpace.bodies.add(body);
+		}
+		
+		protected function cullAsteroidField():void 
+		{
+			for (var k:int = 0; k < asteroidField.numChildren; k++)
+			{
+				var asteroid:DisplayObject = asteroidField.getChildAt(k);
+				if (Math.abs(cameraPosition.x - asteroid.x) < viewDistance && Math.abs(cameraPosition.y - asteroid.y) < viewDistance)
+				{
+					asteroid.visible = true;
+				}
+				else
+				{
+					asteroid.visible = false;
+				}
+			}
 		}
 		
 		private function onBulletHit(event:InteractionCallback):void

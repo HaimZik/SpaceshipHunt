@@ -378,6 +378,11 @@ package spaceshiptHuntDevelopment.level
 			}
 		}
 		
+		override protected function cullAsteroidField():void 
+		{
+
+		}
+		
 		protected function selectPolygon(underMousePosition:Vec2):int
 		{
 			for each (var body:Body in obstacleBody)
