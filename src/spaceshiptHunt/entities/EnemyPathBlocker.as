@@ -21,7 +21,7 @@ package spaceshiptHunt.entities
 		protected var aimAccuracy:Number;
 		protected var minDisatnceFromWall:Number;
 		protected var lastBackwardBlockedCheck:Number;
-		protected var _isBackwardBlocked:Boolean=false;
+		protected var _isBackwardBlocked:Boolean = false;
 		protected var backwardBlockedCheckRate:Number;
 		
 		public function EnemyPathBlocker(position:Vec2)
@@ -39,7 +39,7 @@ package spaceshiptHunt.entities
 			maxAttackRange = minAttackRange * 1.3;
 			attackTriggerRange = minAttackRange * 3;
 			firingRate = 0.4;
-			aimAccuracy = Math.PI / 6; //4.0;
+			aimAccuracy = Math.PI / 8; //4.0;
 			lastBackwardBlockedCheck = Starling.juggler.elapsedTime;
 			backwardBlockedCheckRate = 0.8;
 		}
@@ -59,32 +59,43 @@ package spaceshiptHunt.entities
 			var rotaDiff:Number = rotationDiffrenceToPoint(predictedPosition);
 			predictedPosition.dispose();
 			body.applyAngularImpulse(maxAngularAcceleration * rotaDiff);
-			if (Math.abs(rotaDiff) < aimAccuracy / 2)
+			if (bulletsLeft > 0)
 			{
-				currentAction = attackPlayer;
+				if (Math.abs(rotaDiff) < aimAccuracy / 2)
+				{
+					currentAction = attackPlayer;
+				}
+				if (!isPlayerInRange(minDisatnceFromWall * 2) && isBackwardBlocked()) //isPathBlocked())
+				{
+					currentAction = goToPlayerPath;
+				}
 			}
-			if (!isPlayerInRange(minDisatnceFromWall*2) && isBackwardBlocked()) //isPathBlocked())
+			else if (Starling.juggler.elapsedTime - lastReloadTime > reloadTime)
 			{
-				currentAction = goToPlayerPath;
+				bulletsLeft += maxBullets;
 			}
 		}
 		
 		protected function playerPredictedPosition():Vec2
 		{
-			return Player.current.body.position.add(Player.current.body.velocity.mul(0.6, true));
+			if (Player.current.body.velocity.lsq() > 20000.0)
+			{
+				return Player.current.body.position.add(Player.current.body.velocity.mul(0.6, true));
+			}
+			return Player.current.body.position.add(Player.current.body.velocity.mul(0.1, true));
 		}
 		
 		protected function attackPlayer():void
 		{
-			if (isPlayerInRange(maxAttackRange) && !(!isPlayerInRange(minDisatnceFromWall*2) && isBackwardBlocked()))
+			if (isPlayerInRange(maxAttackRange) && !(!isPlayerInRange(minDisatnceFromWall * 2) && isBackwardBlocked()))
 			{
 				var predictedPosition:Vec2 = playerPredictedPosition();
 				var angleToPlayer:Number = Math.abs(rotationDiffrenceToPoint(predictedPosition));
 				predictedPosition.dispose();
-				if (angleToPlayer < aimAccuracy)
+				if (bulletsLeft > 0 && angleToPlayer < aimAccuracy)
 				{
 					startShooting();
-					if (angleToPlayer > aimAccuracy * 0.75)
+					if (angleToPlayer > aimAccuracy * 0.85)
 					{
 						aimToPlayer();
 					}
@@ -112,7 +123,7 @@ package spaceshiptHunt.entities
 		
 		protected function isBackwardBlocked():Boolean
 		{
-			if (Starling.juggler.elapsedTime-lastBackwardBlockedCheck < backwardBlockedCheckRate)
+			if (Starling.juggler.elapsedTime - lastBackwardBlockedCheck < backwardBlockedCheckRate)
 			{
 				return _isBackwardBlocked;
 			}
@@ -172,7 +183,7 @@ package spaceshiptHunt.entities
 			}
 			else
 			{
-				if (isPlayerInRange(minAttackRange) && !(!isPlayerInRange(minDisatnceFromWall*2) && isBackwardBlocked()))
+				if (isPlayerInRange(minAttackRange) && !(!isPlayerInRange(minDisatnceFromWall * 2) && isBackwardBlocked()))
 				{
 					currentAction = aimToPlayer;
 					chasingTarget = null;

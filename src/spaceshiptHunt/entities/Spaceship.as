@@ -46,13 +46,18 @@ package spaceshiptHunt.entities
 		protected var firingRate:Number = 0.1;
 		protected var bulletSpeed:Number = 80.0;
 		protected const rotateTowardThreshold:Number = 0.02;
+		protected var maxBullets:int = 5;
+		protected var bulletsLeft:int;
 		protected var filledLife:Quad;
 		protected var lifebarBackground:Quad;
+		protected var lastReloadTime:Number;
+		protected var reloadTime:Number = 2.5;
 		private var shootingCallId:uint;
 		
 		public function Spaceship(position:Vec2)
 		{
 			super(position);
+			bulletsLeft = maxBullets;
 			weaponsPlacement = new Dictionary(true);
 		}
 		
@@ -223,6 +228,11 @@ package spaceshiptHunt.entities
 		{
 			if (!Environment.current.paused)
 			{
+				bulletsLeft -= 1;
+			if (bulletsLeft == 0)
+			{
+				startReload();
+			}
 				var position:Vec2 = Vec2.get(weaponRight.x + weaponLeft.child.width / 4, weaponRight.y - 5);
 				var bulletVelocity:Vec2 = Vec2.get(0, (bulletSpeed + Math.random() * bulletSpeed) * body.mass);
 				bulletVelocity.angle = body.rotation - Math.PI / 2 + Math.random() * 0.1 + 0.05;
@@ -237,6 +247,11 @@ package spaceshiptHunt.entities
 				bulletVelocity.dispose();
 				position.dispose();
 			}
+		}
+		
+		protected function startReload():void 
+		{
+			lastReloadTime = Starling.juggler.elapsedTime;
 		}
 		
 		protected function attachDisplayObject(displayObject:DisplayObject, displayParent:DisplayObjectContainer):TransformNode
