@@ -85,7 +85,7 @@ package DDLS.ai
 			{
 				if (!tryFindPathOrthogonal(forwardDirectionX, forwardDirectionY, toX, toY, resultPath))
 				{
-				//	tryFindPathDiagonal(offsetLength, toX, toY, resultPath);
+					tryFindPathDiagonal(offsetLength, toX, toY, resultPath);
 				}
 			}
 			else

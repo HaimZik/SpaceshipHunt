@@ -15,8 +15,8 @@ package DDLS.ai
 		
 		private var _mesh:DDLSMesh;
 		
-		private var __closedFaces:Array = [];
-		private var __openedFaces:Array = [];
+		private var __closedFaces:Array;
+		private var __openedFaces:Array;
 		private var __entryEdges:Array = [];
 		private var __entryX:Array = [];
 		private var __entryY:Array = [];
@@ -43,6 +43,13 @@ package DDLS.ai
 		{
 			__iterEdge = new IteratorFromFaceToInnerEdges();
 			sortBuffer = new Vector.<DDLSFace>();
+			__closedFaces = new Array(500);
+			__openedFaces = new Array(500);
+			for (var i:int = 0; i < 500; i++)
+			{
+				__closedFaces[i] = null;
+			    __openedFaces[i] = null;
+			}
 		}
 		
 		public function dispose():void
@@ -232,7 +239,6 @@ package DDLS.ai
 						}
 					}
 				}
-				//
 				__openedFaces[currentFaceID] = null;
 				__closedFaces[currentFaceID] = true;
 				sortBuffer.length = __sortedOpenedFaces.length;
@@ -505,21 +511,21 @@ package DDLS.ai
 		
 		private function clearTemps():void
 		{
-			var length:int = __entryX.length;
-			for (var i:int = 0; i < length; i++)
-			{
-				if (__entryX[i])
-				{
-					__entryX[i] = undefined;
-					__entryY[i] = undefined;
-					__scoreF[i] = undefined;
-					__scoreG[i] = undefined;
-					__scoreH[i] = undefined;
-					__predecessor[i] = undefined;
-					__entryEdges[i] = undefined;
-				}
-			}
-			length = __closedFaces.length;
+			//var length:int = __entryX.length;
+			//for (var i:int = 0; i < length; i++)
+			//{
+			//if (__entryX[i])
+			//{
+			//__entryX[i] = undefined;
+			//__entryY[i] = undefined;
+			//__scoreF[i] = undefined;
+			//__scoreG[i] = undefined;
+			//__scoreH[i] = undefined;
+			//__predecessor[i] = undefined;
+			//__entryEdges[i] = undefined;
+			//}
+			//}
+			var length:int = __openedFaces.length;
 			for (var j:int = 0; j < length; j++)
 			{
 				if (__closedFaces[j])

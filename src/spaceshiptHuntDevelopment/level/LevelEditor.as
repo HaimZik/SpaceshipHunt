@@ -104,15 +104,7 @@ package spaceshiptHuntDevelopment.level
 		{
 			var preBaseZoom:Number = _baseZoom;
 			baseZoom += e.delta * _baseZoom * 0.05;
-			if (paused)
-			{
-				mainDisplay.scale = baseZoom;
-				var camPosition:Point = Pool.getPoint(cameraPosition.x, cameraPosition.y);
-				mainDisplay.localToGlobal(camPosition, camPosition);
-				mainDisplay.x -= camPosition.x - mainDisplay.stage.stageWidth * 0.5;
-				mainDisplay.y -= camPosition.y - mainDisplay.stage.stageHeight * 0.5;
-				Pool.putPoint(camPosition);
-			}
+			camTargetVelocity.setxy(0, 0);
 		}
 		
 		public function get levelEditorMode():Boolean

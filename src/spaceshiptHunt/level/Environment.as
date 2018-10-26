@@ -65,13 +65,15 @@ package spaceshiptHunt.level
 		protected const MAX_ZOOM_OUT:Number = 0.3;
 		protected var _baseZoom:Number = 1.0;
 		protected var navMeshUpdateRate:Number = 1.2;
-		protected var viewDistance:Number = 2048.0;
+		protected var viewDistance:Number = 1548.0;
 		protected var pathfinder:DDLSPathFinder;
 		protected var lastNavMeshUpdate:Number;
 		protected var commandQueue:Vector.<Function>;
 		protected var navBody:DDLSObject;
 		protected var staticMeshRelativePath:String;
 		protected var asteroidField:Sprite;
+		protected var camTargetVelocity:Vec2 = new Vec2();
+		protected var camAngularVelocity:Number;
 		private var rayHelper:Ray;
 		
 		public function Environment()
@@ -144,13 +146,16 @@ package spaceshiptHunt.level
 				light.x = Player.current.graphics.x;
 				light.y = Player.current.graphics.y + 400;
 				cameraPosition.x = Player.current.graphics.x;
-				cameraPosition.y = Player.current.graphics.y;	
+				cameraPosition.y = Player.current.graphics.y;
+				var player:Player = Player.current;
+				camAngularVelocity = MathUtil.normalizeAngle(mainDisplay.rotation) - MathUtil.normalizeAngle(player.body.angularVel / 17 - player.body.rotation);
+				camTargetVelocity.set(player.body.velocity).rotate(mainDisplay.rotation).muleq(0.2);
 				cullAsteroidField();
-				focusCam();
-				for (var j:int = 0; j < BodyInfo.list.length; j++)
-				{
-					BodyInfo.list[j].lateSyncGraphics();
-				}
+			}
+			focusCam();
+			for (var j:int = 0; j < BodyInfo.list.length; j++)
+			{
+				BodyInfo.list[j].lateSyncGraphics();
 			}
 			if (didNavMeshUpdated)
 			{
@@ -175,10 +180,8 @@ package spaceshiptHunt.level
 			Pool.putPoint(camPosition);
 		}
 		
-		private function focusCam():void
+		protected function focusCam():void
 		{
-			var player:Player = Player.current;
-			var camAngularVelocity:Number = MathUtil.normalizeAngle(mainDisplay.rotation) - MathUtil.normalizeAngle(player.body.angularVel / 17 - player.body.rotation);
 			var rotationChangeThreshold:Number = 0.002;
 			var didChange:Boolean = false;
 			if (!MathUtil.isEquivalent(camAngularVelocity, 0, rotationChangeThreshold))
@@ -188,8 +191,7 @@ package spaceshiptHunt.level
 				mainDisplay.rotation -= camAngularVelocity;
 				didChange = true;
 			}
-			var velocity:Vec2 = player.body.velocity.copy(true).rotate(mainDisplay.rotation).muleq(0.2);
-			var newScale:Number = baseZoom - Math.min(MAX_ZOOM_OUT * baseZoom, velocity.length * velocity.length / 30000);
+			var newScale:Number = baseZoom - Math.min(MAX_ZOOM_OUT * baseZoom, camTargetVelocity.length * camTargetVelocity.length / 30000);
 			if (!MathUtil.isEquivalent(mainDisplay.scale, newScale, 0.01))
 			{
 				mainDisplay.scale += (newScale - mainDisplay.scale) / 16;
@@ -197,10 +199,10 @@ package spaceshiptHunt.level
 			}
 			var camPosition:Point = Pool.getPoint(cameraPosition.x, cameraPosition.y);
 			mainDisplay.localToGlobal(camPosition, camPosition);
-			//velocity.x = 0;
-			//velocity.y = 0;
-			var camVelocityX:Number = camPosition.x - velocity.x - mainDisplay.stage.stageWidth / 2;
-			var camVelocityY:Number = camPosition.y - velocity.y - mainDisplay.stage.stageHeight * 0.7;
+			var camVelocityX:Number = camPosition.x - camTargetVelocity.x - mainDisplay.stage.stageWidth / 2;
+			var camVelocityY:Number = camPosition.y - camTargetVelocity.y - mainDisplay.stage.stageHeight * 0.7;
+			//camVelocityX = 0;
+			//camVelocityY = 0;
 			if (!(MathUtil.isEquivalent(camVelocityX, 0, 0.75) && MathUtil.isEquivalent(camVelocityY, 0, 0.75)))
 			{
 				mainDisplay.x -= camVelocityX * 1.0;
@@ -213,7 +215,6 @@ package spaceshiptHunt.level
 				Game.underSpaceshipsLayer.transformationMatrix = mainDisplay.transformationMatrix;
 			}
 			Pool.putPoint(camPosition);
-			velocity.dispose();
 		}
 		
 		public function togglePaused():void
@@ -221,13 +222,17 @@ package spaceshiptHunt.level
 			if (Player.current.lifePoints > 0)
 			{
 				paused = !paused;
+				if (paused)
+				{
+					camAngularVelocity = 0;
+				}
 			}
 		}
 		
 		public function findPath(pathfindingAgent:DDLSEntityAI, x:Number, y:Number, outPath:Vector.<Number>):void
 		{
 			pathfinder.entity = pathfindingAgent;
-			trace(pathfindingAgent.approximateObject.id);
+			//	trace(pathfindingAgent.approximateObject.id);
 			pathfinder.findPath(x, y, outPath);
 		}
 		
@@ -444,12 +449,13 @@ package spaceshiptHunt.level
 			physicsSpace.bodies.add(body);
 		}
 		
-		protected function cullAsteroidField():void 
+		protected function cullAsteroidField():void
 		{
-			for (var k:int = 0; k < asteroidField.numChildren; k++)
+			var viewRadius:Number = viewDistance / mainDisplay.scale;
+			for (var i:int = 0; i < asteroidField.numChildren; i++)
 			{
-				var asteroid:DisplayObject = asteroidField.getChildAt(k);
-				if (Math.abs(cameraPosition.x - asteroid.x) < viewDistance && Math.abs(cameraPosition.y - asteroid.y) < viewDistance)
+				var asteroid:DisplayObject = asteroidField.getChildAt(i);
+				if (Math.abs(cameraPosition.x - asteroid.x) < viewRadius && Math.abs(cameraPosition.y - asteroid.y) < viewRadius)
 				{
 					asteroid.visible = true;
 				}
