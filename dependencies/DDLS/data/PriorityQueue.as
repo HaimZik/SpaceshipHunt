@@ -46,7 +46,7 @@ package DDLS.data
 		 **/
 		public function insert(value:DDLSFace):void
 		{
-			_length = _queue.push(value);
+			_queue[_length++]=value;
 			bubbleUp(_length - 1);
 		}
 		
@@ -95,29 +95,25 @@ package DDLS.data
 			return oldRoot;
 		}
 		
-		private function bubbleUp(index:uint):void
+		private function bubbleUp(index:int):void
 		{
 			if (index == 0)
 			{
 				return;
 			}
 			
-			var parent:uint = getParentOf(index);
+			var parent:int = getParentOf(index);
 			if (evaluate(index, parent))
 			{
 				swap(index, parent);
 				bubbleUp(parent);
 			}
-			else
-			{
-				return;
-			}
 		}
 		
 		private function swapUntilQueueIsCorrect(value:uint):void
 		{
-			var left:uint = getLeftOf(value);
-			var right:uint = getRightOf(value);
+			var left:int = getLeftOf(value);
+			var right:int = getRightOf(value);
 			
 			if (evaluate(left, value))
 			{
@@ -139,7 +135,7 @@ package DDLS.data
 			}
 		}
 		
-		private function swap(self:uint, target:uint):void
+		private function swap(self:int, target:int):void
 		{
 			var placeHolder:DDLSFace = _queue[self];
 			_queue[self] = _queue[target];
@@ -149,11 +145,11 @@ package DDLS.data
 		/**
 		 * Helpers
 		 */
-		private function evaluate(self:uint, target:uint):Boolean
+		private function evaluate(self:int, target:int):Boolean
 		{
 			//if (_isMax)
 			//{
-			return self<_length && scoreF[_queue[self].id] > scoreF[_queue[target]];
+			return self<_length && scoreF[_queue[self].id] > scoreF[_queue[target].id];
 			//}
 			//else
 			//{
@@ -168,7 +164,7 @@ package DDLS.data
 			//}
 		}
 		
-		private function getParentOf(index:uint):uint
+		private function getParentOf(index:int):int
 		{
 			return (index - 1) >> 1;
 		}
