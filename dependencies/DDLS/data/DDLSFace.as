@@ -2,12 +2,12 @@ package DDLS.data
 {
 	public class DDLSFace
 	{
-		
+	
+		public var edge:DDLSEdge;
 		private static var INC:int = 0;
 		private var _id:int;
 		
 		private var _isReal:Boolean;
-		private var _edge:DDLSEdge;
 		
 		public var colorDebug:int = -1;
 		
@@ -31,17 +31,12 @@ package DDLS.data
 		public function setDatas(edge:DDLSEdge, isReal:Boolean=true):void
 		{
 			_isReal = isReal;
-			_edge = edge;
+			this.edge = edge;
 		}
 		
 		public function dispose():void
 		{
-			_edge = null;
-		}
-		
-		public function get edge():DDLSEdge
-		{
-			return _edge;
+			edge = null;
 		}
 		
 	}
