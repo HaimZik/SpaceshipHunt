@@ -9,15 +9,10 @@ package DDLS.data
 		{
 			return oppositeEdge.originVertex;
 		}
-			
-		public function get nextLeftEdge():DDLSEdge
-		{
-			return _nextLeftEdge;
-		}
 		
 		public function get prevLeftEdge():DDLSEdge
 		{
-			return _nextLeftEdge.nextLeftEdge;
+			return nextLeftEdge.nextLeftEdge;
 		}
 		
 		public function get nextRightEdge():DDLSEdge
@@ -32,17 +27,12 @@ package DDLS.data
 		
 		public function get rotLeftEdge():DDLSEdge
 		{
-			return _nextLeftEdge.nextLeftEdge.oppositeEdge;
+			return nextLeftEdge.nextLeftEdge.oppositeEdge;
 		}
 		
 		public function get rotRightEdge():DDLSEdge
 		{
 			return oppositeEdge.nextLeftEdge;
-		}
-		
-		public function get leftFace():DDLSFace
-		{
-			return _leftFace;
 		}
 		
 		public function get rightFace():DDLSFace
@@ -58,8 +48,8 @@ package DDLS.data
 		// root datas
 		private var _isReal:Boolean;
 		private var _isConstrained:Boolean;
-		private var _nextLeftEdge:DDLSEdge;
-		private var _leftFace:DDLSFace;
+		public var nextLeftEdge:DDLSEdge;
+		public var leftFace:DDLSFace;
 
 		private var _fromConstraintSegments:Vector.<DDLSConstraintSegment>;
 		
@@ -94,8 +84,8 @@ package DDLS.data
 			_isReal = isReal;
 			this.originVertex = originVertex;
 			this.oppositeEdge = oppositeEdge;
-			_nextLeftEdge = nextLeftEdge;
-			_leftFace = leftFace;
+			this.nextLeftEdge = nextLeftEdge;
+			this.leftFace = leftFace;
 		}
 		
 		public function addFromConstraintSegment(segment:DDLSConstraintSegment):void
@@ -109,16 +99,6 @@ package DDLS.data
 			var index:int = _fromConstraintSegments.indexOf(segment);
 			if (index != -1)
 				_fromConstraintSegments.removeAt(index);
-		}
-		
-		public function set nextLeftEdge(value:DDLSEdge):void
-		{
-			_nextLeftEdge = value;
-		}
-		
-		public function set leftFace(value:DDLSFace):void
-		{
-			_leftFace = value;
 		}
 		
 		public function set isConstrained(value:Boolean):void
@@ -140,8 +120,8 @@ package DDLS.data
 		{
 			originVertex = null;
 			oppositeEdge = null;
-			_nextLeftEdge = null;
-			_leftFace = null;
+			nextLeftEdge = null;
+			leftFace = null;
 			_fromConstraintSegments.length=0;
 		}
 		

@@ -45,12 +45,12 @@ package DDLS.ai
 		
 		public function get approximateObject():DDLSObject
 		{
-			if (!_approximateObject)
-			{
-				return null;
-			}
-			_approximateObject.matrix.identity();
-			_approximateObject.matrix.translate(x, y);
+			//if (!_approximateObject)
+			//{
+				//return null;
+			//}
+			//_approximateObject.matrix.identity();
+			//_approximateObject.matrix.translate(x, y);
 			return _approximateObject;
 		}
 		
@@ -110,7 +110,8 @@ package DDLS.ai
 			_x = value;
 		}
 
-		public function get radius():Number
+		[Inline]
+		public final function get radius():Number
 		{
 			return _radius;
 		}

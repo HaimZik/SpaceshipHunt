@@ -34,10 +34,8 @@ package DDLS.ai
 		private var _diameterSquared:Number;
 		
 		private var priorityQueue:PriorityQueue;
-	//	private var sortBuffer:Vector.<DDLSFace>;
 		
 		//helpers pool
-	//	private var __sortedOpenedFaces:Vector.<DDLSFace> = new Vector.<DDLSFace>();
 		private var vFaceToCheck:Vector.<DDLSFace> = new Vector.<DDLSFace>();
 		private var vFaceIsFromEdge:Vector.<DDLSEdge> = new Vector.<DDLSEdge>();
 		
@@ -45,13 +43,17 @@ package DDLS.ai
 		{
 			__iterEdge = new IteratorFromFaceToInnerEdges();
 			priorityQueue = new PriorityQueue(__scoreF);
-		//	sortBuffer = new Vector.<DDLSFace>();
 			__closedFaces = new Array(500);
 			__openedFaces = new Array(500);
 			for (var i:int = 0; i < 500; i++)
 			{
 				__closedFaces[i] = null;
-			    __openedFaces[i] = null;
+				__openedFaces[i] = null;
+				__entryX[i] = 0;
+				__entryY[i] = 0;
+				__scoreF[i] = 0;
+				__scoreG[i] = 0;
+				__scoreH[i] = 0;
 			}
 		}
 		
@@ -60,9 +62,7 @@ package DDLS.ai
 			_mesh = null;
 			
 			__closedFaces = null;
-	//		__sortedOpenedFaces = null;
 			priorityQueue = null;
-//			sortBuffer = null;
 			__openedFaces = null;
 			__entryEdges = null;
 			__entryX = null;
@@ -152,13 +152,13 @@ package DDLS.ai
 			   trace( "from face:", __fromFace );
 			   trace( "to face:", __toFace );*/
 			var fromFaceId:int = __fromFace.id;
-			priorityQueue.insert(__fromFace);
 			__entryEdges[fromFaceId] = null;
 			__entryX[fromFaceId] = fromX;
 			__entryY[fromFaceId] = fromY;
 			__scoreG[fromFaceId] = 0;
 			__scoreH[fromFaceId] = Math.sqrt((toX - fromX) * (toX - fromX) + (toY - fromY) * (toY - fromY));
 			__scoreF[fromFaceId] = __scoreH[fromFaceId] + __scoreG[fromFaceId];
+			priorityQueue.insert(__fromFace);
 			
 			var innerEdge:DDLSEdge;
 			var neighbourFace:DDLSFace;
@@ -171,7 +171,6 @@ package DDLS.ai
 			var entryPointY:Number;
 			var distancePointX:Number;
 			var distancePointY:Number;
-			var fillDatas:Boolean;
 			while (true)
 			{
 				// no path found
@@ -220,18 +219,19 @@ package DDLS.ai
 						distancePointY = fromPointY - entryPointY;
 						g = __scoreG[currentFaceID] + Math.sqrt(distancePointX * distancePointX + distancePointY * distancePointY);
 						f = h + g;
-						fillDatas = false;
 						if (!__openedFaces[neighbourFaceId])
 						{
+							__entryEdges[neighbourFaceId] = innerEdge;
+							__entryX[neighbourFaceId] = entryPointX;
+							__entryY[neighbourFaceId] = entryPointY;
+							__scoreF[neighbourFaceId] = f;
+							__scoreG[neighbourFaceId] = g;
+							__scoreH[neighbourFaceId] = h;
+							__predecessor[neighbourFaceId] = __curFace;
 							priorityQueue.insert(neighbourFace);
 							__openedFaces[neighbourFaceId] = true;
-							fillDatas = true;
 						}
 						else if (__scoreF[neighbourFaceId] > f)
-						{
-							fillDatas = true;
-						}
-						if (fillDatas)
 						{
 							__entryEdges[neighbourFaceId] = innerEdge;
 							__entryX[neighbourFaceId] = entryPointX;
@@ -245,8 +245,6 @@ package DDLS.ai
 				}
 				__openedFaces[currentFaceID] = null;
 				__closedFaces[currentFaceID] = true;
-				//sortBuffer.length = __sortedOpenedFaces.length;
-				//sortfaces(0, __sortedOpenedFaces.length);
 			}
 			
 			// if we didn't find a path
@@ -283,44 +281,44 @@ package DDLS.ai
 		
 		//private function sortfaces(startIndex:int, length:int):void
 		//{
-			//// This is a port of the C++ merge sort algorithm shown here:
-			//// http://www.cprogramming.com/tutorial/computersciencetheory/mergesort.html
-			//
-			//if (length > 1)
-			//{
-				//var i:int;
-				//var endIndex:int = startIndex + length;
-				//var halfLength:int = length / 2;
-				//var l:int = startIndex; // current position in the left subvector
-				//var r:int = startIndex + halfLength; // current position in the right subvector
-				//
-				//// sort each subvector
-				//sortfaces(startIndex, halfLength);
-				//sortfaces(startIndex + halfLength, length - halfLength);
-				//
-				//// merge the vectors, using the buffer vector for temporary storage
-				//for (i = 0; i < length; i++)
-				//{
-					//// Check to see if any elements remain in the left vector; 
-					//// if so, we check if there are any elements left in the right vector;
-					//// if so, we compare them. Otherwise, we know that the merge must
-					//// take the element from the left vector. */
-					//if (l < startIndex + halfLength && (r == endIndex || __scoreF[__sortedOpenedFaces[l].id] >= __scoreF[__sortedOpenedFaces[r].id]))
-					//{
-						//sortBuffer[i] = __sortedOpenedFaces[l];
-						//l++;
-					//}
-					//else
-					//{
-						//sortBuffer[i] = __sortedOpenedFaces[r];
-						//r++;
-					//}
-				//}
-				//
-				//// copy the sorted subvector back to the input
-				//for (i = startIndex; i < endIndex; i++)
-					//__sortedOpenedFaces[i] = sortBuffer[int(i - startIndex)];
-			//}
+		//// This is a port of the C++ merge sort algorithm shown here:
+		//// http://www.cprogramming.com/tutorial/computersciencetheory/mergesort.html
+		//
+		//if (length > 1)
+		//{
+		//var i:int;
+		//var endIndex:int = startIndex + length;
+		//var halfLength:int = length / 2;
+		//var l:int = startIndex; // current position in the left subvector
+		//var r:int = startIndex + halfLength; // current position in the right subvector
+		//
+		//// sort each subvector
+		//sortfaces(startIndex, halfLength);
+		//sortfaces(startIndex + halfLength, length - halfLength);
+		//
+		//// merge the vectors, using the buffer vector for temporary storage
+		//for (i = 0; i < length; i++)
+		//{
+		//// Check to see if any elements remain in the left vector; 
+		//// if so, we check if there are any elements left in the right vector;
+		//// if so, we compare them. Otherwise, we know that the merge must
+		//// take the element from the left vector. */
+		//if (l < startIndex + halfLength && (r == endIndex || __scoreF[__sortedOpenedFaces[l].id] >= __scoreF[__sortedOpenedFaces[r].id]))
+		//{
+		//sortBuffer[i] = __sortedOpenedFaces[l];
+		//l++;
+		//}
+		//else
+		//{
+		//sortBuffer[i] = __sortedOpenedFaces[r];
+		//r++;
+		//}
+		//}
+		//
+		//// copy the sorted subvector back to the input
+		//for (i = startIndex; i < endIndex; i++)
+		//__sortedOpenedFaces[i] = sortBuffer[int(i - startIndex)];
+		//}
 		//}
 		
 		private function isWalkableByRadius(fromEdge:DDLSEdge, throughFace:DDLSFace, toEdge:DDLSEdge):Boolean

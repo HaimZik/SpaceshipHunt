@@ -46,8 +46,8 @@ package DDLS.data
 		 **/
 		public function insert(value:DDLSFace):void
 		{
-			_queue[_length++]=value;
-			bubbleUp(_length - 1);
+			_queue[_length]=value;
+			bubbleUp(_length++);
 		}
 		
 		/**
@@ -125,11 +125,7 @@ package DDLS.data
 				swap(value, right);
 				swapUntilQueueIsCorrect(right);
 			}
-			else if (value == 0)
-			{
-				return;
-			}
-			else
+			else if (value != 0)
 			{
 				swapUntilQueueIsCorrect(0);
 			}
