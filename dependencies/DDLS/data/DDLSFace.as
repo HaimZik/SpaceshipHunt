@@ -4,6 +4,7 @@ package DDLS.data
 	{
 	
 		public var edge:DDLSEdge;
+		private static var face:Vector.<DDLSFace> = new <DDLSFace>[];
 		private static var INC:int = 0;
 		private var _id:int;
 		
@@ -11,10 +12,20 @@ package DDLS.data
 		
 		public var colorDebug:int = -1;
 		
+		public static function getFaceByID(faceID:int):DDLSFace
+		{
+			return face[faceID];
+		}
+		
+		public static function get largestID():int
+		{
+			return INC;
+		}
+		
 		public function DDLSFace()
 		{
 			_id = INC;
-			INC++;
+			face[INC++] = this;
 		}
 		
 		[Inline]

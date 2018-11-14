@@ -34,20 +34,20 @@ package DDLS.ai
 			if (_radius == 0)
 				return;
 			
-			for ( var i:int=0 ; i<NUM_SEGMENTS ; i++ )
+			for (var i:int = 0; i < NUM_SEGMENTS; i++)
 			{
-				coordinates.push( _radius * Math.cos(2*Math.PI*i/NUM_SEGMENTS) );
-				coordinates.push( _radius * Math.sin(2*Math.PI*i/NUM_SEGMENTS) );
-				coordinates.push( _radius * Math.cos(2*Math.PI*(i+1)/NUM_SEGMENTS) );
-				coordinates.push( _radius * Math.sin(2*Math.PI*(i+1)/NUM_SEGMENTS) );
-			}		
+				coordinates.push(_radius * Math.cos(2 * Math.PI * i / NUM_SEGMENTS));
+				coordinates.push(_radius * Math.sin(2 * Math.PI * i / NUM_SEGMENTS));
+				coordinates.push(_radius * Math.cos(2 * Math.PI * (i + 1) / NUM_SEGMENTS));
+				coordinates.push(_radius * Math.sin(2 * Math.PI * (i + 1) / NUM_SEGMENTS));
+			}
 		}
 		
 		public function get approximateObject():DDLSObject
 		{
 			//if (!_approximateObject)
 			//{
-				//return null;
+			//return null;
 			//}
 			//_approximateObject.matrix.identity();
 			//_approximateObject.matrix.translate(x, y);
@@ -59,57 +59,61 @@ package DDLS.ai
 			_approximateObject.dispose();
 			_approximateObject = null;
 		}
-
+		
 		public function get angleFOV():Number
 		{
 			return _angleFOV;
 		}
-
+		
 		public function set angleFOV(value:Number):void
 		{
 			_angleFOV = value;
 		}
-
+		
 		public function get dirNormY():Number
 		{
 			return _dirNormY;
 		}
-
+		
 		public function set dirNormY(value:Number):void
 		{
 			_dirNormY = value;
 		}
-
+		
 		public function get dirNormX():Number
 		{
 			return _dirNormX;
 		}
-
+		
 		public function set dirNormX(value:Number):void
 		{
 			_dirNormX = value;
 		}
-
-		public function get y():Number
-		{
-			return _y;
-		}
-
-		public function set y(value:Number):void
-		{
-			_y = value;
-		}
-
-		public function get x():Number
+		
+		[Inline]
+		public final function get x():Number
 		{
 			return _x;
 		}
-
-		public function set x(value:Number):void
+		
+		[Inline]
+		public final function set x(value:Number):void
 		{
 			_x = value;
 		}
-
+		
+		[Inline]
+		public final function get y():Number
+		{
+			return _y;
+		}
+		
+		[Inline]
+		public final function set y(value:Number):void
+		{
+			_y = value;
+		}
+		
 		[Inline]
 		public final function get radius():Number
 		{
@@ -124,8 +128,8 @@ package DDLS.ai
 		public function set radius(value:Number):void
 		{
 			_radius = value;
-			_radiusSquared = _radius*_radius;
+			_radiusSquared = _radius * _radius;
 		}
-
+	
 	}
 }

@@ -4,12 +4,9 @@ package DDLS.data
 	public class PriorityQueue
 	{
 		protected var scoreF:Array;
-		//public static const MAX_HEAP:uint = 0;
-		//public static const MIN_HEAP:uint = 1;
-		protected var _queue:Vector.<DDLSFace>;
-		//	private var _criteria:String;
-		//	private var _isMax:Boolean;
+		protected var _queue:Vector.<int>;
 		protected var _length:int = 0;
+		protected var itemIndex:Vector.<int>;
 		
 		/**
 		 * This is an improved Priority Queue data type implementation that can be used to sort any object type.
@@ -18,25 +15,16 @@ package DDLS.data
 		 * For more on binary heaps see: http://en.wikipedia.org/wiki/Binary_heap
 		 *
 		 * @param criteria The criteria by which to sort the objects. This should be a property of the objects you're sorting.
-		 * @param heapType either PriorityQueue.MAX_HEAP or PriorityQueue.MIN_HEAP.
 		 **/
-		public function PriorityQueue(scoreF:Array) //criteria:String, heapType:uint)
+		public function PriorityQueue(scoreF:Array, largestID:int)
 		{
 			this.scoreF = scoreF;
-			//if (heapType == MAX_HEAP)
-			//{
-			//_isMax = true;
-			//}
-			//else if (heapType == MIN_HEAP)
-			//{
-			//_isMax = false;
-			//}
-			//else
-			//{
-			//throw new Error(heapType + " not supported.");
-			//}
-			//_criteria = criteria;
-			_queue = new Vector.<DDLSFace>();
+			for (var i:int = scoreF.length; i < largestID; i++)
+			{
+				this.scoreF[i] = 0;
+			}
+			itemIndex = new Vector.<int>(largestID);
+			_queue = new Vector.<int>();
 		}
 		
 		/**
@@ -44,9 +32,9 @@ package DDLS.data
 		 *
 		 * @param value The object to insert into the heap.
 		 **/
-		public function insert(value:DDLSFace):void
+		public function insert(itemID:int):void
 		{
-			_queue[_length]=value;
+			_queue[_length] = itemID;
 			bubbleUp(_length++);
 		}
 		
@@ -59,40 +47,51 @@ package DDLS.data
 			return _length;
 		}
 		
-		public function set length(value:int):void
+		public function reset(largestID:int):void
 		{
-			_queue.length = value;
-			_length = value;
+			for (var i:int = scoreF.length; i < largestID; i++)
+			{
+				scoreF[i] = 0;
+			}
+			itemIndex.length = largestID;
+			_queue.length = 0;
+			_length = 0;
 		}
 		
 		/**
 		 * Peeks at the highest priority element.
 		 * @return the highest priority element
 		 **/
-		public function getHighestPriorityElement():DDLSFace
+		public function getHighestPriorityItem():int
 		{
 			return _queue[0];
 		}
 		
 		/**
 		 * Removes and returns the highest priority element from the queue.
-		 * @return the highest priority element
+		 * @return the highest priority item id
 		 **/
-		public function shiftHighestPriorityElement():DDLSFace
+		public function shiftHighestPriorityItem():int
 		{
 			//if (_length < 0)
 			//{
 			//throw new Error("There are no more elements in your priority queue.");
 			//}
-			var oldRoot:DDLSFace = _queue[0];
-			var newRoot:DDLSFace = _queue.pop();
-			_length--;
-			if (_length != 0)
+			var oldRoot:int = _queue[0];
+			var newRoot:int = _queue.pop();
+			if (--_length != 0)
 			{
-			_queue[0] = newRoot;
-			swapUntilQueueIsCorrect(0);
+				_queue[0] = newRoot;
+				itemIndex[newRoot] = 0;
+				swapUntilQueueIsCorrect(0);
 			}
 			return oldRoot;
+		}
+		
+		public function decreaseHeuristics(itemID:int):void
+		{
+			var index:int = itemIndex[itemID];
+			bubbleUp(index);
 		}
 		
 		private function bubbleUp(index:int):void
@@ -110,22 +109,22 @@ package DDLS.data
 			}
 		}
 		
-		private function swapUntilQueueIsCorrect(value:uint):void
+		private function swapUntilQueueIsCorrect(index:uint):void
 		{
-			var left:int = getLeftOf(value);
-			var right:int = getRightOf(value);
+			var left:int = getLeftOf(index);
+			var right:int = getRightOf(index);
 			
-			if (evaluate(left, value))
+			if (evaluate(left, index))
 			{
-				swap(value, left);
+				swap(index, left);
 				swapUntilQueueIsCorrect(left);
 			}
-			else if (evaluate(right, value))
+			else if (evaluate(right, index))
 			{
-				swap(value, right);
+				swap(index, right);
 				swapUntilQueueIsCorrect(right);
 			}
-			else if (value != 0)
+			else if (index != 0)
 			{
 				swapUntilQueueIsCorrect(0);
 			}
@@ -133,9 +132,11 @@ package DDLS.data
 		
 		private function swap(self:int, target:int):void
 		{
-			var placeHolder:DDLSFace = _queue[self];
+			var placeHolder:int = _queue[self];
 			_queue[self] = _queue[target];
 			_queue[target] = placeHolder;
+			itemIndex[_queue[target]] = self;
+			itemIndex[placeHolder] = target;
 		}
 		
 		/**
@@ -145,7 +146,7 @@ package DDLS.data
 		{
 			//if (_isMax)
 			//{
-			return self<_length && scoreF[_queue[self].id] > scoreF[_queue[target].id];
+			return self < _length && scoreF[_queue[self]] < scoreF[_queue[target]];
 			//}
 			//else
 			//{

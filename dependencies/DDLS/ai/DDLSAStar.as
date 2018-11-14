@@ -42,7 +42,7 @@ package DDLS.ai
 		public function DDLSAStar()
 		{
 			__iterEdge = new IteratorFromFaceToInnerEdges();
-			priorityQueue = new PriorityQueue(__scoreF);
+			priorityQueue = new PriorityQueue(__scoreF, DDLSFace.largestID);
 			__closedFaces = new Array(500);
 			__openedFaces = new Array(500);
 			for (var i:int = 0; i < 500; i++)
@@ -51,7 +51,6 @@ package DDLS.ai
 				__openedFaces[i] = null;
 				__entryX[i] = 0;
 				__entryY[i] = 0;
-				__scoreF[i] = 0;
 				__scoreG[i] = 0;
 				__scoreH[i] = 0;
 			}
@@ -91,23 +90,16 @@ package DDLS.ai
 			_mesh = value;
 		}
 		
-		private var __fromFace:DDLSFace;
-		private var __toFace:DDLSFace;
-		private var __curFace:DDLSFace;
-		
 		public function findPath(fromX:Number, fromY:Number, toX:Number, toY:Number, resultListFaces:Vector.<DDLSFace>, resultListEdges:Vector.<DDLSEdge>):void
 		{
 			//trace("findPath");
-			priorityQueue.length = 0;
-			
+			priorityQueue.reset(DDLSFace.largestID);
+			var __fromFace:DDLSFace;
+		    var __toFace:DDLSFace;
+		    var __curFace:DDLSFace;
 			var loc:Object;
 			var locEdge:DDLSEdge;
 			var locVertex:DDLSVertex;
-			var distance:Number;
-			var p1:DDLSPoint2D;
-			var p2:DDLSPoint2D;
-			var p3:DDLSPoint2D;
-			//
 			loc = DDLSGeom2D.locatePosition(fromX, fromY, _mesh);
 			locVertex = loc as DDLSVertex;
 			if (locVertex)
@@ -151,6 +143,7 @@ package DDLS.ai
 			   __toFace.colorDebug = 0xFF0000;
 			   trace( "from face:", __fromFace );
 			   trace( "to face:", __toFace );*/
+			var toFaceId:int = __toFace.id;
 			var fromFaceId:int = __fromFace.id;
 			__entryEdges[fromFaceId] = null;
 			__entryX[fromFaceId] = fromX;
@@ -158,7 +151,7 @@ package DDLS.ai
 			__scoreG[fromFaceId] = 0;
 			__scoreH[fromFaceId] = Math.sqrt((toX - fromX) * (toX - fromX) + (toY - fromY) * (toY - fromY));
 			__scoreF[fromFaceId] = __scoreH[fromFaceId] + __scoreG[fromFaceId];
-			priorityQueue.insert(__fromFace);
+			priorityQueue.insert(fromFaceId);
 			
 			var innerEdge:DDLSEdge;
 			var neighbourFace:DDLSFace;
@@ -182,15 +175,15 @@ package DDLS.ai
 				}
 				
 				// we reached the target face
-				__curFace = priorityQueue.shiftHighestPriorityElement();
-				if (__curFace == __toFace)
+				var currentFaceID:int = priorityQueue.shiftHighestPriorityItem();
+				if (currentFaceID == toFaceId)
 				{
 					break;
 				}
 				
 				// we continue the search
+				__curFace = DDLSFace.getFaceByID(currentFaceID);
 				__iterEdge.fromFace = __curFace;
-				var currentFaceID:int = __curFace.id;
 				while ((innerEdge = __iterEdge.next()) != null)
 				{
 					if (innerEdge.isConstrained)
@@ -228,7 +221,7 @@ package DDLS.ai
 							__scoreG[neighbourFaceId] = g;
 							__scoreH[neighbourFaceId] = h;
 							__predecessor[neighbourFaceId] = __curFace;
-							priorityQueue.insert(neighbourFace);
+							priorityQueue.insert(neighbourFaceId);
 							__openedFaces[neighbourFaceId] = true;
 						}
 						else if (__scoreF[neighbourFaceId] > f)
@@ -240,6 +233,7 @@ package DDLS.ai
 							__scoreG[neighbourFaceId] = g;
 							__scoreH[neighbourFaceId] = h;
 							__predecessor[neighbourFaceId] = __curFace;
+							priorityQueue.decreaseHeuristics(neighbourFaceId);
 						}
 					}
 				}
