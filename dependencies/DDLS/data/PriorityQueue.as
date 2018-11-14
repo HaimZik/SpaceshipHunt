@@ -3,7 +3,7 @@ package DDLS.data
 	
 	public class PriorityQueue
 	{
-		protected var scoreF:Array;
+		protected var heuristics:Array;
 		protected var _queue:Vector.<int>;
 		protected var _length:int = 0;
 		protected var itemIndex:Vector.<int>;
@@ -16,12 +16,12 @@ package DDLS.data
 		 *
 		 * @param criteria The criteria by which to sort the objects. This should be a property of the objects you're sorting.
 		 **/
-		public function PriorityQueue(scoreF:Array, largestID:int)
+		public function PriorityQueue(heuristics:Array, largestID:int)
 		{
-			this.scoreF = scoreF;
-			for (var i:int = scoreF.length; i < largestID; i++)
+			this.heuristics = heuristics;
+			for (var i:int = heuristics.length; i < largestID; i++)
 			{
-				this.scoreF[i] = 0;
+				this.heuristics[i] = 0;
 			}
 			itemIndex = new Vector.<int>(largestID);
 			_queue = new Vector.<int>();
@@ -49,9 +49,9 @@ package DDLS.data
 		
 		public function reset(largestID:int):void
 		{
-			for (var i:int = scoreF.length; i < largestID; i++)
+			for (var i:int = heuristics.length; i < largestID; i++)
 			{
-				scoreF[i] = 0;
+				heuristics[i] = 0;
 			}
 			itemIndex.length = largestID;
 			_queue.length = 0;
@@ -71,7 +71,7 @@ package DDLS.data
 		 * Removes and returns the highest priority element from the queue.
 		 * @return the highest priority item id
 		 **/
-		public function shiftHighestPriorityItem():int
+		public function shift():int
 		{
 			//if (_length < 0)
 			//{
@@ -88,7 +88,7 @@ package DDLS.data
 			return oldRoot;
 		}
 		
-		public function decreaseHeuristics(itemID:int):void
+		public function decreaseHeuristic(itemID:int):void
 		{
 			var index:int = itemIndex[itemID];
 			bubbleUp(index);
@@ -134,8 +134,8 @@ package DDLS.data
 		{
 			var placeHolder:int = _queue[self];
 			_queue[self] = _queue[target];
+			itemIndex[_queue[self]] = self;
 			_queue[target] = placeHolder;
-			itemIndex[_queue[target]] = self;
 			itemIndex[placeHolder] = target;
 		}
 		
@@ -144,21 +144,7 @@ package DDLS.data
 		 */
 		private function evaluate(self:int, target:int):Boolean
 		{
-			//if (_isMax)
-			//{
-			return self < _length && scoreF[_queue[self]] < scoreF[_queue[target]];
-			//}
-			//else
-			//{
-			//if (_queue[self][_criteria] < _queue[target][_criteria])
-			//{
-			//return true;
-			//}
-			//else
-			//{
-			//return false;
-			//}
-			//}
+			return self < _length && heuristics[_queue[self]] < heuristics[_queue[target]];
 		}
 		
 		private function getParentOf(index:int):int

@@ -175,7 +175,7 @@ package DDLS.ai
 				}
 				
 				// we reached the target face
-				var currentFaceID:int = priorityQueue.shiftHighestPriorityItem();
+				var currentFaceID:int = priorityQueue.shift();
 				if (currentFaceID == toFaceId)
 				{
 					break;
@@ -233,7 +233,7 @@ package DDLS.ai
 							__scoreG[neighbourFaceId] = g;
 							__scoreH[neighbourFaceId] = h;
 							__predecessor[neighbourFaceId] = __curFace;
-							priorityQueue.decreaseHeuristics(neighbourFaceId);
+							priorityQueue.decreaseHeuristic(neighbourFaceId);
 						}
 					}
 				}

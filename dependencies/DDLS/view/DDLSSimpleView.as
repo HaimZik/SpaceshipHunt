@@ -35,9 +35,8 @@ package DDLS.view
 			_vertices = new Sprite();
 			_paths = new Sprite();
 			_entities = new Sprite();
-			
 			_surface = new Sprite();
-			_surface.addChild(_edges);
+			//_surface.addChild(_edges);
 			_surface.addChild(_constraints);
 			_surface.addChild(_vertices);
 			_surface.addChild(_paths);

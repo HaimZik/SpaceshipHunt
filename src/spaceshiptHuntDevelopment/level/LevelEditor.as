@@ -24,13 +24,11 @@ package spaceshiptHuntDevelopment.level
 	import spaceshiptHunt.entities.BodyInfo;
 	import spaceshiptHunt.entities.Entity;
 	import spaceshiptHunt.entities.PhysicsParticle;
-	import spaceshiptHunt.entities.Player;
 	import spaceshiptHunt.level.Environment;
 	import starling.core.Starling;
 	import starling.display.Canvas;
 	import starling.display.DisplayObject;
 	import starling.display.DisplayObjectContainer;
-	import starling.display.Sprite;
 	import starling.display.Stage;
 	import starling.events.Touch;
 	import starling.events.TouchEvent;
