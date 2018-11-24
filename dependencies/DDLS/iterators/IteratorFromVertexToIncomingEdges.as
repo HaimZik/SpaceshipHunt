@@ -25,6 +25,7 @@ package DDLS.iterators
 		}
 		
 		private var _resultEdge:DDLSEdge;
+		
 		public function next():DDLSEdge
 		{
 			if (_nextEdge)

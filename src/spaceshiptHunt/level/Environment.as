@@ -90,7 +90,7 @@ package spaceshiptHunt.level
 				assetsLoader.numConnections = 50;
 			}
 			commandQueue = new Vector.<Function>();
-			navMesh = DDLSRectMeshFactory.buildRectangle(10000, 10000);
+			navMesh = DDLSRectMeshFactory.buildRectangle(5000, 5000);
 			navBody = new DDLSObject();
 			navMesh.insertObject(navBody);
 			pathfinder = new DDLSPathFinder(this);
@@ -211,8 +211,7 @@ package spaceshiptHunt.level
 			}
 			if (didChange)
 			{
-				Game.aboveSpaceshipsLayer.transformationMatrix = mainDisplay.transformationMatrix;
-				Game.underSpaceshipsLayer.transformationMatrix = mainDisplay.transformationMatrix;
+				syncTransforms();
 			}
 			Pool.putPoint(camPosition);
 		}
@@ -464,6 +463,12 @@ package spaceshiptHunt.level
 					asteroid.visible = false;
 				}
 			}
+		}
+		
+		protected function syncTransforms():void 
+		{
+			Game.aboveSpaceshipsLayer.transformationMatrix = mainDisplay.transformationMatrix;
+			Game.underSpaceshipsLayer.transformationMatrix = mainDisplay.transformationMatrix;
 		}
 		
 		private function onBulletHit(event:InteractionCallback):void

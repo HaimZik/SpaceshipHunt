@@ -25,7 +25,8 @@ package DDLS.data
 			return oppositeEdge.nextLeftEdge.oppositeEdge;
 		}
 		
-		public function get rotLeftEdge():DDLSEdge
+		[inline]
+		public final function get rotLeftEdge():DDLSEdge
 		{
 			return nextLeftEdge.nextLeftEdge.oppositeEdge;
 		}
@@ -35,7 +36,8 @@ package DDLS.data
 			return oppositeEdge.nextLeftEdge;
 		}
 		
-		public function get rightFace():DDLSFace
+		[inline]
+		public final function get rightFace():DDLSFace
 		{
 			return oppositeEdge.leftFace;
 		}
@@ -68,7 +70,8 @@ package DDLS.data
 			return _id;
 		}
 		
-		public function get isReal():Boolean
+		[inline]
+		public final function get isReal():Boolean
 		{
 			return _isReal;
 		}

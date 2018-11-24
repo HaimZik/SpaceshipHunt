@@ -4,7 +4,7 @@ package DDLS.data
 
 	public class DDLSObject
 	{
-		
+		public var hasChanged:Boolean;
 		private static var INC:int = 0;
 		private var _id:int;
 		
@@ -20,8 +20,6 @@ package DDLS.data
 		private var _rotation:Number;
 		private var _x:Number;
 		private var _y:Number;
-		
-		private var _hasChanged:Boolean;
 		
 		public function DDLSObject()
 		{
@@ -40,7 +38,7 @@ package DDLS.data
 			
 			_coordinates = new Vector.<Number>();
 			
-			_hasChanged = false;
+			hasChanged = false;
 		}
 		
 		public function get id():int
@@ -77,7 +75,7 @@ package DDLS.data
 		public function set pivotX(value:Number):void
 		{
 			_pivotX = value;
-			_hasChanged = true;
+			hasChanged = true;
 		}
 		
 		public function get pivotY():Number
@@ -88,7 +86,7 @@ package DDLS.data
 		public function set pivotY(value:Number):void
 		{
 			_pivotY = value;
-			_hasChanged = true;
+			hasChanged = true;
 		}
 		
 		public function get scaleX():Number
@@ -101,7 +99,7 @@ package DDLS.data
 			if (_scaleX != value)
 			{
 				_scaleX = value;
-				_hasChanged = true;
+				hasChanged = true;
 			}
 		}
 
@@ -115,7 +113,7 @@ package DDLS.data
 			if (_scaleY != value)
 			{
 				_scaleY = value;
-				_hasChanged = true;
+				hasChanged = true;
 			}
 		}
 
@@ -129,7 +127,7 @@ package DDLS.data
 			if (_rotation != value)
 			{
 				_rotation = value;
-				_hasChanged = true;
+				hasChanged = true;
 			}
 		}
 
@@ -143,7 +141,7 @@ package DDLS.data
 			if (_x != value)
 			{
 				_x = value;
-				_hasChanged = true;
+				hasChanged = true;
 			}
 		}
 
@@ -157,7 +155,7 @@ package DDLS.data
 			if (_y != value)
 			{
 				_y = value;
-				_hasChanged = true;
+				hasChanged = true;
 			}
 		}
 
@@ -169,7 +167,7 @@ package DDLS.data
 		public function set matrix(value:DDLSMatrix2D):void
 		{
 			_matrix = value;
-			_hasChanged = true;
+			hasChanged = true;
 		}
 
 		public function get coordinates():Vector.<Number>
@@ -180,7 +178,7 @@ package DDLS.data
 		public function set coordinates(value:Vector.<Number>):void
 		{
 			_coordinates = value;
-			_hasChanged = true;
+			hasChanged = true;
 		}
 
 		public function get constraintShape():DDLSConstraintShape
@@ -191,17 +189,7 @@ package DDLS.data
 		public function set constraintShape(value:DDLSConstraintShape):void
 		{
 			_constraintShape = value;
-			_hasChanged = true;
-		}
-
-		public function get hasChanged():Boolean
-		{
-			return _hasChanged;
-		}
-
-		public function set hasChanged(value:Boolean):void
-		{
-			_hasChanged = value;
+			hasChanged = true;
 		}
 		
 		public function get edges():Vector.<DDLSEdge>

@@ -29,7 +29,9 @@ package DDLS.data.math
 		static private var __circumcenter:Point = new Point();
 		static private var iterFace:IteratorFromVertexToHoldingFaces = new IteratorFromVertexToHoldingFaces();
 		static private var iterEdge:IteratorFromFaceToInnerEdges = new IteratorFromFaceToInnerEdges();
-		static protected var edgesToCheckHelper:Vector.<DDLSEdge>=new Vector.<DDLSEdge>();
+		static private var edgesToCheckHelper:Vector.<DDLSEdge>=new Vector.<DDLSEdge>();
+		static private var checkedEdges:Dictionary= new Dictionary();
+		static private var searchCount:int;
 		
 		
 		static public function locatePosition(x:Number, y:Number, mesh:DDLSMesh):Object
@@ -158,12 +160,12 @@ package DDLS.data.math
 			var edge:DDLSEdge;
 			var pos1:DDLSPoint2D;
 			var pos2:DDLSPoint2D;
-			var checkedEdges:Dictionary = new Dictionary();
 			var intersecting:Boolean;
+			searchCount++;
 			while (edgesToCheckHelper.length > 0)
 			{
 				edge = edgesToCheckHelper.pop();
-				checkedEdges[edge] = true;
+				checkedEdges[edge] = searchCount;
 				pos1 = edge.originVertex.pos;
 				pos2 = edge.destinationVertex.pos;
 				intersecting = intersectionsSegmentCircle(pos1.x, pos1.y, pos2.x, pos2.y, x, y, radius);
@@ -174,12 +176,12 @@ package DDLS.data.math
 					else
 					{
 						edge = edge.oppositeEdge.nextLeftEdge;
-						if (!checkedEdges[edge] && !checkedEdges[edge.oppositeEdge] && edgesToCheckHelper.indexOf(edge) == -1 && edgesToCheckHelper.indexOf(edge.oppositeEdge) == -1)
+						if (checkedEdges[edge]!=searchCount && checkedEdges[edge.oppositeEdge]!=searchCount && edgesToCheckHelper.indexOf(edge) == -1 && edgesToCheckHelper.indexOf(edge.oppositeEdge) == -1)
 						{
 							edgesToCheckHelper.push(edge);
 						}
 						edge = edge.nextLeftEdge;
-						if (!checkedEdges[edge] && !checkedEdges[edge.oppositeEdge] && edgesToCheckHelper.indexOf(edge) == -1 && edgesToCheckHelper.indexOf(edge.oppositeEdge) == -1)
+						if (checkedEdges[edge]!=searchCount && checkedEdges[edge.oppositeEdge]!=searchCount && edgesToCheckHelper.indexOf(edge) == -1 && edgesToCheckHelper.indexOf(edge.oppositeEdge) == -1)
 						{
 							edgesToCheckHelper.push(edge);
 						}

@@ -8,15 +8,16 @@ package DDLS.view
 	import DDLS.data.math.DDLSPoint2D;
 	import DDLS.iterators.IteratorFromMeshToVertices;
 	import DDLS.iterators.IteratorFromVertexToIncomingEdges;
+	import flash.display.GraphicsPathCommand;
 	import flash.display.LineScaleMode;
 	import flash.display.Sprite;
-	import flash.geom.Point;
 	import flash.geom.Rectangle;
-	import flash.text.TextField;
 	import flash.utils.Dictionary;
 	
 	public class DDLSSimpleView
 	{
+		private var drawCommands:Vector.<int>;
+		private var lineCoord:Vector.<Number>;
 		
 		private var _edges:Sprite;
 		private var _constraints:Sprite;
@@ -38,9 +39,11 @@ package DDLS.view
 			_surface = new Sprite();
 			//_surface.addChild(_edges);
 			_surface.addChild(_constraints);
-			_surface.addChild(_vertices);
+			//	_surface.addChild(_vertices);
 			_surface.addChild(_paths);
-			_surface.addChild(_entities);
+			//	_surface.addChild(_entities);
+			drawCommands = new Vector.<int>();
+			lineCoord = new Vector.<Number>();
 		}
 		
 		public function get surface():Sprite
@@ -55,19 +58,14 @@ package DDLS.view
 		
 		public function drawMesh(mesh:DDLSMesh, cleanBefore:Boolean = true, viewCenterX:Number = 0, viewCenterY = 0, viewRadius:Number = -1):void
 		{
+			_constraints.scrollRect = new Rectangle(0, 0, viewCenterX + viewRadius, viewCenterY + viewRadius);
+			var viewRadiusSquared:Number = Math.pow(viewRadius * 1.5, 2);
 			if (cleanBefore)
 			{
 				cleanMesh();
 			}
 			while (_vertices.numChildren)
 				_vertices.removeChildAt(0);
-			if (viewRadius == -1 || isMeshEndVisable(mesh, viewCenterX, viewCenterY, viewRadius))
-			{
-				_surface.graphics.beginFill(0x00, 0);
-				_surface.graphics.lineStyle(1, 0xFF0000, 1, false, LineScaleMode.NONE);
-				_surface.graphics.drawRect(0, 0, mesh.width, mesh.height);
-				_surface.graphics.endFill();
-			}
 			
 			var vertex:DDLSVertex;
 			var incomingEdge:DDLSEdge;
@@ -80,6 +78,12 @@ package DDLS.view
 			iterEdges = new IteratorFromVertexToIncomingEdges();
 			var dictVerticesDone:Dictionary;
 			dictVerticesDone = new Dictionary();
+			var commandCount:int = -1;
+			_constraints.graphics.lineStyle(2, 0xFF0000, 1, false, LineScaleMode.NONE);
+			if (viewRadius == -1 || isMeshEndVisable(mesh, viewCenterX, viewCenterY, viewRadius))
+			{
+				_constraints.graphics.drawRect(0, 0, mesh.width, mesh.height);
+			}
 			while ((vertex = iterVertices.next()) != null)
 			{
 				dictVerticesDone[vertex] = true;
@@ -87,20 +91,20 @@ package DDLS.view
 					continue;
 				
 				//_vertices.graphics.lineStyle(0, 0);
-				_vertices.graphics.beginFill(0x0000FF, 1);
-				_vertices.graphics.drawCircle(vertex.pos.x, vertex.pos.y, 0.5);
-				_vertices.graphics.endFill();
+				//_vertices.graphics.beginFill(0x0000FF, 1);
+				//_vertices.graphics.drawCircle(vertex.pos.x, vertex.pos.y, 0.5);
+				//_vertices.graphics.endFill();
 				
-				if (_showVerticesIndices)
-				{
-					var tf:TextField = new TextField();
-					tf.mouseEnabled = false;
-					tf.text = String(vertex.id);
-					tf.x = vertex.pos.x + 5;
-					tf.y = vertex.pos.y + 5;
-					tf.width = tf.height = 20;
-					_vertices.addChild(tf);
-				}
+				//if (_showVerticesIndices)
+				//{
+				//var tf:TextField = new TextField();
+				//tf.mouseEnabled = false;
+				//tf.text = String(vertex.id);
+				//tf.x = vertex.pos.x + 5;
+				//tf.y = vertex.pos.y + 5;
+				//tf.width = tf.height = 20;
+				//_vertices.addChild(tf);
+				//}
 				
 				iterEdges.fromVertex = vertex;
 				incomingEdge = iterEdges.next();
@@ -108,26 +112,32 @@ package DDLS.view
 				{
 					if (!dictVerticesDone[incomingEdge.originVertex])
 					{
-						if (viewRadius == -1 || isLineInView(incomingEdge.originVertex.pos, incomingEdge.destinationVertex.pos, viewCenterX, viewCenterY, viewRadius))
+						if (viewRadius == -1 || isLineInView(incomingEdge.originVertex.pos, incomingEdge.destinationVertex.pos, viewCenterX, viewCenterY, viewRadiusSquared))
 						{
 							if (incomingEdge.isConstrained)
 							{
-								_constraints.graphics.lineStyle(2, 0xFF0000, 1, false, LineScaleMode.NONE);
-								_constraints.graphics.moveTo(incomingEdge.originVertex.pos.x, incomingEdge.originVertex.pos.y);
-								_constraints.graphics.lineTo(incomingEdge.destinationVertex.pos.x, incomingEdge.destinationVertex.pos.y);
+								//_constraints.graphics.lineStyle(2, 0xFF0000, 1, false, LineScaleMode.NONE);
+								drawCommands[++commandCount] = GraphicsPathCommand.MOVE_TO;
+								lineCoord[commandCount * 2] = incomingEdge.originVertex.pos.x;
+								lineCoord[commandCount * 2 + 1] = incomingEdge.originVertex.pos.y;
+								drawCommands[++commandCount] = GraphicsPathCommand.LINE_TO;
+								lineCoord[commandCount * 2] = incomingEdge.destinationVertex.pos.x;
+								lineCoord[commandCount * 2 + 1] = incomingEdge.destinationVertex.pos.y;
 							}
 							else
 							{
-								_edges.graphics.lineStyle(1, 0x999999, 1, false, LineScaleMode.NONE);
-								_edges.graphics.moveTo(incomingEdge.originVertex.pos.x, incomingEdge.originVertex.pos.y);
-								_edges.graphics.lineTo(incomingEdge.destinationVertex.pos.x, incomingEdge.destinationVertex.pos.y);
+								//_edges.graphics.lineStyle(1, 0x999999, 1, false, LineScaleMode.NONE);
+								//_edges.graphics.moveTo(incomingEdge.originVertex.pos.x, incomingEdge.originVertex.pos.y);
+								//_edges.graphics.lineTo(incomingEdge.destinationVertex.pos.x, incomingEdge.destinationVertex.pos.y);
 							}
 						}
 					}
 					incomingEdge = iterEdges.next();
 				}
 			}
-		
+			drawCommands.length = commandCount + 1;
+			lineCoord.length = (commandCount + 1) * 2;
+			_constraints.graphics.drawPath(drawCommands, lineCoord);
 		}
 		
 		public function drawEntity(entity:DDLSEntityAI, cleanBefore:Boolean = true):void
@@ -172,7 +182,7 @@ package DDLS.view
 		
 		public function cleanMesh():void
 		{
-			_surface.graphics.clear();
+			//	_surface.graphics.clear();
 			_edges.graphics.clear();
 			_constraints.graphics.clear();
 			_vertices.graphics.clear();
@@ -190,18 +200,17 @@ package DDLS.view
 		
 		private function vertexIsInsideAABB(vertex:DDLSVertex, mesh:DDLSMesh):Boolean
 		{
-			if (vertex.pos.x < 0 || vertex.pos.x > mesh.width || vertex.pos.y < 0 || vertex.pos.y > mesh.height)
+			if (vertex.pos.x <= 0 || vertex.pos.x >= mesh.width || vertex.pos.y <= 0 || vertex.pos.y >= mesh.height)
 				return false;
 			else
 				return true;
 		}
 		
-		private function isLineInView(lineStart:DDLSPoint2D, lineEnd:DDLSPoint2D, viewCenterX:Number, viewCenterY:Number, viewRadius:Number):Boolean
+		private function isLineInView(lineStart:DDLSPoint2D, lineEnd:DDLSPoint2D, viewCenterX:Number, viewCenterY:Number, viewRangeSquared:Number):Boolean
 		{
-			var viewRangeSquared:Number = Math.pow(viewRadius * 1.5, 2);
-			var isStartVertexInView:Boolean = Math.pow(viewCenterX - lineStart.x, 2) < viewRangeSquared && Math.abs(viewCenterY - lineStart.y) < viewRangeSquared;
-			var isEndVertexInView:Boolean = Math.pow(viewCenterX - lineEnd.x, 2) < viewRangeSquared && Math.abs(viewCenterY - lineEnd.y) < viewRangeSquared
-			return isStartVertexInView || isEndVertexInView || lineStart.distanceTo(lineEnd) > viewRadius * 2;
+			var isStartVertexInView:Boolean = Math.pow(viewCenterX - lineStart.x + viewCenterY - lineStart.y, 2) < viewRangeSquared;
+			var isEndVertexInView:Boolean = Math.pow(viewCenterX - lineEnd.x + viewCenterY - lineEnd.y, 2) < viewRangeSquared;
+			return isStartVertexInView || isEndVertexInView || Math.pow(lineStart.x - lineEnd.x + lineStart.y - lineEnd.y, 2) > viewRangeSquared * 2;
 		}
 	
 	}

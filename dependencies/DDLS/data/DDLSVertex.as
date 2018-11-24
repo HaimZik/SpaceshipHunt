@@ -5,13 +5,13 @@ package DDLS.data
 	public class DDLSVertex
 	{
 		
-		private static var INC:int = 0;
-		private var _id:int;
 		
 		public var pos:DDLSPoint2D;
+		public var edge:DDLSEdge;
 		
 		private var _isReal:Boolean;
-		private var _edge:DDLSEdge;
+		private static var INC:int = 0;
+		private var _id:int;
 		
 		private var _fromConstraintSegments:Vector.<DDLSConstraintSegment>;
 		
@@ -32,7 +32,8 @@ package DDLS.data
 			return _id;
 		}
 		
-		public function get isReal():Boolean
+		[inline]
+		public final function get isReal():Boolean
 		{
 			return _isReal;
 		}
@@ -50,7 +51,7 @@ package DDLS.data
 		public function setDatas(edge:DDLSEdge, isReal:Boolean=true):void
 		{
 			_isReal = isReal;
-			_edge = edge;
+			this.edge = edge;
 		}
 		
 		public function addFromConstraintSegment(segment:DDLSConstraintSegment):void
@@ -68,18 +69,8 @@ package DDLS.data
 		
 		public function dispose():void
 		{
-			_edge = null;
+			edge = null;
 			_fromConstraintSegments.length=0;
-		}
-		
-		public function get edge():DDLSEdge
-		{
-			return _edge;
-		}
-		
-		public function set edge(value:DDLSEdge):void
-		{
-			_edge = value;
 		}
 		
 		public function toString():String

@@ -81,10 +81,10 @@ package spaceshiptHuntDevelopment.level
 			navShape = new Dictionary();
 			verticesDisplay = new Canvas();
 			var stage:Stage = Starling.current.stage;
-			napeDebug = new ShapeDebug(stage.stageWidth, stage.stageHeight, 0x33333333);
 			navMeshDebugView = new DDLSSimpleView();
 			navMeshDebugView.surface.mouseEnabled = false;
 			Starling.current.nativeOverlay.addChild(navMeshDebugView.surface);
+			//napeDebug = new ShapeDebug(stage.stageWidth, stage.stageHeight, 0x33333333);
 			//Starling.current.nativeOverlay.addChild(napeDebug.display);
 			Key.addKeyUpCallback(Keyboard.N, switchNavMeshView);
 			Key.addKeyUpCallback(Keyboard.F12, toggleLevelEditorMode);
@@ -125,8 +125,8 @@ package spaceshiptHuntDevelopment.level
 		
 		override public function update(passedTime:Number):void
 		{
-			super.update(passedTime);
 			drawDebugGrp();
+			super.update(passedTime);
 		}
 		
 		override public function loadLevel(levelName:String, onFinsh:Function = null):void
@@ -170,12 +170,7 @@ package spaceshiptHuntDevelopment.level
 					lastViewCenter.x = viewCenter.x;
 					lastViewCenter.y = viewCenter.y;
 					navMeshDebugView.cleanMesh();
-					navMeshDebugView.surface.transform.matrix = mainDisplay.transformationMatrix;
-					navMeshDebugView.drawMesh(Environment.current.navMesh, false, viewCenter.x, viewCenter.y, viewRadius);
-				}
-				else
-				{
-					navMeshDebugView.surface.transform.matrix = mainDisplay.transformationMatrix;
+					navMeshDebugView.drawMesh(Environment.current.navMesh, false, viewCenter.x, viewCenter.y, viewRadius/ mainDisplay.scale);
 				}
 				Pool.putPoint(viewCenter);
 				for (var i:int = 0; i < BodyInfo.list.length; i++)
@@ -185,6 +180,16 @@ package spaceshiptHuntDevelopment.level
 						(BodyInfo.list[i] as Entity).drawDebug(navMeshDebugView);
 					}
 				}
+			//	navMeshDebugView.surface.transform.matrix = mainDisplay.transformationMatrix;
+			}
+		}
+		
+		override protected function syncTransforms():void 
+		{
+			super.syncTransforms();
+			if (displayNavMesh)
+			{
+			navMeshDebugView.surface.transform.matrix = mainDisplay.transformationMatrix;
 			}
 		}
 		
@@ -368,9 +373,9 @@ package spaceshiptHuntDevelopment.level
 			}
 		}
 		
-		override protected function cullAsteroidField():void 
+		override protected function cullAsteroidField():void
 		{
-
+		
 		}
 		
 		protected function selectPolygon(underMousePosition:Vec2):int
@@ -468,7 +473,7 @@ package spaceshiptHuntDevelopment.level
 				var viewRadius:Number = Math.max(Starling.current.viewPort.width, Starling.current.viewPort.height) / 2;
 				var viewCenter:Point = Pool.getPoint(viewRadius, viewRadius);
 				viewCenter = (navMeshDebugView.surface.globalToLocal(viewCenter));
-				navMeshDebugView.drawMesh(Environment.current.navMesh, true, viewCenter.x, viewCenter.y, viewRadius);
+				navMeshDebugView.drawMesh(Environment.current.navMesh, true, viewCenter.x, viewCenter.y, viewRadius/mainDisplay.scale);
 				lastViewCenter.x = viewCenter.x;
 				lastViewCenter.y = viewCenter.y;
 				Pool.putPoint(viewCenter);
@@ -654,7 +659,7 @@ package spaceshiptHuntDevelopment.level
 		
 		CONFIG::air
 		{
-			public static function imageToMesh(image:BitmapData):Vector.<Vector.<int>>
+			public static function imageToMesh(image:BitmapData, pivotX:Number = 0.5, pivotY:Number = 0.5):Vector.<Vector.<int>>
 			{
 				var body:Body = new Body();
 				var imageIso:BitmapDataIso = new BitmapDataIso(image);
@@ -674,8 +679,8 @@ package spaceshiptHuntDevelopment.level
 						data.push(new Vector.<int>(shape.localVerts.length * 2, true));
 						for (var j:int = 0; j < shape.localVerts.length; j++)
 						{
-							data[data.length - 1][j * 2] = shape.localVerts.at(j).x - image.width / 2
-							data[data.length - 1][j * 2 + 1] = shape.localVerts.at(j).y - image.height / 2;
+							data[data.length - 1][j * 2] = shape.localVerts.at(j).x - pivotX * image.width
+							data[data.length - 1][j * 2 + 1] = shape.localVerts.at(j).y - pivotY * image.height;
 						}
 					}
 				}
@@ -700,7 +705,14 @@ package spaceshiptHuntDevelopment.level
 					var bmp:Bitmap = e.target.content as Bitmap;
 					var data:BitmapData = bmp.bitmapData;
 					var name:String = file.name.slice(0, file.name.indexOf("."));
-					saveFile("physicsBodies/" + name + "/Mesh.json", meshToString(imageToMesh(data)));
+					if (name.substr(0, "level".length).toLowerCase() == "level")
+					{
+					saveFile("devPhysicsBodies/levelSpecific/" + name + "/static/asteroidField/Mesh.json", meshToString(imageToMesh(data,0,0)));	
+					}
+					else
+					{
+						saveFile("physicsBodies/" + name + "/Mesh.json", meshToString(imageToMesh(data)));
+					}
 					data.dispose();
 					loader.contentLoaderInfo.removeEventListener(Event.COMPLETE, arguments.callee);
 				});
@@ -710,7 +722,7 @@ package spaceshiptHuntDevelopment.level
 			protected function dropFolder(x:Number, y:Number, file:File):void
 			{
 				var spwanLocation:Point = mainDisplay.globalToLocal(new Point(x, y));
-				spawnEntity(file.name, [spwanLocation.x,spwanLocation.y]);
+				spawnEntity(file.name, [spwanLocation.x, spwanLocation.y]);
 				if (paused)
 				{
 					syncGraphics();

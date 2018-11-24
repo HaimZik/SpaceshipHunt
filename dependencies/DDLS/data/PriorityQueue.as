@@ -3,7 +3,7 @@ package DDLS.data
 	
 	public class PriorityQueue
 	{
-		protected var heuristics:Array;
+		protected var heuristics:Vector.<Number>;
 		protected var _queue:Vector.<int>;
 		protected var _length:int = 0;
 		protected var itemIndex:Vector.<int>;
@@ -16,14 +16,10 @@ package DDLS.data
 		 *
 		 * @param criteria The criteria by which to sort the objects. This should be a property of the objects you're sorting.
 		 **/
-		public function PriorityQueue(heuristics:Array, largestID:int)
+		public function PriorityQueue(heuristics:Vector.<Number>)
 		{
 			this.heuristics = heuristics;
-			for (var i:int = heuristics.length; i < largestID; i++)
-			{
-				this.heuristics[i] = 0;
-			}
-			itemIndex = new Vector.<int>(largestID);
+			itemIndex = new Vector.<int>(heuristics.length);
 			_queue = new Vector.<int>();
 		}
 		
@@ -47,13 +43,9 @@ package DDLS.data
 			return _length;
 		}
 		
-		public function reset(largestID:int):void
+		public function reset():void
 		{
-			for (var i:int = heuristics.length; i < largestID; i++)
-			{
-				heuristics[i] = 0;
-			}
-			itemIndex.length = largestID;
+			itemIndex.length = heuristics.length;
 			_queue.length = 0;
 			_length = 0;
 		}
