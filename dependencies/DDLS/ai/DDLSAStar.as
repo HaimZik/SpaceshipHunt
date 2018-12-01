@@ -164,13 +164,13 @@ package DDLS.ai
 				// no path found
 				if (priorityQueue.length == 0)
 				{
-					//trace("DDLSAStar no path found");
+					//no path found
 					curFace = null;
 					break;
 				}
 				
-				// we reached the target face
 				var currentFaceID:int = priorityQueue.shift();
+				// we reached the target face
 				if (currentFaceID == toFaceId)
 				{
 					break;

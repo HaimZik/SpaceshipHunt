@@ -25,10 +25,9 @@ package DDLS.ai
 		// useful to keep track of done vertices and compare the sides
 		private var verticesDoneSide:Dictionary = new Dictionary(true);
 		private var pointSidesDic:Dictionary = new Dictionary(true);
-		private var pathSides:Dictionary= new Dictionary(true);
+		private var pathSides:Dictionary = new Dictionary(true);
 		// we keep the successor relation in a dictionnary
 		private var pointSuccessorDic:Dictionary = new Dictionary(true);
-		
 		
 		public function DDLSFunnel()
 		{
@@ -140,7 +139,6 @@ package DDLS.ai
 						}
 					}
 				}
-				//
 				checkFace = listFaces[listFaces.length - 1];
 				p1 = checkFace.edge.originVertex.pos;
 				p2 = checkFace.edge.destinationVertex.pos;
@@ -180,6 +178,16 @@ package DDLS.ai
 			startPoint = new DDLSPoint2D(fromX, fromY);
 			endPoint = new DDLSPoint2D(toX, toY);
 			
+			// first we skip the first face and first edge if the starting point lies on the first interior edge:
+			
+			if (listFaces.length > 1)
+			{
+				if (listEdges[0] == DDLSGeom2D.isInFace(fromX, fromY, listFaces[0]))
+				{
+					listEdges.shift();
+					listFaces.shift();
+				}
+			}
 			if (listFaces.length == 1)
 			{
 				resultPath.push(startPoint.x);
@@ -196,17 +204,6 @@ package DDLS.ai
 			var currEdge:DDLSEdge;
 			var currVertex:DDLSVertex;
 			var direction:int;
-			
-			// first we skip the first face and first edge if the starting point lies on the first interior edge:
-			if (listEdges[0] == DDLSGeom2D.isInFace(fromX, fromY, listFaces[0]))
-			{
-				if (listEdges.length == 1)
-				{
-					return;
-				}
-				listEdges.shift();
-				listFaces.shift();
-			}
 			
 			// our funnels, inited with starting point
 			var funnelLeft:Vector.<DDLSPoint2D> = new <DDLSPoint2D>[startPoint];

@@ -14,7 +14,8 @@ package DDLS.iterators
 			
 		}
 		
-		public function set fromFace( value:DDLSFace ):void
+		[inline]
+		public final function set fromFace( value:DDLSFace ):void
 		{
 			_fromFace = value;
 			_nextEdge = _fromFace.edge;
