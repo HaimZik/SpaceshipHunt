@@ -12,7 +12,7 @@ package DDLS.ai
 	
 	import flash.utils.Dictionary;
 	
-	public class DDLSAStar
+	public class AStar
 	{
 		
 		private var _mesh:DDLSMesh;
@@ -43,7 +43,7 @@ package DDLS.ai
 		private var vFaceIsFromEdge:Vector.<DDLSEdge> = new Vector.<DDLSEdge>();
 		protected var proj:DDLSPoint2D = new DDLSPoint2D();
 		
-		public function DDLSAStar()
+		public function AStar()
 		{
 			__iterEdge = new IteratorFromFaceToInnerEdges();
 			facesDone = new Dictionary();

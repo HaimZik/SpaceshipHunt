@@ -11,7 +11,7 @@ package DDLS.ai
 	import flash.display.Sprite;
 	import flash.utils.Dictionary;
 	
-	public class DDLSFunnel
+	public class Funnel
 	{
 		
 		public var debugSurface:Sprite;
@@ -29,7 +29,7 @@ package DDLS.ai
 		// we keep the successor relation in a dictionnary
 		private var pointSuccessorDic:Dictionary = new Dictionary(true);
 		
-		public function DDLSFunnel()
+		public function Funnel()
 		{
 			_poolPoints = new Vector.<DDLSPoint2D>();
 			_sampleCircle = new Vector.<Vec2>();

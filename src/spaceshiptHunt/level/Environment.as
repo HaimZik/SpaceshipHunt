@@ -6,7 +6,7 @@ package spaceshiptHunt.level
 	 */
 	
 	import DDLS.ai.DDLSEntityAI;
-	import DDLS.ai.DDLSPathFinder;
+	import DDLS.ai.PathFinder;
 	import DDLS.data.DDLSMesh;
 	import DDLS.data.DDLSObject;
 	import DDLS.data.HitTestable;
@@ -66,7 +66,7 @@ package spaceshiptHunt.level
 		protected var _baseZoom:Number = 1.0;
 		protected var navMeshUpdateRate:Number = 1.2;
 		protected var viewDistance:Number = 1548.0;
-		protected var pathfinder:DDLSPathFinder;
+		protected var pathfinder:PathFinder;
 		protected var lastNavMeshUpdate:Number;
 		protected var commandQueue:Vector.<Function>;
 		protected var navBody:DDLSObject;
@@ -93,7 +93,7 @@ package spaceshiptHunt.level
 			navMesh = DDLSRectMeshFactory.buildRectangle(5000, 5000);
 			navBody = new DDLSObject();
 			navMesh.insertObject(navBody);
-			pathfinder = new DDLSPathFinder(this);
+			pathfinder = new PathFinder(this);
 			pathfinder.mesh = navMesh;
 			var bulletCollisionListener:InteractionListener = new InteractionListener(CbEvent.BEGIN, InteractionType.SENSOR, CbType.ANY_BODY, PhysicsParticle.INTERACTION_TYPE, onBulletHit);
 			physicsSpace.listeners.add(bulletCollisionListener);

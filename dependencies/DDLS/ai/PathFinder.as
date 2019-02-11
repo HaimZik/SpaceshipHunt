@@ -6,22 +6,22 @@ package DDLS.ai
 	import DDLS.data.HitTestable;
 	import DDLS.data.math.DDLSGeom2D;
 	
-	public class DDLSPathFinder
+	public class PathFinder
 	{
 		public var hitTester:HitTestable;
 		private var _mesh:DDLSMesh;
-		private var _astar:DDLSAStar;
-		private var _funnel:DDLSFunnel;
+		private var _astar:AStar;
+		private var _funnel:Funnel;
 		private var _entity:DDLSEntityAI;
 		private var _radius:Number;
 		
 		private var __listFaces:Vector.<DDLSFace>;
 		private var __listEdges:Vector.<DDLSEdge>;
 		
-		public function DDLSPathFinder(hitTester:HitTestable)
+		public function PathFinder(hitTester:HitTestable)
 		{
-			_astar = new DDLSAStar();
-			_funnel = new DDLSFunnel();
+			_astar = new AStar();
+			_funnel = new Funnel();
 			this.hitTester = hitTester;
 			__listFaces = new Vector.<DDLSFace>();
 			__listEdges = new Vector.<DDLSEdge>();

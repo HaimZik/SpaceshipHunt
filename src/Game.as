@@ -151,6 +151,31 @@ package
 			addChild(buttonsDisplay);
 			buttonsDisplay.addChild(joystick);
 		}
+		//-----------------------------------------------------------------------------------------------------------------------------------------
+		//runtime functions
+		
+		private function enterFrame(event:EnterFrameEvent, passedTime:Number):void
+		{
+			//Starling.current.juggler.advanceTime(event.passedTime);
+			//some strange bug or maybe I optimize faster than the speed of light
+			if (event.passedTime > 0)
+			{
+				gameEnvironment.update(passedTime);
+				if (!gameEnvironment.paused)
+				{
+					playerController.update();
+					adjustParallaxBackground();
+				}
+			}
+		}
+		
+		private function adjustParallaxBackground():void
+		{
+			var parallaxRatio:Number = 0.5;
+			var playerPos:Vec2 = Player.current.body.position;
+			background.x = playerPos.x - (playerPos.x * parallaxRatio) % 512 - background.width / 2;
+			background.y = playerPos.y - (playerPos.y * parallaxRatio) % 512 - background.height / 2;
+		}
 		
 //-----------------------------------------------------------------------------------------------------------------------------------------
 		//event functions	
@@ -231,32 +256,6 @@ package
 			joystick.radios = int(Math.min(800, e.width, e.height) / 5);
 			shootButton.radios = int(Math.min(800, e.width, e.height) / 5);
 			resizeHUD();
-		}
-		
-//-----------------------------------------------------------------------------------------------------------------------------------------
-		//runtime functions
-		
-		private function enterFrame(event:EnterFrameEvent, passedTime:Number):void
-		{
-			//Starling.current.juggler.advanceTime(event.passedTime);
-			//some strange bug or maybe I optimize faster than the speed of light
-			if (event.passedTime > 0)
-			{
-				gameEnvironment.update(passedTime);
-				if (!gameEnvironment.paused)
-				{
-					playerController.update();
-					adjustParallaxBackground();
-				}
-			}
-		}
-		
-		private function adjustParallaxBackground():void
-		{
-			var parallaxRatio:Number = 0.5;
-			var playerPos:Vec2 = Player.current.body.position;
-			background.x = playerPos.x - (playerPos.x * parallaxRatio) % 512 - background.width / 2;
-			background.y = playerPos.y - (playerPos.y * parallaxRatio) % 512 - background.height / 2;
 		}
 	
 	}
