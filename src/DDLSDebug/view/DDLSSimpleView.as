@@ -1,4 +1,4 @@
-package DDLS.view
+package DDLSDebug.view
 {
 	import DDLS.ai.DDLSEntityAI;
 	import DDLS.data.DDLSEdge;
@@ -14,26 +14,25 @@ package DDLS.view
 	import flash.geom.Rectangle;
 	import flash.utils.Dictionary;
 	
-	public class DDLSSimpleView
+	public class DDLSSimpleView extends View
 	{
-		private var drawCommands:Vector.<int>;
-		private var lineCoord:Vector.<Number>;
+		protected var drawCommands:Vector.<int>;
+		protected var lineCoord:Vector.<Number>;
 		
-		private var _edges:Sprite;
-		private var _constraints:Sprite;
-		private var _vertices:Sprite;
-		private var _paths:Sprite;
-		private var _entities:Sprite;
+		protected var _edges:Sprite;
+		protected var _constraints:Sprite;
+		protected var _vertices:Sprite;
+		protected var _paths:Sprite;
+		protected var _entities:Sprite;
 		
-		private var _surface:Sprite;
+		protected var _surface:Sprite;
 		
-		private var _showVerticesIndices:Boolean = false;
+		protected var _showVerticesIndices:Boolean = false;
 		
 		public function DDLSSimpleView()
 		{
 			_edges = new Sprite();
 			_constraints = new Sprite();
-			_vertices = new Sprite();
 			_paths = new Sprite();
 			_entities = new Sprite();
 			_surface = new Sprite();
@@ -51,25 +50,15 @@ package DDLS.view
 			return _surface;
 		}
 		
-		public function isMeshEndVisable(mesh:DDLSMesh, viewCenterX:Number, viewCenterY, viewRadius:Number):Boolean
+		override public function drawMesh(mesh:DDLSMesh, cleanBefore:Boolean = true, viewCenterX:Number = 0, viewCenterY = 0, viewRadius:Number = -1):void
 		{
-			return viewCenterX < viewRadius * 2 || viewCenterX > mesh.width - viewRadius * 2 || viewCenterY < viewRadius * 2 || viewCenterY > mesh.height - viewRadius * 2;
-		}
-		
-		public function drawMesh(mesh:DDLSMesh, cleanBefore:Boolean = true, viewCenterX:Number = 0, viewCenterY = 0, viewRadius:Number = -1):void
-		{
-	//	_constraints.scrollRect = new Rectangle(0, 0, viewCenterX + viewRadius, viewCenterY + viewRadius);
-			if (cleanBefore)
-			{
-				cleanMesh();
-			}
-			while (_vertices.numChildren)
-				_vertices.removeChildAt(0);
-			
+			_constraints.scrollRect = new Rectangle(viewCenterX - viewRadius, viewCenterY - viewRadius, viewRadius * 2.1, viewRadius * 2.1);
+			_constraints.x = viewCenterX - viewRadius;
+			_constraints.y = viewCenterY - viewRadius;
+			super.drawMesh(mesh, cleanBefore, viewCenterX, viewCenterY, viewRadius);
 			var vertex:DDLSVertex;
 			var incomingEdge:DDLSEdge;
-			var holdingFace:DDLSFace;
-			
+			var holdingFace:DDLSFace;		
 			var iterVertices:IteratorFromMeshToVertices;
 			iterVertices = new IteratorFromMeshToVertices();
 			iterVertices.fromMesh = mesh;
@@ -134,27 +123,23 @@ package DDLS.view
 					incomingEdge = iterEdges.next();
 				}
 			}
-			drawCommands.length = commandCount+1;
+			drawCommands.length = commandCount + 1;
 			lineCoord.length = drawCommands.length * 2;
 			_constraints.graphics.drawPath(drawCommands, lineCoord);
 		}
 		
-		public function drawEntity(entity:DDLSEntityAI, cleanBefore:Boolean = true):void
+		override public function drawEntity(entity:DDLSEntityAI, cleanBefore:Boolean = true):void
 		{
-			if (cleanBefore)
-				_entities.graphics.clear();
-			
+			super.drawEntity(entity, cleanBefore);
 			_entities.graphics.lineStyle(1, 0x00FF00, 1, false, LineScaleMode.NONE);
 			_entities.graphics.beginFill(0x00FF00, 0.5);
 			_entities.graphics.drawCircle(entity.x, entity.y, entity.radius);
 			_entities.graphics.endFill();
 		}
 		
-		public function drawEntities(vEntities:Vector.<DDLSEntityAI>, cleanBefore:Boolean = true):void
+		override public function drawEntities(vEntities:Vector.<DDLSEntityAI>, cleanBefore:Boolean = true):void
 		{
-			if (cleanBefore)
-				_entities.graphics.clear();
-			
+			super.drawEntities(vEntities, cleanBefore);
 			_entities.graphics.lineStyle(1, 0x00FF00, 0.5, false, LineScaleMode.NONE);
 			for (var i:int = 0; i < vEntities.length; i++)
 			{
@@ -164,11 +149,9 @@ package DDLS.view
 			}
 		}
 		
-		public function drawPath(path:Vector.<Number>, cleanBefore:Boolean = true, color:uint = 0xFF00FF):void
+		override public function drawPath(path:Vector.<Number>, cleanBefore:Boolean = true, color:uint = 0xFF00FF):void
 		{
-			if (cleanBefore)
-				_paths.graphics.clear();
-			
+			super.drawPath(path, cleanBefore, color);
 			if (path.length == 0)
 				return;
 			
@@ -179,12 +162,12 @@ package DDLS.view
 				_paths.graphics.lineTo(path[i], path[i + 1]);
 		}
 		
-		public function cleanMesh():void
+		override public function cleanMesh():void
 		{
+			super.cleanMesh();
 			//	_surface.graphics.clear();
 			_edges.graphics.clear();
 			_constraints.graphics.clear();
-			_vertices.graphics.clear();
 		}
 		
 		public function cleanPaths():void
@@ -195,23 +178,6 @@ package DDLS.view
 		public function cleanEntities():void
 		{
 			_entities.graphics.clear();
-		}
-		
-		private function vertexIsInsideAABB(vertex:DDLSVertex, mesh:DDLSMesh):Boolean
-		{
-			if (vertex.pos.x <= 0 || vertex.pos.x >= mesh.width || vertex.pos.y <= 0 || vertex.pos.y >= mesh.height)
-				return false;
-			else
-				return true;
-		}
-		
-		private function isLineInView(lineStart:DDLSPoint2D, lineEnd:DDLSPoint2D, viewCenterX:Number, viewCenterY:Number, viewRange:Number):Boolean
-		{
-			var isStartVertexInView:Boolean = Math.abs(viewCenterX - lineStart.x)<viewRange
-			&&Math.abs( viewCenterY - lineStart.y) < viewRange;
-			var isEndVertexInView:Boolean = Math.abs(viewCenterX - lineEnd.x)<viewRange
-			&& Math.abs( viewCenterY - lineEnd.y) < viewRange;
-			return isStartVertexInView || isEndVertexInView;// || Math.pow(lineStart.x - lineEnd.x + lineStart.y - lineEnd.y, 2) > viewRangeSquared * 2;
 		}
 	
 	}

@@ -1,7 +1,7 @@
 package spaceshiptHuntDevelopment.level
 {
 	import DDLS.data.DDLSObject;
-	import DDLS.view.DDLSSimpleView;
+	import DDLSDebug.view.DDLSStarlingView;
 	import flash.display.Bitmap;
 	import flash.display.Loader;
 	import flash.events.Event;
@@ -62,9 +62,9 @@ package spaceshiptHuntDevelopment.level
 		private var currentPoly:starling.geom.Polygon;
 		private var lastObstacleId:int = -1;
 		private var napeDebug:ShapeDebug;
-		private var navMeshDebugView:DDLSSimpleView;
+		private var navMeshDebugView:DDLSStarlingView;
 		private var lastViewCenter:Point = new Point(0, 0);
-		private var displayNavMesh:Boolean = false;
+		private var displayNavMesh:Boolean = true;
 		CONFIG::air
 		{
 			private var dragEx:DragAndDropArea;
@@ -81,9 +81,10 @@ package spaceshiptHuntDevelopment.level
 			navShape = new Dictionary();
 			verticesDisplay = new Canvas();
 			var stage:Stage = Starling.current.stage;
-			navMeshDebugView = new DDLSSimpleView();
-			navMeshDebugView.surface.mouseEnabled = false;
-			Starling.current.nativeOverlay.addChild(navMeshDebugView.surface);
+			navMeshDebugView = new DDLSStarlingView();
+//			navMeshDebugView.surface.mouseEnabled = false;
+			mainDisplay.addChild(navMeshDebugView.canvas);
+			//	Starling.current.nativeOverlay.addChild(navMeshDebugView.surface);
 			//napeDebug = new ShapeDebug(stage.stageWidth, stage.stageHeight, 0x33333333);
 			//Starling.current.nativeOverlay.addChild(napeDebug.display);
 			Key.addKeyUpCallback(Keyboard.N, switchNavMeshView);
@@ -163,15 +164,16 @@ package spaceshiptHuntDevelopment.level
 				navMeshDebugView.cleanPaths();
 				navMeshDebugView.cleanEntities();
 				var viewRadius:Number = Math.max(Starling.current.viewPort.width, Starling.current.viewPort.height) / 2;
-				var viewCenter:Point = Pool.getPoint(cameraPosition.x,cameraPosition.y);
+				var viewCenter:Point = Pool.getPoint(cameraPosition.x, cameraPosition.y);
 				if (Starling.juggler.elapsedTime - lastNavMeshUpdate == 0 || navMeshDebugView.isMeshEndVisable(Environment.current.navMesh, viewCenter.x, viewCenter.y, viewRadius) || Point.distance(viewCenter, lastViewCenter) > viewRadius / 2.1)
 				{
 					lastViewCenter.x = viewCenter.x;
 					lastViewCenter.y = viewCenter.y;
 					navMeshDebugView.cleanMesh();
-					navMeshDebugView.drawMesh(Environment.current.navMesh, false, viewCenter.x, viewCenter.y, viewRadius/ mainDisplay.scale);
+					navMeshDebugView.drawMesh(Environment.current.navMesh, false, viewCenter.x, viewCenter.y, viewRadius / mainDisplay.scale);
 				}
 				Pool.putPoint(viewCenter);
+				navMeshDebugView.cleanPaths();
 				for (var i:int = 0; i < BodyInfo.list.length; i++)
 				{
 					if (BodyInfo.list[i] is Entity)
@@ -179,16 +181,17 @@ package spaceshiptHuntDevelopment.level
 						(BodyInfo.list[i] as Entity).drawDebug(navMeshDebugView);
 					}
 				}
-			//	navMeshDebugView.surface.transform.matrix = mainDisplay.transformationMatrix;
+					//	navMeshDebugView.surface.transform.matrix = mainDisplay.transformationMatrix;
 			}
 		}
 		
-		override protected function syncTransforms():void 
+		override protected function syncTransforms():void
 		{
 			super.syncTransforms();
 			if (displayNavMesh)
 			{
-			navMeshDebugView.surface.transform.matrix = mainDisplay.transformationMatrix;
+//			navMeshDebugView.surface.transform.matrix = mainDisplay.transformationMatrix;
+				//navMeshDebugView.canvas.transformationMatrix = mainDisplay.transformationMatrix;
 			}
 		}
 		
@@ -471,8 +474,8 @@ package spaceshiptHuntDevelopment.level
 			{
 				var viewRadius:Number = Math.max(Starling.current.viewPort.width, Starling.current.viewPort.height) / 2;
 				var viewCenter:Point = Pool.getPoint(viewRadius, viewRadius);
-				viewCenter = (navMeshDebugView.surface.globalToLocal(viewCenter));
-				navMeshDebugView.drawMesh(Environment.current.navMesh, true, viewCenter.x, viewCenter.y, viewRadius/mainDisplay.scale);
+				viewCenter = (mainDisplay.globalToLocal(viewCenter));
+				navMeshDebugView.drawMesh(Environment.current.navMesh, true, viewCenter.x, viewCenter.y, viewRadius / mainDisplay.scale);
 				lastViewCenter.x = viewCenter.x;
 				lastViewCenter.y = viewCenter.y;
 				Pool.putPoint(viewCenter);
@@ -706,7 +709,7 @@ package spaceshiptHuntDevelopment.level
 					var name:String = file.name.slice(0, file.name.indexOf("."));
 					if (name.substr(0, "level".length).toLowerCase() == "level")
 					{
-					saveFile("devPhysicsBodies/levelSpecific/" + name + "/static/asteroidField/Mesh.json", meshToString(imageToMesh(data,0,0)));	
+						saveFile("devPhysicsBodies/levelSpecific/" + name + "/static/asteroidField/Mesh.json", meshToString(imageToMesh(data, 0, 0)));
 					}
 					else
 					{

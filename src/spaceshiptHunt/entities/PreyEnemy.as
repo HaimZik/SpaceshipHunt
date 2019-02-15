@@ -1,6 +1,5 @@
 package spaceshiptHunt.entities
 {
-	import DDLS.view.DDLSSimpleView;
 	import nape.geom.RayResult;
 	import nape.geom.Vec2;
 	import spaceshiptHunt.entities.Enemy;
@@ -188,9 +187,9 @@ package spaceshiptHunt.entities
 		
 		CONFIG::debug
 		{
-			import DDLS.view.DDLSSimpleView;
+			import DDLSDebug.view.DDLSStarlingView;
 			
-			override public function drawDebug(canvas:DDLSSimpleView):void
+			override public function drawDebug(canvas:DDLSStarlingView):void
 			{
 				super.drawDebug(canvas);
 				canvas.drawPath(playerPredictedPath, false, Color.BLUE);

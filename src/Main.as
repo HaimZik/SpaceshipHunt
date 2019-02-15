@@ -4,6 +4,7 @@ package
 	import flash.display.StageAlign;
 	import flash.display.StageScaleMode;
 	import flash.events.Event;
+	import flash.system.Capabilities;
 	import input.Key;
 	import starling.core.Starling;
 	import starling.utils.SystemUtil;
@@ -34,7 +35,7 @@ package
 			if (SystemUtil.isDesktop)
 			{
 				gameEngine.showStats = true;
-				if (CONFIG::release)
+				if (!Capabilities.isDebugger)
 				{
 					gameEngine.antiAliasing = 4;
 				}
