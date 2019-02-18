@@ -65,6 +65,8 @@ package spaceshiptHuntDevelopment.level
 		private var navMeshDebugView:DDLSStarlingView;
 		private var lastViewCenter:Point = new Point(0, 0);
 		private var displayNavMesh:Boolean = true;
+		private var lastDebugDraw:Number = 0;
+		
 		CONFIG::air
 		{
 			private var dragEx:DragAndDropArea;
@@ -165,15 +167,16 @@ package spaceshiptHuntDevelopment.level
 				navMeshDebugView.cleanEntities();
 				var viewRadius:Number = Math.max(Starling.current.viewPort.width, Starling.current.viewPort.height) / 2;
 				var viewCenter:Point = Pool.getPoint(cameraPosition.x, cameraPosition.y);
-				if (Starling.juggler.elapsedTime - lastNavMeshUpdate == 0 || navMeshDebugView.isMeshEndVisable(Environment.current.navMesh, viewCenter.x, viewCenter.y, viewRadius) || Point.distance(viewCenter, lastViewCenter) > viewRadius / 2.1)
+				var time:Number = Starling.juggler.elapsedTime;
+				if (lastNavMeshUpdate > lastDebugDraw || Point.distance(viewCenter, lastViewCenter) > viewRadius / 2.1)
 				{
+					lastDebugDraw = time;
 					lastViewCenter.x = viewCenter.x;
 					lastViewCenter.y = viewCenter.y;
 					navMeshDebugView.cleanMesh();
 					navMeshDebugView.drawMesh(Environment.current.navMesh, false, viewCenter.x, viewCenter.y, viewRadius / mainDisplay.scale);
 				}
 				Pool.putPoint(viewCenter);
-				navMeshDebugView.cleanPaths();
 				for (var i:int = 0; i < BodyInfo.list.length; i++)
 				{
 					if (BodyInfo.list[i] is Entity)
