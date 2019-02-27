@@ -167,10 +167,14 @@ package spaceshiptHuntDevelopment.level
 				navMeshDebugView.cleanEntities();
 				var viewRadius:Number = Math.max(Starling.current.viewPort.width, Starling.current.viewPort.height) / 2;
 				var viewCenter:Point = Pool.getPoint(cameraPosition.x, cameraPosition.y);
-				var time:Number = Starling.juggler.elapsedTime;
+				//when starling is out of foucus the time reset to zero
+				if (lastDebugDraw > lastNavMeshUpdate)
+				{
+					lastDebugDraw = lastNavMeshUpdate;
+				}
 				if (lastNavMeshUpdate > lastDebugDraw || Point.distance(viewCenter, lastViewCenter) > viewRadius / 2.1)
 				{
-					lastDebugDraw = time;
+					lastDebugDraw = lastNavMeshUpdate;
 					lastViewCenter.x = viewCenter.x;
 					lastViewCenter.y = viewCenter.y;
 					navMeshDebugView.cleanMesh();

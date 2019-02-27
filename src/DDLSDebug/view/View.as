@@ -77,7 +77,7 @@ package DDLSDebug.view
 		{
 			var isStartVertexInView:Boolean = Math.abs(viewCenterX - lineStart.x) < viewRange && Math.abs(viewCenterY - lineStart.y) < viewRange;
 			var isEndVertexInView:Boolean = Math.abs(viewCenterX - lineEnd.x) < viewRange && Math.abs(viewCenterY - lineEnd.y) < viewRange;
-			return isStartVertexInView || isEndVertexInView; // || Math.pow(lineStart.x - lineEnd.x + lineStart.y - lineEnd.y, 2) > viewRangeSquared * 2;
+			return isStartVertexInView || isEndVertexInView || Math.pow(lineStart.x - lineEnd.x + lineStart.y - lineEnd.y, 2) > viewRange*viewRange * 2;
 		}
 	
 	}

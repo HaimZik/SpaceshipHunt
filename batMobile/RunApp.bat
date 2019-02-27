@@ -97,7 +97,8 @@ if errorlevel 1 goto installfail
 echo.
 echo Starting application on the device for debugging...
 echo.
-adb shell am start -n air.%APP_ID%/.AppEntry
+::adb shell am start -n air.%APP_ID%/.AppEntry
+adb shell am start -n  air.spaceshipHuntDev/.AppEntry
 exit
 
 :installfail

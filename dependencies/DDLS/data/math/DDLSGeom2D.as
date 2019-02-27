@@ -84,7 +84,8 @@ package DDLS.data.math
 					//	objectContainer = null;
 					//	break;
 				//	throw new Error("WALK TAKE MORE THAN 50 LOOP");
-				return new DDLSVertex();
+				return null;
+				//return new DDLSVertex();
 				}
 				iterEdge.fromFace = currFace;
 				do

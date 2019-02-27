@@ -45,7 +45,6 @@ package spaceshiptHunt.level
 	import starling.textures.Texture;
 	import starling.utils.AssetManager;
 	import starling.utils.MathUtil;
-	import starling.utils.MeshUtil;
 	import starling.utils.Pool;
 	import starling.utils.SystemUtil;
 	

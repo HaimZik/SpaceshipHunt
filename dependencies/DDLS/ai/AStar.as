@@ -19,13 +19,13 @@ package DDLS.ai
 		
 		private var closedFaces:Vector.<Boolean> = new <Boolean>[];
 		private var openedFaces:Vector.<Boolean> = new <Boolean>[];
-		private var entryEdges:Vector.<DDLSEdge> =new <DDLSEdge> [];
+		private var entryEdges:Vector.<DDLSEdge> = new <DDLSEdge>[];
 		private var entryX:Vector.<Number> = new <Number>[];
 		private var entryY:Vector.<Number> = new <Number>[];
 		private var scoreF:Vector.<Number> = new <Number>[];
 		private var scoreG:Vector.<Number> = new <Number>[];
 		private var scoreH:Vector.<Number> = new <Number>[];
-		private var predecessor:Vector.<DDLSFace> =new <DDLSFace>[];
+		private var predecessor:Vector.<DDLSFace> = new <DDLSFace>[];
 		
 		private var __iterEdge:IteratorFromFaceToInnerEdges;
 		
@@ -87,7 +87,7 @@ package DDLS.ai
 		public function findPath(fromX:Number, fromY:Number, toX:Number, toY:Number, resultListFaces:Vector.<DDLSFace>, resultListEdges:Vector.<DDLSEdge>):void
 		{
 			//trace("findPath");
-			closedFaces.length=openedFaces.length=entryX.length=entryY.length=entryEdges.length=predecessor.length=scoreF.length=scoreG.length=scoreH.length=DDLSFace.largestID;
+			closedFaces.length = openedFaces.length = entryX.length = entryY.length = entryEdges.length = predecessor.length = scoreF.length = scoreG.length = scoreH.length = DDLSFace.largestID;
 			priorityQueue.reset();
 			var fromFace:DDLSFace;
 			var toFace:DDLSFace;
@@ -110,9 +110,9 @@ package DDLS.ai
 				
 				fromFace = locEdge.leftFace;
 			}
-			else
+			else if (!(fromFace = loc as DDLSFace))
 			{
-				fromFace = loc as DDLSFace;
+				return;
 			}
 			//
 			loc = DDLSGeom2D.locatePosition(toX, toY, _mesh);
@@ -130,9 +130,13 @@ package DDLS.ai
 				}
 			}
 			else if ((locEdge = loc as DDLSEdge))
+			{
 				toFace = locEdge.leftFace;
-			else
-				toFace = loc as DDLSFace;
+			}
+			else if (!(toFace = loc as DDLSFace))
+			{
+				return;
+			}
 			
 			/*__fromFace.colorDebug = 0xFF0000;
 			   __toFace.colorDebug = 0xFF0000;

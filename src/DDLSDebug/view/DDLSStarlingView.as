@@ -65,8 +65,8 @@ package DDLSDebug.view
 			while ((vertex = iterVertices.next()) != null)
 			{
 				dictVerticesDone[vertex] = true;
-				if (!vertexIsInsideAABB(vertex, mesh))
-					continue;
+		//		if (!vertexIsInsideAABB(vertex, mesh))
+			//		continue;
 				
 				//_vertices.graphics.lineStyle(0, 0);
 				//_vertices.graphics.beginFill(0x0000FF, 1);
@@ -99,6 +99,7 @@ package DDLSDebug.view
 							if (incomingEdge.isConstrained)
 							{
 								//_constraints.graphics.lineStyle(2, 0xFF0000, 1, false, LineScaleMode.NONE);
+							var lineAlpha:Number = 0.5;
 								graphics.moveTo(incomingEdge.originVertex.pos.x, incomingEdge.originVertex.pos.y);
 								destinationX = incomingEdge.destinationVertex.pos.x;
 								destinationY = incomingEdge.destinationVertex.pos.y;

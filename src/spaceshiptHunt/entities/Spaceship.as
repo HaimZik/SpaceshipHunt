@@ -78,7 +78,7 @@ package spaceshiptHunt.entities
 			engineLocation = Vec2.get(bodyDescription.engineLocation.x, bodyDescription.engineLocation.y);
 			maxAcceleration = body.mass * 8;
 			maxAngularAcceleration = body.mass * 180;
-			if (SystemUtil.isDesktop)
+		//	if (SystemUtil.isDesktop)
 			{
 				addFireParticle();
 			}
