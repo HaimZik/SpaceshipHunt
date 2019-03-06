@@ -137,7 +137,7 @@ package DDLS.ai
 			{
 				return true;
 			}
-			return DDLSGeom2D.isCircleIntersectingAnyConstraint(_entity.x + directionX, _entity.x + directionY, _entity.radius, _mesh);
+			return DDLSGeom2D.isCircleIntersectingAnyConstraint(_entity.x + directionX*2, _entity.y + directionY*2, _entity.radius, _mesh);
 		}
 	
 	}

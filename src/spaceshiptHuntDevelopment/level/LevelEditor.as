@@ -206,10 +206,12 @@ package spaceshiptHuntDevelopment.level
 		{
 			if (displayNavMesh)
 			{
-				cleanDebugView();
+				cleanDebugView();	
+				navMeshDebugView.canvas.removeFromParent();
 			}
 			else
 			{
+				mainDisplay.addChild(navMeshDebugView.canvas);
 				drawNavMesh();
 			}
 			displayNavMesh = !displayNavMesh;
@@ -494,6 +496,7 @@ package spaceshiptHuntDevelopment.level
 			navMeshDebugView.cleanPaths();
 			navMeshDebugView.cleanEntities();
 			navMeshDebugView.cleanMesh();
+			navMeshDebugView.canvas.removeFromParent();
 		}
 		
 		protected function findBodyInfoById(id:int):BodyInfo

@@ -5,8 +5,8 @@ package DDLS.data.math
 		
 		private var _originalSeed:int;
 		private var _currSeed:int;
-		private var _rangeMin:int;
-		private var _rangeMax:int;
+		public var rangeMin:int;
+		public var rangeMax:int;
 		
 		private var _numIter:int;
 		//private var _tempString:String;
@@ -14,19 +14,15 @@ package DDLS.data.math
 		public function DDLSRandGenerator(seed:int=1234, rangeMin:int=0, rangeMax:int=1)
 		{
 			_originalSeed = _currSeed = seed;
-			_rangeMin = rangeMin;
-			_rangeMax = rangeMax;
+			this.rangeMin = rangeMin;
+			this.rangeMax = rangeMax;
 			
 			_numIter = 0;
 		}
 		
 		public function set seed(value:int):void		{	_originalSeed = _currSeed = value;		}
-		public function set rangeMin(value:int):void	{	_rangeMin = value;	}
-		public function set rangeMax(value:int):void	{	_rangeMax = value;	}
 		
 		public function get seed():int					{		return _originalSeed;	}
-		public function get rangeMin():int				{		return _rangeMin;		}
-		public function get rangeMax():int				{		return _rangeMax;		}
 		
 		public function reset():void
 		{
@@ -34,7 +30,8 @@ package DDLS.data.math
 			_numIter = 0;
 		}
 		
-		public function next():int
+		[inline]
+		public final function next():int
 		{
 			//_tempString = (_currSeed*_currSeed).toString();
 			//
@@ -56,7 +53,7 @@ package DDLS.data.math
 				//reset();
 				
 			//fix for bad performance
-			return _rangeMin+int(Math.random()*_rangeMax);
+			return rangeMin+int(Math.random()*rangeMax);
 		}
 
 	}

@@ -40,7 +40,7 @@ package DDLS.data.math
 			
 			if (!_randGen)
 				_randGen = new DDLSRandGenerator();
-			_randGen.seed = x * 10 + 4 * y;
+			//_randGen.seed = x * 10 + 4 * y;
 			
 			var i:int;
 			var numSamples:int = Math.pow(mesh.__vertices.length, 1 / 3);
@@ -124,9 +124,14 @@ package DDLS.data.math
 				}
 			}
 			else if (loc is DDLSEdge)
+			{
 				face = (loc as DDLSEdge).leftFace;
-			else
-				face = loc as DDLSFace;
+			}
+			else if (!(face = loc as DDLSFace))
+			{
+				return true;
+			}
+			
 			
 			// if a vertex is in the circle, a contrainst must intersect the circle
 			// because a vertex always belongs to a contrained edge

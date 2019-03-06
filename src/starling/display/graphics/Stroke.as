@@ -51,7 +51,6 @@ package starling.display.graphics
 			}
 			else
 				_line = new Vector.<StrokeVertex>;
-				
 			_numVertices = 0;
 			setGeometryInvalid();
 			_hasDegenerates = false;

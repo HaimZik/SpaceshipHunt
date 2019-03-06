@@ -16,6 +16,7 @@ package DDLSDebug.view
 	import starling.display.graphics.Stroke;
 	import starling.filters.FragmentFilter;
 	import starling.textures.TextureSmoothing;
+	import starling.utils.Color;
 	
 	/**
 	 * ...
@@ -36,8 +37,8 @@ package DDLSDebug.view
 			paths = new Stroke();
 			canvas.addChild(graphics);
 			canvas.addChild(paths);
-			var filter:FragmentFilter = new FragmentFilter();
-			filter.textureSmoothing = TextureSmoothing.NONE;
+			//var filter:FragmentFilter = new FragmentFilter();
+		//	filter.textureSmoothing = TextureSmoothing.NONE;
 			//filter.resolution = 0.5;
 			//canvas.filter = filter;
 		}
@@ -124,6 +125,8 @@ package DDLSDebug.view
 			super.cleanMesh();
 			graphics.clear();
 		}
+		
+//		public function dispose
 		
 		override public function cleanPaths():void
 		{
