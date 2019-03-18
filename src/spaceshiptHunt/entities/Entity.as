@@ -79,8 +79,8 @@ package spaceshiptHunt.entities
 		
 		CONFIG::debug
 		{
-			import DDLSDebug.view.DDLSStarlingView;		
-			public function drawDebug(canvas:DDLSStarlingView):void
+			import DDLSDebug.view.DDLSView;		
+			public function drawDebug(canvas:DDLSView):void
 			{
 				canvas.drawEntity(pathfindingAgent, false);
 			}

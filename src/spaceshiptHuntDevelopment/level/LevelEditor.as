@@ -1,7 +1,9 @@
 package spaceshiptHuntDevelopment.level
 {
 	import DDLS.data.DDLSObject;
+	import DDLSDebug.view.DDLSSimpleView;
 	import DDLSDebug.view.DDLSStarlingView;
+	import DDLSDebug.view.DDLSView;
 	import flash.display.Bitmap;
 	import flash.display.Loader;
 	import flash.events.Event;
@@ -22,8 +24,10 @@ package spaceshiptHuntDevelopment.level
 	import nape.shape.Polygon;
 	import nape.util.ShapeDebug;
 	import spaceshiptHunt.entities.BodyInfo;
+	import spaceshiptHunt.entities.Enemy;
 	import spaceshiptHunt.entities.Entity;
 	import spaceshiptHunt.entities.PhysicsParticle;
+	import spaceshiptHunt.entities.Spaceship;
 	import spaceshiptHunt.level.Environment;
 	import starling.core.Starling;
 	import starling.display.Canvas;
@@ -62,7 +66,7 @@ package spaceshiptHuntDevelopment.level
 		private var currentPoly:starling.geom.Polygon;
 		private var lastObstacleId:int = -1;
 		private var napeDebug:ShapeDebug;
-		private var navMeshDebugView:DDLSStarlingView;
+		private var navMeshDebugView:DDLSView;
 		private var lastViewCenter:Point = new Point(0, 0);
 		private var displayNavMesh:Boolean = true;
 		private var lastDebugDraw:Number = 0;
@@ -83,10 +87,12 @@ package spaceshiptHuntDevelopment.level
 			navShape = new Dictionary();
 			verticesDisplay = new Canvas();
 			var stage:Stage = Starling.current.stage;
-			navMeshDebugView = new DDLSStarlingView();
+			var flashView:DDLSSimpleView;
+			navMeshDebugView = flashView = new DDLSSimpleView();
+			;
+			Starling.current.nativeOverlay.addChild(flashView.surface);
 //			navMeshDebugView.surface.mouseEnabled = false;
-			mainDisplay.addChild(navMeshDebugView.canvas);
-			//	Starling.current.nativeOverlay.addChild(navMeshDebugView.surface);
+			//mainDisplay.addChild(navMeshDebugView.canvas);
 			//napeDebug = new ShapeDebug(stage.stageWidth, stage.stageHeight, 0x33333333);
 			//Starling.current.nativeOverlay.addChild(napeDebug.display);
 			Key.addKeyUpCallback(Keyboard.N, switchNavMeshView);
@@ -186,10 +192,41 @@ package spaceshiptHuntDevelopment.level
 					if (BodyInfo.list[i] is Entity)
 					{
 						(BodyInfo.list[i] as Entity).drawDebug(navMeshDebugView);
+						if (BodyInfo.list[i] is Spaceship)
+						{
+							var agent:Enemy = (BodyInfo.list[i] as Enemy);
+							if (Key.isDown(Keyboard.U))
+							{
+								var path:Vector.<Number> = agent.path;
+								if (path.length > 2)
+								{
+									agent.findPathTo(path[path.length - 2], path[path.length - 1], path);
+									if (!isPathValid(path))
+									{
+									agent.findPathTo(path[path.length - 2], path[path.length - 1], path);
+										trace("invaild " + agent.body.id);
+									}
+								}
+							}
+						}
 					}
 				}
-					//	navMeshDebugView.surface.transform.matrix = mainDisplay.transformationMatrix;
+				(navMeshDebugView as DDLSSimpleView).surface.transform.matrix = mainDisplay.transformationMatrix;
 			}
+		}
+		
+		protected function isPathValid(path:Vector.<Number>):Boolean
+		{
+			for (var i:int = 0; i < path.length-2; i+=1)
+			{
+				var fromX:Number = path[i];
+				var fromY:Number = path[++i];
+				if (hitTestLine(fromX, fromY,path[i+1]-fromX,path[i+2]-fromY))
+				{
+					return false;
+				}
+			}
+			return true;
 		}
 		
 		override protected function syncTransforms():void
@@ -197,8 +234,7 @@ package spaceshiptHuntDevelopment.level
 			super.syncTransforms();
 			if (displayNavMesh)
 			{
-//			navMeshDebugView.surface.transform.matrix = mainDisplay.transformationMatrix;
-				//navMeshDebugView.canvas.transformationMatrix = mainDisplay.transformationMatrix;
+				(navMeshDebugView as DDLSSimpleView).surface.transform.matrix = mainDisplay.transformationMatrix;
 			}
 		}
 		
@@ -206,12 +242,18 @@ package spaceshiptHuntDevelopment.level
 		{
 			if (displayNavMesh)
 			{
-				cleanDebugView();	
-				navMeshDebugView.canvas.removeFromParent();
+				cleanDebugView();
+				if (navMeshDebugView is DDLSStarlingView)
+				{
+					(navMeshDebugView as DDLSStarlingView).canvas.removeFromParent();
+				}
 			}
 			else
 			{
-				mainDisplay.addChild(navMeshDebugView.canvas);
+				if (navMeshDebugView is DDLSStarlingView)
+				{
+					mainDisplay.addChild((navMeshDebugView as DDLSStarlingView).canvas);
+				}
 				drawNavMesh();
 			}
 			displayNavMesh = !displayNavMesh;
@@ -496,7 +538,10 @@ package spaceshiptHuntDevelopment.level
 			navMeshDebugView.cleanPaths();
 			navMeshDebugView.cleanEntities();
 			navMeshDebugView.cleanMesh();
-			navMeshDebugView.canvas.removeFromParent();
+			if (navMeshDebugView is DDLSStarlingView)
+			{
+				(navMeshDebugView as DDLSStarlingView).canvas.removeFromParent();
+			}
 		}
 		
 		protected function findBodyInfoById(id:int):BodyInfo

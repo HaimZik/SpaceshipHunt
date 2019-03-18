@@ -11,12 +11,12 @@ package DDLSDebug.view
 	import flash.display.Sprite;
 	import flash.utils.Dictionary;
 	
-	public class View
+	public class DDLSView
 	{
 		protected var _showVerticesIndices:Boolean = false;
 		protected var _vertices:flash.display.Sprite = new Sprite();
 		
-		public function View()
+		public function DDLSView()
 		{
 		
 		}

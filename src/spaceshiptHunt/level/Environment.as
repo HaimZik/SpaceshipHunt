@@ -234,10 +234,10 @@ package spaceshiptHunt.level
 			pathfinder.findPath(x, y, outPath);
 		}
 		
-		public function hitTestLine(fromEntity:DDLSEntityAI, directionX:Number, directionY:Number):Boolean
+		public function hitTestLine(fromX:Number,fromY:Number, directionX:Number, directionY:Number):Boolean
 		{
-			rayHelper.origin.x = fromEntity.x;
-			rayHelper.origin.y = fromEntity.y;
+			rayHelper.origin.x = fromX;
+			rayHelper.origin.y = fromY;
 			rayHelper.direction.x = directionX;
 			rayHelper.direction.y = directionY;
 			rayHelper.maxDistance = rayHelper.direction.length;

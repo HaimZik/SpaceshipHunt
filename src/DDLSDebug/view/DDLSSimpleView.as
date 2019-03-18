@@ -14,20 +14,18 @@ package DDLSDebug.view
 	import flash.geom.Rectangle;
 	import flash.utils.Dictionary;
 	
-	public class DDLSSimpleView extends View
+	public class DDLSSimpleView extends DDLSView
 	{
 		protected var drawCommands:Vector.<int>;
 		protected var lineCoord:Vector.<Number>;
 		
 		protected var _edges:Sprite;
 		protected var _constraints:Sprite;
-		protected var _vertices:Sprite;
+//		protected var _vertices:Sprite;
 		protected var _paths:Sprite;
 		protected var _entities:Sprite;
 		
 		protected var _surface:Sprite;
-		
-		protected var _showVerticesIndices:Boolean = false;
 		
 		public function DDLSSimpleView()
 		{
@@ -36,7 +34,7 @@ package DDLSDebug.view
 			_paths = new Sprite();
 			_entities = new Sprite();
 			_surface = new Sprite();
-			//_surface.addChild(_edges);
+			_surface.addChild(_edges);
 			_surface.addChild(_constraints);
 			//	_surface.addChild(_vertices);
 			_surface.addChild(_paths);
@@ -96,6 +94,7 @@ package DDLSDebug.view
 				
 				iterEdges.fromVertex = vertex;
 				incomingEdge = iterEdges.next();
+				_edges.graphics.lineStyle(1, 0x999999, 1, false, LineScaleMode.NONE);
 				while (incomingEdge)
 				{
 					if (!dictVerticesDone[incomingEdge.originVertex])
@@ -114,9 +113,8 @@ package DDLSDebug.view
 							}
 							else
 							{
-								//_edges.graphics.lineStyle(1, 0x999999, 1, false, LineScaleMode.NONE);
-								//_edges.graphics.moveTo(incomingEdge.originVertex.pos.x, incomingEdge.originVertex.pos.y);
-								//_edges.graphics.lineTo(incomingEdge.destinationVertex.pos.x, incomingEdge.destinationVertex.pos.y);
+							_edges.graphics.moveTo(incomingEdge.originVertex.pos.x, incomingEdge.originVertex.pos.y);
+							_edges.graphics.lineTo(incomingEdge.destinationVertex.pos.x, incomingEdge.destinationVertex.pos.y);
 							}
 						}
 					}
@@ -170,13 +168,15 @@ package DDLSDebug.view
 			_constraints.graphics.clear();
 		}
 		
-		public function cleanPaths():void
+		override public function cleanPaths():void 
 		{
+			super.cleanPaths();
 			_paths.graphics.clear();
 		}
 		
-		public function cleanEntities():void
+		override public function cleanEntities():void 
 		{
+			super.cleanEntities();
 			_entities.graphics.clear();
 		}
 	

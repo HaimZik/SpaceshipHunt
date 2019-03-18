@@ -22,7 +22,7 @@ package DDLSDebug.view
 	 * ...
 	 * @author Haim Shnitzer
 	 */
-	public class DDLSStarlingView extends View
+	public class DDLSStarlingView extends DDLSView
 	{
 		public var canvas:Sprite;
 		protected var graphics:Stroke;

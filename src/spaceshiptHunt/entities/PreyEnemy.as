@@ -187,9 +187,9 @@ package spaceshiptHunt.entities
 		
 		CONFIG::debug
 		{
-			import DDLSDebug.view.DDLSStarlingView;
+			import DDLSDebug.view.DDLSView;
 			
-			override public function drawDebug(canvas:DDLSStarlingView):void
+			override public function drawDebug(canvas:DDLSView):void
 			{
 				super.drawDebug(canvas);
 				canvas.drawPath(playerPredictedPath, false, Color.BLUE);
