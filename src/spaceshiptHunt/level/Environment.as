@@ -232,9 +232,70 @@ package spaceshiptHunt.level
 			pathfinder.entity = pathfindingAgent;
 			//	trace(pathfindingAgent.approximateObject.id);
 			pathfinder.findPath(x, y, outPath);
+			if (outPath.length > 2)
+			{
+				fixPath(outPath);
+			}
 		}
 		
-		public function hitTestLine(fromX:Number,fromY:Number, directionX:Number, directionY:Number):Boolean
+		protected function fixPath(path:Vector.<Number>, maxFix:int = 4):void
+		{
+			var blockedPart:int = findBlockedWay(path);
+			if (blockedPart != -1)
+			{
+				maxFix--;
+				if (maxFix == 0 || blockedPart == 0)
+				{
+					path.length = 0;
+					return;
+				}
+			}
+			else
+			{
+				return;
+			}
+			var offset:int = -2;
+			var fromX:Number = path[blockedPart + offset];
+			var fromY:Number = path[blockedPart + 1 + offset];
+			var toX:Number = path[path.length - 2];
+			var toY:Number = path[path.length - 1];
+			var badPath:Vector.<Number> = new Vector.<Number>();
+			if (maxFix == 1)
+			{
+				pathfinder.findPathFrom(fromX, fromY, toX, toY, badPath);
+			}
+			//agent.findPathTo(path[path.length - 2], path[path.length - 1], path);
+			pathfinder.findPathFrom(fromX, fromY, toX, toY, badPath);
+			fixPath(badPath, maxFix);
+			path.length = blockedPart + badPath.length;
+			for (var i:int = blockedPart - offset; i < path.length; i++)
+			{
+				path[i] = badPath[i - blockedPart + offset];
+			}
+			
+			//	var refind:int = findBlockedWay(badPath);
+			//	if (refind != -1)
+			{
+				//trace(blockedPart + " fromX:" + fromX + " fromY:" + fromY + " toX:" + toX + " toY:" + toY + " invaild " + agent.body.id);
+				//	pathfinder.findPathDebug(fromX, fromY, toX, toY, badPath);
+			}
+		}
+		
+		protected function findBlockedWay(path:Vector.<Number>):int
+		{
+			for (var i:int = 0; i < path.length - 2; i++)
+			{
+				var fromX:Number = path[i];
+				var fromY:Number = path[++i];
+				if (hitTestLine(fromX, fromY, path[i + 1] - fromX, path[i + 2] - fromY))
+				{
+					return i - 1;
+				}
+			}
+			return -1;
+		}
+		
+		public function hitTestLine(fromX:Number, fromY:Number, directionX:Number, directionY:Number):Boolean
 		{
 			rayHelper.origin.x = fromX;
 			rayHelper.origin.y = fromY;
@@ -464,7 +525,7 @@ package spaceshiptHunt.level
 			}
 		}
 		
-		protected function syncTransforms():void 
+		protected function syncTransforms():void
 		{
 			Game.aboveSpaceshipsLayer.transformationMatrix = mainDisplay.transformationMatrix;
 			Game.underSpaceshipsLayer.transformationMatrix = mainDisplay.transformationMatrix;

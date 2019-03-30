@@ -67,9 +67,9 @@ package DDLS.ai
 			{
 				throw new Error("Entity missing");
 			}
-			resultPath.length = 0;
 			_astar.radius = _entity.radius;
 			_funnel.radius = _entity.radius;
+			resultPath.length = 0;
 			__listFaces.length = 0;
 			__listEdges.length = 0;
 			if (DDLSGeom2D.isCircleIntersectingAnyConstraint(toX, toY, _entity.radius, _mesh))
@@ -133,11 +133,23 @@ package DDLS.ai
 		
 		private function isPathBlocked(directionX:Number, directionY:Number):Boolean
 		{
-			if (!(directionX == 0 && directionY==0) && hitTester.hitTestLine(_entity.x,_entity.y, directionX , directionY))
+			if (!(directionX == 0 && directionY == 0) && hitTester.hitTestLine(_entity.x, _entity.y, directionX, directionY))
 			{
 				return true;
 			}
 			return DDLSGeom2D.isCircleIntersectingAnyConstraint(_entity.x + directionX, _entity.y + directionY, _entity.radius, _mesh);
+		}
+		
+		public function findPathFrom(fromX:Number, fromY:Number, toX:Number, toY:Number, resultPath:Vector.<Number>):void
+		{
+			resultPath.length = 0;
+			__listFaces.length = 0;
+			__listEdges.length = 0;
+			_astar.findPath(fromX, fromY, toX, toY, __listFaces, __listEdges);
+			if (__listFaces.length != 0)
+			{
+				_funnel.findPath(fromX, fromY, toX, toY, __listFaces, __listEdges, resultPath);
+			}
 		}
 	
 	}

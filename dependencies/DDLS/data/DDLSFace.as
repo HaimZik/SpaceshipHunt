@@ -10,8 +10,6 @@ package DDLS.data
 		
 		private var _isReal:Boolean;
 		
-		public var colorDebug:int = -1;
-		
 		public static function getFaceByID(faceID:int):DDLSFace
 		{
 			return face[faceID];

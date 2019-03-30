@@ -55,8 +55,6 @@ package DDLS.data
 
 		private var _fromConstraintSegments:Vector.<DDLSConstraintSegment>;
 		
-		public var colorDebug:int = -1;
-		
 		public function DDLSEdge()
 		{
 			_id = INC;

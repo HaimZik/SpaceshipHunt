@@ -27,7 +27,6 @@ package spaceshiptHuntDevelopment.level
 	import spaceshiptHunt.entities.Enemy;
 	import spaceshiptHunt.entities.Entity;
 	import spaceshiptHunt.entities.PhysicsParticle;
-	import spaceshiptHunt.entities.Spaceship;
 	import spaceshiptHunt.level.Environment;
 	import starling.core.Starling;
 	import starling.display.Canvas;
@@ -68,7 +67,7 @@ package spaceshiptHuntDevelopment.level
 		private var napeDebug:ShapeDebug;
 		private var navMeshDebugView:DDLSView;
 		private var lastViewCenter:Point = new Point(0, 0);
-		private var displayNavMesh:Boolean = true;
+		private var displayNavMesh:Boolean = false;
 		private var lastDebugDraw:Number = 0;
 		
 		CONFIG::air
@@ -192,41 +191,10 @@ package spaceshiptHuntDevelopment.level
 					if (BodyInfo.list[i] is Entity)
 					{
 						(BodyInfo.list[i] as Entity).drawDebug(navMeshDebugView);
-						if (BodyInfo.list[i] is Spaceship)
-						{
-							var agent:Enemy = (BodyInfo.list[i] as Enemy);
-							if (Key.isDown(Keyboard.U))
-							{
-								var path:Vector.<Number> = agent.path;
-								if (path.length > 2)
-								{
-									agent.findPathTo(path[path.length - 2], path[path.length - 1], path);
-									if (!isPathValid(path))
-									{
-									agent.findPathTo(path[path.length - 2], path[path.length - 1], path);
-										trace("invaild " + agent.body.id);
-									}
-								}
-							}
-						}
 					}
 				}
 				(navMeshDebugView as DDLSSimpleView).surface.transform.matrix = mainDisplay.transformationMatrix;
 			}
-		}
-		
-		protected function isPathValid(path:Vector.<Number>):Boolean
-		{
-			for (var i:int = 0; i < path.length-2; i+=1)
-			{
-				var fromX:Number = path[i];
-				var fromY:Number = path[++i];
-				if (hitTestLine(fromX, fromY,path[i+1]-fromX,path[i+2]-fromY))
-				{
-					return false;
-				}
-			}
-			return true;
 		}
 		
 		override protected function syncTransforms():void

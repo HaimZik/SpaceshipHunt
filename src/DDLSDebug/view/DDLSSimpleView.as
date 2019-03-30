@@ -38,7 +38,7 @@ package DDLSDebug.view
 			_surface.addChild(_constraints);
 			//	_surface.addChild(_vertices);
 			_surface.addChild(_paths);
-			//	_surface.addChild(_entities);
+			_surface.addChild(_entities);
 			drawCommands = new Vector.<int>();
 			lineCoord = new Vector.<Number>();
 		}
@@ -113,8 +113,8 @@ package DDLSDebug.view
 							}
 							else
 							{
-							_edges.graphics.moveTo(incomingEdge.originVertex.pos.x, incomingEdge.originVertex.pos.y);
-							_edges.graphics.lineTo(incomingEdge.destinationVertex.pos.x, incomingEdge.destinationVertex.pos.y);
+						//	_edges.graphics.moveTo(incomingEdge.originVertex.pos.x, incomingEdge.originVertex.pos.y);
+						//	_edges.graphics.lineTo(incomingEdge.destinationVertex.pos.x, incomingEdge.destinationVertex.pos.y);
 							}
 						}
 					}
@@ -130,7 +130,7 @@ package DDLSDebug.view
 		{
 			super.drawEntity(entity, cleanBefore);
 			_entities.graphics.lineStyle(1, 0x00FF00, 1, false, LineScaleMode.NONE);
-			_entities.graphics.beginFill(0x00FF00, 0.5);
+			_entities.graphics.beginFill(0x00FF00, 0.1);
 			_entities.graphics.drawCircle(entity.x, entity.y, entity.radius);
 			_entities.graphics.endFill();
 		}

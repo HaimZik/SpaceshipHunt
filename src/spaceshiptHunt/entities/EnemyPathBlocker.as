@@ -22,6 +22,7 @@ package spaceshiptHunt.entities
 		protected var minDisatnceFromWall:Number;
 		protected var lastBackwardBlockedCheck:Number;
 		protected var _isBackwardBlocked:Boolean = false;
+		protected var dodgeDirX:Number = 1;
 		protected var backwardBlockedCheckRate:Number;
 		
 		public function EnemyPathBlocker(position:Vec2)
@@ -61,6 +62,7 @@ package spaceshiptHunt.entities
 			body.applyAngularImpulse(maxAngularAcceleration * rotaDiff);
 			if (bulletsLeft > 0)
 			{
+				dodge(0.5);
 				if (Math.abs(rotaDiff) < aimAccuracy / 2)
 				{
 					currentAction = attackPlayer;
@@ -70,9 +72,32 @@ package spaceshiptHunt.entities
 					currentAction = goToPlayerPath;
 				}
 			}
-			else if (Starling.juggler.elapsedTime - lastReloadTime > reloadTime)
+			else
 			{
-				bulletsLeft += maxBullets;
+				dodge(1);
+				if (Starling.juggler.elapsedTime - lastReloadTime > reloadTime)
+				{
+					bulletsLeft += maxBullets;
+				}
+			}
+		}
+		
+		protected function dodge(speed:Number = 1):void
+		{
+			var dirVec:Vec2 = Vec2.fromPolar(pathfindingAgent.radius, body.rotation * dodgeDirX);
+			tempRay.origin.set(body.position).addeq(dirVec);
+			tempRay.direction.set(dirVec);
+			tempRay.maxDistance = 100;
+			dirVec.dispose();
+			var rayResult:RayResult = body.space.rayCast(tempRay, false);
+			if (rayResult == null)
+			{
+				impulse.x = 1 * dodgeDirX;
+			}
+			else
+			{
+				dodgeDirX *= -1;
+				rayResult.dispose();
 			}
 		}
 		

@@ -52,12 +52,16 @@ package spaceshiptHunt.entities
 		protected var lifebarBackground:Quad;
 		protected var lastReloadTime:Number;
 		protected var reloadTime:Number = 2.5;
+		protected var skewSpeed:Number;
+		public var impulse:Vec2;
 		private var shootingCallId:uint;
 		
 		public function Spaceship(position:Vec2)
 		{
 			super(position);
 			bulletsLeft = maxBullets;
+			skewSpeed = 0.2;
+			impulse = new Vec2();
 			weaponsPlacement = new Dictionary(true);
 		}
 		
@@ -106,6 +110,17 @@ package spaceshiptHunt.entities
 			for (var i:int = 0; i < attachedTransforms.length; i++)
 			{
 				attachedTransforms[i].update();
+			}
+		}
+		
+		override public function update():void 
+		{
+			super.update();
+			graphics.skewY = graphics.skewY * (1.0 - skewSpeed) + (impulse.x * 0.4) * skewSpeed;
+			if (impulse.length != 0)
+			{
+				body.applyImpulse(impulse.mul(maxAcceleration, true).rotate(body.rotation));
+				impulse.setxy(0.0, 0.0);
 			}
 		}
 		
@@ -191,7 +206,7 @@ package spaceshiptHunt.entities
 		public function findPathToEntity(entity:DDLSEntityAI, outPath:Vector.<Number>):void
 		{
 		//	trace("findPathTo Entity " + entity.approximateObject.id + " from entity " + pathfindingAgent.approximateObject.id);
-			var diraction:Vec2 = Vec2.weak(entity.x - _pathfindingAgent.x, entity.y - _pathfindingAgent.y);
+			var diraction:Vec2 = Vec2.weak(entity.x - pathfindingAgent.x, entity.y - pathfindingAgent.y);
 			diraction.length = pathfindingAgent.radius + entity.radius + pathfindingAgentSafeDistance * 2 + 2;
 			findPathTo(entity.x - diraction.x, entity.y - diraction.y, outPath);
 			for (var i:int = 0; i < 3; i++)

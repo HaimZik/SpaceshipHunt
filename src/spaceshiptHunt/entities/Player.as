@@ -12,18 +12,14 @@ package spaceshiptHunt.entities
 	public class Player extends Spaceship
 	{
 		
-		public var impulse:Vec2;
 		public var maxTurningAcceleration:Number;
-		protected var skewSpeed:Number;
 		private static var _current:Player = new Player(new Vec2());
 		
 		public function Player(position:Vec2)
 		{
 			//normally should be called by Player.current
 			super(position);
-			impulse = Vec2.get(0, 0);
 			weaponsPlacement["fireCannon"] = Vec2.get(16, -37);
-			skewSpeed = 0.2;
 			fireColor = Color.AQUA;
 		}
 		
@@ -62,21 +58,6 @@ package spaceshiptHunt.entities
 		{
 			super.dispose();
 			body.shapes.clear();
-		}
-		
-		override public function update():void
-		{
-			super.update();
-			graphics.skewY = graphics.skewY * (1.0 - skewSpeed) + (impulse.x * 0.4) * skewSpeed;
-			if (impulse.length != 0)
-			{
-				body.applyImpulse(impulse.mul(maxAcceleration, true).rotate(body.rotation));
-				impulse.setxy(0.0, 0.0);
-			}
-			//if (body.velocity.length > 500)
-			//{
-			//body.velocity.length = 500;
-			//}			
 		}
 	
 	}

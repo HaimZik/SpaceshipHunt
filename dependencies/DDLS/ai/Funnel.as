@@ -52,7 +52,7 @@ package DDLS.ai
 		private var _currPoolPointsIndex:int = 0;
 		private var __point:DDLSPoint2D;
 		
-		public function getPoint(x:Number = 0, y:Number = 0):DDLSPoint2D
+		private function getPoint(x:Number = 0, y:Number = 0):DDLSPoint2D
 		{
 			__point = _poolPoints[_currPoolPointsIndex];
 			__point.set(x, y);

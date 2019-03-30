@@ -16,17 +16,17 @@ package spaceshiptHunt.entities
 	
 	public class Entity extends BodyInfo
 	{
-		protected var _pathfindingAgent:DDLSEntityAI;
+		public var pathfindingAgent:DDLSEntityAI;
 		static protected var pathfindingAgentSafeDistance:Number = 30;
 		protected var pathUpdateInterval:int = 48;
 		
 		public function Entity(position:Vec2)
 		{
 			super(position);
-			_pathfindingAgent = new DDLSEntityAI();
-			_pathfindingAgent.x = position.x;
-			_pathfindingAgent.y = _pathfindingAgent.y;
-		    graphics = new Sprite();
+			pathfindingAgent = new DDLSEntityAI();
+			pathfindingAgent.x = position.x;
+			pathfindingAgent.y = position.y;
+			graphics = new Sprite();
 		}
 		
 		override public function init(bodyDescription:Object):void
@@ -70,11 +70,6 @@ package spaceshiptHunt.entities
 		{
 			(graphics as DisplayObjectContainer).removeChildren(0, -1, true);
 			super.dispose();
-		}
-		
-		public function get pathfindingAgent():DDLSEntityAI
-		{
-			return _pathfindingAgent;
 		}
 		
 		CONFIG::debug
