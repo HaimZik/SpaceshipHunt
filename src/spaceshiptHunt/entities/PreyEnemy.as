@@ -54,10 +54,10 @@ package spaceshiptHunt.entities
 				{
 					graphics.alpha += 0.025;
 				}
-				if (body.space.timeStamp - playerPathCheckTime > pathUpdateInterval)
+				if (timeStamp - playerPathCheckTime > pathUpdateInterval)
 				{
 					Player.current.findPathToEntity(pathfindingAgent, _playerPredictedPath);
-					playerPathCheckTime = body.space.timeStamp;
+					playerPathCheckTime = timeStamp;
 				}
 			}
 			else
@@ -66,7 +66,7 @@ package spaceshiptHunt.entities
 				{
 					graphics.alpha -= 0.005;
 				}
-				if (body.space.timeStamp - playerPathCheckTime > pathUpdateInterval)
+				if (timeStamp - playerPathCheckTime > pathUpdateInterval)
 				{
 					var playerPosX:Number = Player.current.pathfindingAgent.x;
 					var playerPosY:Number = Player.current.pathfindingAgent.y;
@@ -75,7 +75,7 @@ package spaceshiptHunt.entities
 					Player.current.findPathToEntity(pathfindingAgent, _playerPredictedPath);
 					Player.current.pathfindingAgent.x = playerPosX;
 					Player.current.pathfindingAgent.y = playerPosY;
-					playerPathCheckTime = body.space.timeStamp;
+					playerPathCheckTime = timeStamp;
 				}
 			}
 			updateArrow();

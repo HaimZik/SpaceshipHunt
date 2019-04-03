@@ -103,15 +103,15 @@ package DDLS.ai
 			// we check the start and goal
 			if (_radius > 0)
 			{
-				var checkFace:DDLSFace = listFaces[0];
+				var checkEdge:DDLSEdge = listFaces[0].edge;
 				var distanceSquared:Number;
 				var distance:Number;
 				var p1:DDLSPoint2D;
 				var p2:DDLSPoint2D;
 				var p3:DDLSPoint2D;
-				p1 = checkFace.edge.originVertex.pos;
-				p2 = checkFace.edge.destinationVertex.pos;
-				p3 = checkFace.edge.nextLeftEdge.destinationVertex.pos;
+				p1 = checkEdge.originVertex.pos;
+				p2 = checkEdge.destinationVertex.pos;
+				p3 = checkEdge.nextLeftEdge.destinationVertex.pos;
 				distanceSquared = (p1.x - fromX) * (p1.x - fromX) + (p1.y - fromY) * (p1.y - fromY);
 				if (distanceSquared <= _radiusSquared)
 				{
@@ -139,10 +139,10 @@ package DDLS.ai
 						}
 					}
 				}
-				checkFace = listFaces[listFaces.length - 1];
-				p1 = checkFace.edge.originVertex.pos;
-				p2 = checkFace.edge.destinationVertex.pos;
-				p3 = checkFace.edge.nextLeftEdge.destinationVertex.pos;
+				checkEdge = listFaces[listFaces.length - 1].edge;
+				p1 = checkEdge.originVertex.pos;
+				p2 = checkEdge.destinationVertex.pos;
+				p3 = checkEdge.nextLeftEdge.destinationVertex.pos;
 				distanceSquared = (p1.x - toX) * (p1.x - toX) + (p1.y - toY) * (p1.y - toY);
 				if (distanceSquared <= _radiusSquared)
 				{

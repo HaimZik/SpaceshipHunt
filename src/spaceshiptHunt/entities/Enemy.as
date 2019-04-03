@@ -91,7 +91,7 @@ package spaceshiptHunt.entities
 		override public function update():void
 		{
 			super.update();
-			if (body.space.timeStamp % 61 == 0 && Player.current.lifePoints!=0)
+			if (timeStamp % 61 == 0 && Player.current.lifePoints!=0)
 			{
 				checkPlayerVisible();
 			}
@@ -229,7 +229,7 @@ package spaceshiptHunt.entities
 						}
 						nextPointPos.length = impulseForce;
 						body.applyImpulse(nextPointPos);
-						if (!Environment.current.meshNeedsUpdate && body.space.timeStamp - pathCheckTime > pathUpdateInterval && isPathBlocked())
+						if (!Environment.current.meshNeedsUpdate && timeStamp - body.space.timeStamp > pathUpdateInterval && isPathBlocked())
 						{
 							Environment.current.meshNeedsUpdate = true;
 							reFindPath();
@@ -254,7 +254,7 @@ package spaceshiptHunt.entities
 		
 		protected function reFindPath():void
 		{
-			pathCheckTime = body.space.timeStamp;
+			pathCheckTime = timeStamp;
 			findPathTo(path[path.length - 2], path.pop(), path);
 			if (path.length > 1)
 			{
@@ -275,10 +275,10 @@ package spaceshiptHunt.entities
 				{
 					nextPoint = -1;
 					currentAction = decideNextAction;
-					if (body.space.timeStamp - pathCheckTime > pathUpdateInterval)
+					if (timeStamp - pathCheckTime > pathUpdateInterval)
 					{
 						Environment.current.meshNeedsUpdate = true;
-						pathCheckTime = body.space.timeStamp;
+						pathCheckTime = timeStamp;
 					}
 				}
 				else

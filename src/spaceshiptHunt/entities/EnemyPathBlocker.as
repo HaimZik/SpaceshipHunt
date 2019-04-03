@@ -48,7 +48,7 @@ package spaceshiptHunt.entities
 		override protected function decideNextAction():void
 		{
 			super.decideNextAction();
-			if (body.space.timeStamp - pathCheckTime > pathUpdateInterval)
+			if (timeStamp - pathCheckTime > pathUpdateInterval)
 			{
 				currentAction = goToPlayerPath;
 			}

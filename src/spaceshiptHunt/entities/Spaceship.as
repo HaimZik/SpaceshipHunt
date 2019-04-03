@@ -22,6 +22,7 @@ package spaceshiptHunt.entities
 	import starling.extensions.PDParticleSystem;
 	import starling.textures.Texture;
 	import starling.utils.Color;
+	import starling.utils.MathUtil;
 	import starling.utils.SystemUtil;
 	
 	public class Spaceship extends Entity
@@ -31,6 +32,7 @@ package spaceshiptHunt.entities
 		public var engineLocation:Vec2;
 		public var armorDefance:Number = 8.0;
 		public var fireColor:uint = Color.WHITE;
+		public var impulse:Vec2;
 		[Embed(source = "JetFire.pex", mimeType = "application/octet-stream")]
 		protected static const JetFireConfig:Class;
 		protected var life:Number;
@@ -53,14 +55,15 @@ package spaceshiptHunt.entities
 		protected var lastReloadTime:Number;
 		protected var reloadTime:Number = 2.5;
 		protected var skewSpeed:Number;
-		public var impulse:Vec2;
+		protected var lastDodge:Number;
+		protected var dodgeCooldown:int;
+		protected var dodgeDuration:int;
 		private var shootingCallId:uint;
 		
 		public function Spaceship(position:Vec2)
 		{
 			super(position);
 			bulletsLeft = maxBullets;
-			skewSpeed = 0.2;
 			impulse = new Vec2();
 			weaponsPlacement = new Dictionary(true);
 		}
@@ -80,9 +83,13 @@ package spaceshiptHunt.entities
 			lifebarTransform.x = -filledLife.width * 0.5;
 			lifebarTransform.y = -Math.max(body.bounds.width, body.bounds.height) * 0.5 - lifebarOffset;
 			engineLocation = Vec2.get(bodyDescription.engineLocation.x, bodyDescription.engineLocation.y);
+			lastDodge = timeStamp;
 			maxAcceleration = body.mass * 8;
 			maxAngularAcceleration = body.mass * 180;
-		//	if (SystemUtil.isDesktop)
+			skewSpeed = 0.2;
+			dodgeCooldown = 20;
+			dodgeDuration = 12;
+			//	if (SystemUtil.isDesktop)
 			{
 				addFireParticle();
 			}
@@ -113,13 +120,34 @@ package spaceshiptHunt.entities
 			}
 		}
 		
-		override public function update():void 
+		override public function update():void
 		{
 			super.update();
-			graphics.skewY = graphics.skewY * (1.0 - skewSpeed) + (impulse.x * 0.4) * skewSpeed;
+			var currentSkew:Number = MathUtilities.angleDifference(graphics.skewY, 0);
+			if (MathUtil.isEquivalent(currentSkew, 0))
+			{
+				currentSkew = 0;
+			}
+			var maxSkew:Number = 0.4;
+			graphics.skewY = currentSkew * (1.0 - skewSpeed) + (impulse.x * maxSkew) * skewSpeed;
 			if (impulse.length != 0)
 			{
-				body.applyImpulse(impulse.mul(maxAcceleration, true).rotate(body.rotation));
+				var timeSinceLastDodge:int = timeStamp - lastDodge;
+				var currentSkewAbs:Number = Math.abs(currentSkew);
+				var isDodging:Boolean = timeSinceLastDodge < dodgeDuration;
+				if (!isDodging && (currentSkewAbs < 0.1 && skewSpeed != 0))
+				{
+					if (timeSinceLastDodge > dodgeCooldown)
+					{
+						lastDodge = timeStamp;
+					}
+				}
+				if (isDodging && currentSkewAbs>0.1)
+				{
+					impulse.x /= Math.abs(currentSkewAbs);
+						//impulse.x*=maxSkew
+				}
+				body.applyImpulse(impulse.muleq(maxAcceleration).rotate(body.rotation));
 				impulse.setxy(0.0, 0.0);
 			}
 		}
@@ -205,7 +233,7 @@ package spaceshiptHunt.entities
 		
 		public function findPathToEntity(entity:DDLSEntityAI, outPath:Vector.<Number>):void
 		{
-		//	trace("findPathTo Entity " + entity.approximateObject.id + " from entity " + pathfindingAgent.approximateObject.id);
+			//	trace("findPathTo Entity " + entity.approximateObject.id + " from entity " + pathfindingAgent.approximateObject.id);
 			var diraction:Vec2 = Vec2.weak(entity.x - pathfindingAgent.x, entity.y - pathfindingAgent.y);
 			diraction.length = pathfindingAgent.radius + entity.radius + pathfindingAgentSafeDistance * 2 + 2;
 			findPathTo(entity.x - diraction.x, entity.y - diraction.y, outPath);
@@ -214,19 +242,19 @@ package spaceshiptHunt.entities
 				if (outPath.length == 0)
 				{
 					diraction.set(diraction.perp(true));
-			//		trace("findPathToEntity " + i);
+					//		trace("findPathToEntity " + i);
 					findPathTo(entity.x - diraction.x, entity.y - diraction.y, outPath);
 				}
 				else
 				{
 					diraction.dispose();
-		//			trace("findPathToEntity end");
+					//			trace("findPathToEntity end");
 					return;
 				}
 			}
 			diraction.dispose();
 			Environment.current.meshNeedsUpdate = true;
-	//		trace("findPathToEntity end");
+			//		trace("findPathToEntity end");
 		}
 		
 		public function onBulletHit(impactForce:Number):void
@@ -244,10 +272,10 @@ package spaceshiptHunt.entities
 			if (!Environment.current.paused)
 			{
 				bulletsLeft -= 1;
-			if (bulletsLeft == 0)
-			{
-				startReload();
-			}
+				if (bulletsLeft == 0)
+				{
+					startReload();
+				}
 				var position:Vec2 = Vec2.get(weaponRight.x + weaponLeft.child.width / 4, weaponRight.y - 5);
 				var bulletVelocity:Vec2 = Vec2.get(0, (bulletSpeed + Math.random() * bulletSpeed) * body.mass);
 				bulletVelocity.angle = body.rotation - Math.PI / 2 + Math.random() * 0.1 + 0.05;
@@ -264,7 +292,7 @@ package spaceshiptHunt.entities
 			}
 		}
 		
-		protected function startReload():void 
+		protected function startReload():void
 		{
 			lastReloadTime = Starling.juggler.elapsedTime;
 		}

@@ -63,6 +63,11 @@ package spaceshiptHunt.entities
 				syncGraphics();
 			}
 		}
+		
+		protected function get timeStamp():int
+		{
+			return body.space.timeStamp;
+		}
 	
 	}
 }

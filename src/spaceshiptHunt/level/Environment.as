@@ -420,8 +420,8 @@ package spaceshiptHunt.level
 				{
 					addMesh(polygonArray[j], bodyInfo.body);
 				}
-				bodyInfo.init(bodyDescription);
 				physicsSpace.bodies.add(bodyInfo.body);
+				bodyInfo.init(bodyDescription);
 				mainDisplay.addChild(bodyInfo.graphics);
 			}
 		}
