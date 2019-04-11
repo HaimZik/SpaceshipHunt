@@ -17,7 +17,7 @@ package DDLS.ai
 		
 		public function DDLSEntityAI()
 		{
-			_radius = 10;
+			radius = 10;
 			_x = _y = 0;
 			_dirNormX = 1;
 			_dirNormY = 0;

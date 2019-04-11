@@ -204,8 +204,9 @@ package spaceshiptHunt.level
 			//camVelocityY = 0;
 			if (!(MathUtil.isEquivalent(camVelocityX, 0, 0.75) && MathUtil.isEquivalent(camVelocityY, 0, 0.75)))
 			{
-				mainDisplay.x -= camVelocityX * 1.0;
-				mainDisplay.y -= camVelocityY * 1.0;
+				var smoothness:Number = 1.0 * (Player.current.isDashing() ? 0.9 : 1);
+				mainDisplay.x -= camVelocityX * smoothness;
+				mainDisplay.y -= camVelocityY * smoothness;
 				didChange = true;
 			}
 			if (didChange)

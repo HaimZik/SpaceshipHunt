@@ -62,7 +62,7 @@ package spaceshiptHunt.entities
 			body.applyAngularImpulse(maxAngularAcceleration * rotaDiff);
 			if (bulletsLeft > 0)
 			{
-				dodge(0.5);
+				dodge(0.3);
 				if (Math.abs(rotaDiff) < aimAccuracy / 2)
 				{
 					currentAction = attackPlayer;
@@ -74,7 +74,7 @@ package spaceshiptHunt.entities
 			}
 			else
 			{
-				dodge(1);
+				dodge();
 				if (Starling.juggler.elapsedTime - lastReloadTime > reloadTime)
 				{
 					bulletsLeft += maxBullets;
@@ -87,12 +87,12 @@ package spaceshiptHunt.entities
 			var dirVec:Vec2 = Vec2.fromPolar(pathfindingAgent.radius, body.rotation * dodgeDirX);
 			tempRay.origin.set(body.position).addeq(dirVec);
 			tempRay.direction.set(dirVec);
-			tempRay.maxDistance = 100;
+			tempRay.maxDistance = 175;
 			dirVec.dispose();
 			var rayResult:RayResult = body.space.rayCast(tempRay, false);
 			if (rayResult == null)
 			{
-				impulse.x = 1 * dodgeDirX;
+				impulse.x = speed * dodgeDirX;
 			}
 			else
 			{

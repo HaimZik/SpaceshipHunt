@@ -30,7 +30,6 @@ package DDLS.ai
 		private var __iterEdge:IteratorFromFaceToInnerEdges;
 		
 		private var _radius:Number;
-		private var _radiusSquared:Number;
 		private var _diameter:Number;
 		private var _diameterSquared:Number;
 		private var facesDone:Dictionary;
@@ -74,7 +73,6 @@ package DDLS.ai
 		public function set radius(value:Number):void
 		{
 			_radius = value;
-			_radiusSquared = _radius * _radius;
 			_diameter = _radius * 2;
 			_diameterSquared = _diameter * _diameter;
 		}
@@ -347,7 +345,6 @@ package DDLS.ai
 			}
 			
 			var dot:Number;
-			var result:Boolean;
 			var distSquared:Number;
 			
 			// if we have a right or obtuse angle on CAB

@@ -55,9 +55,10 @@ package spaceshiptHunt.entities
 		protected var lastReloadTime:Number;
 		protected var reloadTime:Number = 2.5;
 		protected var skewSpeed:Number;
-		protected var lastDodge:Number;
-		protected var dodgeCooldown:int;
-		protected var dodgeDuration:int;
+		protected var lastDash:Number;
+		protected var dashCooldown:int;
+		protected var dashDuration:int;
+		protected var dashThreshold:Number;
 		private var shootingCallId:uint;
 		
 		public function Spaceship(position:Vec2)
@@ -83,12 +84,13 @@ package spaceshiptHunt.entities
 			lifebarTransform.x = -filledLife.width * 0.5;
 			lifebarTransform.y = -Math.max(body.bounds.width, body.bounds.height) * 0.5 - lifebarOffset;
 			engineLocation = Vec2.get(bodyDescription.engineLocation.x, bodyDescription.engineLocation.y);
-			lastDodge = timeStamp;
+			lastDash = timeStamp;
 			maxAcceleration = body.mass * 8;
 			maxAngularAcceleration = body.mass * 180;
 			skewSpeed = 0.2;
-			dodgeCooldown = 20;
-			dodgeDuration = 12;
+			dashCooldown = 20;
+			dashDuration = 12;
+			dashThreshold = 0.2;
 			//	if (SystemUtil.isDesktop)
 			{
 				addFireParticle();
@@ -132,17 +134,16 @@ package spaceshiptHunt.entities
 			graphics.skewY = currentSkew * (1.0 - skewSpeed) + (impulse.x * maxSkew) * skewSpeed;
 			if (impulse.length != 0)
 			{
-				var timeSinceLastDodge:int = timeStamp - lastDodge;
 				var currentSkewAbs:Number = Math.abs(currentSkew);
-				var isDodging:Boolean = timeSinceLastDodge < dodgeDuration;
-				if (!isDodging && (currentSkewAbs < 0.1 && skewSpeed != 0))
+				if (Math.abs(impulse.x)>dashThreshold && !isDashing() && currentSkewAbs < 0.1 && skewSpeed != 0)
 				{
-					if (timeSinceLastDodge > dodgeCooldown)
+					var timeSinceLastDash:int = timeStamp - lastDash;
+					if (timeSinceLastDash > dashCooldown)
 					{
-						lastDodge = timeStamp;
+						lastDash = timeStamp;
 					}
 				}
-				if (isDodging && currentSkewAbs>0.1)
+				if (isDashing() && currentSkewAbs > 0.1)
 				{
 					impulse.x /= Math.abs(currentSkewAbs);
 						//impulse.x*=maxSkew
@@ -332,6 +333,12 @@ package spaceshiptHunt.entities
 			leftJetParticles.start();
 			//particleSystem.customFunction = bodyInfo.jetParticlePositioning;
 			//		}
+		}
+		
+		public function isDashing():Boolean
+		{
+			var timeSinceLastDash:int = timeStamp - lastDash;
+			return timeSinceLastDash < dashDuration;
 		}
 	
 		//public function jetParticlePositioning(particles:Vector.<PDParticle>, numActive:int):void

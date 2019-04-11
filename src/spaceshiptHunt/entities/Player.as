@@ -12,7 +12,6 @@ package spaceshiptHunt.entities
 	public class Player extends Spaceship
 	{
 		
-		public var maxTurningAcceleration:Number;
 		private static var _current:Player = new Player(new Vec2());
 		
 		public function Player(position:Vec2)
@@ -43,7 +42,6 @@ package spaceshiptHunt.entities
 				body.shapes.at(i).filter.collisionGroup = 8;
 			}
 			this.gunType = "fireCannon";
-			maxTurningAcceleration = body.mass * 5;
 			maxAngularAcceleration = body.mass * 220;
 			maxAcceleration = body.mass * 18.0;
 		}
