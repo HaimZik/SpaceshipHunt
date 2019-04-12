@@ -40,7 +40,7 @@ package spaceshiptHunt.entities
 			maxAttackRange = minAttackRange * 1.3;
 			attackTriggerRange = minAttackRange * 3;
 			firingRate = 0.4;
-			aimAccuracy = Math.PI / 8; //4.0;
+			aimAccuracy = Math.PI / 4; //4.0;
 			lastBackwardBlockedCheck = Starling.juggler.elapsedTime;
 			backwardBlockedCheckRate = 0.8;
 		}
@@ -120,7 +120,7 @@ package spaceshiptHunt.entities
 				if (bulletsLeft > 0 && angleToPlayer < aimAccuracy)
 				{
 					startShooting();
-					if (angleToPlayer > aimAccuracy)
+					if (angleToPlayer > aimAccuracy*0.6)
 					{
 						aimToPlayer();
 					}

@@ -289,7 +289,7 @@ package spaceshiptHunt.level
 			{
 				var fromX:Number = path[i];
 				var fromY:Number = path[++i];
-				if (hitTestLine(fromX, fromY, path[i + 1] - fromX, path[i + 2] - fromY,true))
+				if (hitTestLine(fromX, fromY, path[i + 1] - fromX, path[i + 2] - fromY))
 				{
 					return i - 1;
 				}
@@ -297,14 +297,14 @@ package spaceshiptHunt.level
 			return -1;
 		}
 		
-		public function hitTestLine(fromX:Number, fromY:Number, directionX:Number, directionY:Number,innerEdge:Boolean=false):Boolean
+		public function hitTestLine(fromX:Number, fromY:Number, directionX:Number, directionY:Number):Boolean
 		{
 			rayHelper.origin.x = fromX;
 			rayHelper.origin.y = fromY;
 			rayHelper.direction.x = directionX;
 			rayHelper.direction.y = directionY;
 			rayHelper.maxDistance = rayHelper.direction.length;
-			var rayResult:RayResult = physicsSpace.rayCast(rayHelper, innerEdge, STATIC_OBSTACLES_FILTER);
+			var rayResult:RayResult = physicsSpace.rayCast(rayHelper, false, STATIC_OBSTACLES_FILTER);
 			if (rayResult)
 			{
 				rayResult.dispose();
