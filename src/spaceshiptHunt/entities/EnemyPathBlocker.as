@@ -105,7 +105,7 @@ package spaceshiptHunt.entities
 		{
 			if (Player.current.body.velocity.lsq() > 20000.0)
 			{
-				return Player.current.body.position.add(Player.current.body.velocity.mul(0.6, true));
+				return Player.current.body.position.add(Player.current.body.velocity.mul(0.2, true));
 			}
 			return Player.current.body.position.add(Player.current.body.velocity.mul(0.1, true));
 		}
@@ -120,7 +120,7 @@ package spaceshiptHunt.entities
 				if (bulletsLeft > 0 && angleToPlayer < aimAccuracy)
 				{
 					startShooting();
-					if (angleToPlayer > aimAccuracy * 0.85)
+					if (angleToPlayer > aimAccuracy)
 					{
 						aimToPlayer();
 					}

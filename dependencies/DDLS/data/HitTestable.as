@@ -8,7 +8,7 @@ package DDLS.data
 	 */
 	public interface HitTestable  
 	{		
-	   function hitTestLine(fromX:Number,fromY:Number,directionX:Number, directionY:Number):Boolean;	
+	   function hitTestLine(fromX:Number,fromY:Number,directionX:Number, directionY:Number,innerEdge:Boolean=false):Boolean;	
 	}
 	
 }

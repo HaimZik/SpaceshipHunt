@@ -245,7 +245,7 @@ package spaceshiptHunt.level
 			if (blockedPart != -1)
 			{
 				maxFix--;
-				if (maxFix == 0 || blockedPart == 0)
+				if (maxFix == 0 || blockedPart <= 2)
 				{
 					path.length = 0;
 					return;
@@ -256,6 +256,7 @@ package spaceshiptHunt.level
 				return;
 			}
 			var offset:int = -2;
+		//	if(
 			var fromX:Number = path[blockedPart + offset];
 			var fromY:Number = path[blockedPart + 1 + offset];
 			var toX:Number = path[path.length - 2];
@@ -268,10 +269,10 @@ package spaceshiptHunt.level
 			//agent.findPathTo(path[path.length - 2], path[path.length - 1], path);
 			pathfinder.findPathFrom(fromX, fromY, toX, toY, badPath);
 			fixPath(badPath, maxFix);
-			path.length = blockedPart + badPath.length;
-			for (var i:int = blockedPart - offset; i < path.length; i++)
+			path.length = blockedPart + badPath.length+offset;
+			for (var i:int = blockedPart + offset; i < path.length; i++)
 			{
-				path[i] = badPath[i - blockedPart + offset];
+				path[i] = badPath[i - (blockedPart + offset)];
 			}
 			
 			//	var refind:int = findBlockedWay(badPath);
@@ -288,7 +289,7 @@ package spaceshiptHunt.level
 			{
 				var fromX:Number = path[i];
 				var fromY:Number = path[++i];
-				if (hitTestLine(fromX, fromY, path[i + 1] - fromX, path[i + 2] - fromY))
+				if (hitTestLine(fromX, fromY, path[i + 1] - fromX, path[i + 2] - fromY,true))
 				{
 					return i - 1;
 				}
@@ -296,14 +297,14 @@ package spaceshiptHunt.level
 			return -1;
 		}
 		
-		public function hitTestLine(fromX:Number, fromY:Number, directionX:Number, directionY:Number):Boolean
+		public function hitTestLine(fromX:Number, fromY:Number, directionX:Number, directionY:Number,innerEdge:Boolean=false):Boolean
 		{
 			rayHelper.origin.x = fromX;
 			rayHelper.origin.y = fromY;
 			rayHelper.direction.x = directionX;
 			rayHelper.direction.y = directionY;
 			rayHelper.maxDistance = rayHelper.direction.length;
-			var rayResult:RayResult = physicsSpace.rayCast(rayHelper, false, STATIC_OBSTACLES_FILTER);
+			var rayResult:RayResult = physicsSpace.rayCast(rayHelper, innerEdge, STATIC_OBSTACLES_FILTER);
 			if (rayResult)
 			{
 				rayResult.dispose();
