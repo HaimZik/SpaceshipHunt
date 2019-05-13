@@ -39,8 +39,8 @@ package spaceshiptHunt.entities
 			minDisatnceFromWall = 100.0;
 			maxAttackRange = minAttackRange * 1.3;
 			attackTriggerRange = minAttackRange * 3;
-			firingRate = 0.4;
-			aimAccuracy = Math.PI / 4; //4.0;
+			firingRate = 24;
+			aimAccuracy = Math.PI / 4;
 			lastBackwardBlockedCheck = Starling.juggler.elapsedTime;
 			backwardBlockedCheckRate = 0.8;
 		}

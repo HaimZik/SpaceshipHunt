@@ -31,7 +31,7 @@ package
 			Starling.multitouchEnabled = true;
 			this.stage.scaleMode = StageScaleMode.NO_SCALE;
 			this.stage.align = StageAlign.TOP_LEFT;
-			gameEngine = new Starling(Game, stage, null, null, "auto", "baselineExtended");
+			gameEngine = new Starling(Game, stage, null, null, "auto", "auto");//"baselineExtended");
 			if (SystemUtil.isDesktop)
 			{
 				gameEngine.showStats = true;

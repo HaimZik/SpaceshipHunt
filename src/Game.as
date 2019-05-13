@@ -7,10 +7,12 @@ package
 	import flash.geom.Rectangle;
 	import flash.media.SoundChannel;
 	import flash.media.SoundTransform;
+	import flash.system.Capabilities;
 	import flash.ui.Keyboard;
 	import input.Key;
 	import io.arkeus.ouya.ControllerInput;
 	import nape.geom.Vec2;
+	import spaceshiptHunt.controls.Flightstick;
 	import spaceshiptHunt.controls.PlayerController;
 	import spaceshiptHunt.controls.TouchJoystick;
 	import spaceshiptHunt.entities.Player;
@@ -103,7 +105,7 @@ package
 			underSpaceshipsLayer.addChild(crossTarget);
 			Key.init(stage);
 			ControllerInput.initialize(Starling.current.nativeStage);
-			shootButton = new TouchJoystick();
+			shootButton = new Flightstick(true);
 			buttonsDisplay.addChild(shootButton);
 			playerController = new PlayerController(Player.current, joystick, shootButton, crossTarget);
 			Starling.current.nativeStage.addEventListener(FullScreenEvent.FULL_SCREEN, onFullscreen);
@@ -253,8 +255,17 @@ package
 			stage.stageHeight = e.height;
 			Starling.current.viewPort.width = e.width;
 			Starling.current.viewPort.height = e.height;
-			joystick.radios = int(Math.min(800, e.width, e.height) / 5);
-			shootButton.radios = int(Math.min(800, e.width, e.height) / 5);
+			var jotstickRadios:Number=Capabilities.screenDPI;
+			if (SystemUtil.isDesktop)
+			{
+				jotstickRadios *= 1;
+			}
+			else
+			{
+				jotstickRadios *= 0.4;
+			}
+			joystick.radios = jotstickRadios;
+			shootButton.radios = jotstickRadios;
 			resizeHUD();
 		}
 	

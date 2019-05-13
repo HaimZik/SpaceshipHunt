@@ -45,8 +45,10 @@ package spaceshiptHunt.entities
 		protected var weaponsPlacement:Dictionary;
 		protected var weaponRight:TransformNode;
 		protected var weaponLeft:TransformNode;
-		protected var firingRate:Number = 0.1;
 		protected var bulletSpeed:Number = 80.0;
+		protected var firingRate:int = 6;
+		protected var lastShoot:int;
+		protected var isShooting:Boolean;
 		protected const rotateTowardThreshold:Number = 0.02;
 		protected var maxBullets:int = 5;
 		protected var bulletsLeft:int;
@@ -59,7 +61,6 @@ package spaceshiptHunt.entities
 		protected var dashCooldown:int;
 		protected var dashDuration:int;
 		protected var dashThreshold:Number;
-		private var shootingCallId:uint;
 		
 		public function Spaceship(position:Vec2)
 		{
@@ -85,6 +86,7 @@ package spaceshiptHunt.entities
 			lifebarTransform.y = -Math.max(body.bounds.width, body.bounds.height) * 0.5 - lifebarOffset;
 			engineLocation = Vec2.get(bodyDescription.engineLocation.x, bodyDescription.engineLocation.y);
 			lastDash = timeStamp;
+			lastShoot = timeStamp;
 			maxAcceleration = body.mass * 8;
 			maxAngularAcceleration = body.mass * 180;
 			skewSpeed = 0.2;
@@ -99,7 +101,6 @@ package spaceshiptHunt.entities
 		
 		override public function dispose():void
 		{
-			stopShooting();
 			Environment.current.navMesh.deleteObject(pathfindingAgent.approximateObject);
 			pathfindingAgent.dispose();
 			lifebarBackground.removeFromParent(true);
@@ -111,15 +112,6 @@ package spaceshiptHunt.entities
 			attachedTransforms = null;
 			weaponRight = weaponLeft = null;
 			super.dispose();
-		}
-		
-		override public function syncGraphics():void
-		{
-			super.syncGraphics();
-			for (var i:int = 0; i < attachedTransforms.length; i++)
-			{
-				attachedTransforms[i].update();
-			}
 		}
 		
 		override public function update():void
@@ -135,7 +127,7 @@ package spaceshiptHunt.entities
 			if (impulse.length != 0)
 			{
 				var currentSkewAbs:Number = Math.abs(currentSkew);
-				if (Math.abs(impulse.x)>dashThreshold && !isDashing() && currentSkewAbs < 0.1 && skewSpeed != 0)
+				if (Math.abs(impulse.x) > dashThreshold && !isDashing() && currentSkewAbs < 0.1 && skewSpeed != 0)
 				{
 					var timeSinceLastDash:int = timeStamp - lastDash;
 					if (timeSinceLastDash > dashCooldown)
@@ -150,6 +142,20 @@ package spaceshiptHunt.entities
 				}
 				body.applyImpulse(impulse.muleq(maxAcceleration).rotate(body.rotation));
 				impulse.setxy(0.0, 0.0);
+			}
+			if (isShooting && timeStamp - lastShoot > firingRate * frameRate/60)
+			{
+				lastShoot = timeStamp;
+				shootParticle();
+			}
+		}
+		
+		override public function syncGraphics():void
+		{
+			super.syncGraphics();
+			for (var i:int = 0; i < attachedTransforms.length; i++)
+			{
+				attachedTransforms[i].update();
 			}
 		}
 		
@@ -205,19 +211,6 @@ package spaceshiptHunt.entities
 			}
 		}
 		
-		public function startShooting():void
-		{
-			if (!Starling.juggler.containsDelayedCalls(shootParticle))
-			{
-				shootingCallId = Starling.juggler.repeatCall(shootParticle, firingRate);
-			}
-		}
-		
-		public function stopShooting():void
-		{
-			Starling.juggler.removeByID(shootingCallId);
-		}
-		
 		public function rotateTowards(angle:Number):void
 		{
 			var angleDifference:Number = MathUtilities.angleDifference(angle + Math.PI / 2, body.rotation);
@@ -261,6 +254,16 @@ package spaceshiptHunt.entities
 		public function onBulletHit(impactForce:Number):void
 		{
 			lifePoints -= impactForce / armorDefance;
+		}
+		
+		public function startShooting():void
+		{
+			isShooting = true;
+		}
+		
+		public function stopShooting():void
+		{
+			isShooting = false;
 		}
 		
 		protected function onDeath():void
@@ -333,6 +336,11 @@ package spaceshiptHunt.entities
 			leftJetParticles.start();
 			//particleSystem.customFunction = bodyInfo.jetParticlePositioning;
 			//		}
+		}
+		
+		protected function get frameRate():Number 
+		{
+			return Starling.current.nativeStage.frameRate;
 		}
 		
 		public function isDashing():Boolean
