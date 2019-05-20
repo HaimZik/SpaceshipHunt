@@ -20,6 +20,7 @@ package starling.rendering
 	import flash.geom.Vector3D;
 	import flash.system.ApplicationDomain;
 	import avm2.intrinsics.memory.sf32;
+	import avm2.intrinsics.memory.lf32;
 	import flash.utils.ByteArray;
 	import flash.utils.Endian;
 	
@@ -112,8 +113,8 @@ package starling.rendering
 		private var _numAttributes:int;
 		private var _premultipliedAlpha:Boolean;
 		private var _tinted:Boolean;
-		private static var currentDomain:ApplicationDomain = ApplicationDomain.currentDomain;
-		private static var currentDomainByteArray:ByteArray;
+		internal static var currentDomain:ApplicationDomain = ApplicationDomain.currentDomain;
+		internal static var currentDomainByteArray:ByteArray;
 		
 		private var _posOffset:int; // in bytes
 		private var _colOffset:int; // in bytes
@@ -230,34 +231,25 @@ package starling.rendering
 					var x:Number, y:Number;
 					var pos:int = targetVertexID * _vertexSize + _posOffset;
 					var endPos:int = pos + (numVertices * _vertexSize);
-					var orignalSize:int = targetRawData.length;
-
+					var orignalLength:int = targetRawData.length;
+                    var growthRate:int = 16;
 					if (currentDomainByteArray != targetRawData)
-					{ //orignalSize * 14; 
-					targetRawData.length = Math.max(orignalSize, Math.max(endPos*4,1024));
-					//targetRawData.length = 2 << 14;
+					{
+					targetRawData.length = Math.max(orignalLength, Math.max(endPos*growthRate,2048));
 						currentDomainByteArray = targetRawData;
 						currentDomain.domainMemory = targetRawData;
-					}else if(endPos*4 > orignalSize)
+					}else if(endPos*growthRate> orignalLength)
 					{
-					targetRawData.length = Math.max(orignalSize, endPos*4);
+					targetRawData.length = endPos*growthRate;
 					}
 					while (pos < endPos)
-					{
-						targetRawData.position = pos;
-						x = targetRawData.readFloat();
-						y = targetRawData.readFloat();
-						
-						// 	targetRawData.position = pos;
-						//	targetRawData.writeFloat(matrix.a * x + matrix.c * y + matrix.tx);
-						//	targetRawData.writeFloat(matrix.d * y + matrix.b * x + matrix.ty);
+					{	
+						x = lf32(pos);
+						y = lf32(pos+4);
 						sf32(matrix.a * x + matrix.c * y + matrix.tx, pos);
-						sf32(matrix.d * y + matrix.b * x + matrix.ty, pos + 4);
-						
+						sf32(matrix.d * y + matrix.b * x + matrix.ty, pos + 4);	
 						pos += _vertexSize;
 					}
-						//	currentDomain.domainMemory = null;
-						//    targetRawData.length = orignalSize;
 				}
 			}
 			else

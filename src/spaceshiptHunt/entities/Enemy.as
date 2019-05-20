@@ -268,7 +268,7 @@ package spaceshiptHunt.entities
 		
 		protected function startFollowingPath():void
 		{
-			if (path.length > 0)
+			if (path.length > 2)
 			{
 				nextPoint = 1;
 				if (isPathBlocked())
