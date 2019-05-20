@@ -9,6 +9,8 @@ package
 	import flash.media.SoundTransform;
 	import flash.system.Capabilities;
 	import flash.ui.Keyboard;
+	import flash.utils.ByteArray;
+	import flash.utils.Endian;
 	import input.Key;
 	import io.arkeus.ouya.ControllerInput;
 	import nape.geom.Vec2;
@@ -38,6 +40,7 @@ package
 		public static var spaceshipsLayer:Sprite;
 		public static var underSpaceshipsLayer:Sprite;
 		public static var aboveSpaceshipsLayer:Sprite;
+		 private var BYTE_ARRAY_SIZE:Number = 10000000;
 	    private var buttonsDisplay:Sprite;
 		private var isReleaseMode:Boolean;
 		private var gameEnvironment:Environment;
@@ -59,7 +62,29 @@ package
 		//initialization functions		
 		public function init():void
 		{
-			var fakeReleaseMode:Boolean = false;
+			//var ba:ByteArray = new ByteArray();
+			
+			
+			//for (var j:Number = 1; j <= 16; j++) 
+			//{
+			//ba.position = 0;
+			//ba.writeFloat(j);
+			//ba.position = 0;
+				//trace("    ");
+			//trace(ba.readFloat());
+			//trace(ba[0], ba[1], ba[2],ba[3]);
+	//var kill:int = 9 ;
+		//	trace( (ba[3] << kill) >> (kill+5));
+//trace(ba[0] | ba[1] | ba[3]<<5 | ba[2]);	
+	//		}
+//ba.writeFloat(0);
+//ba.writeFloat(1);			
+	//ba.position = 0;
+	//var combo:Number = ba.readDouble();
+	//trace(combo);
+	
+	
+		var fakeReleaseMode:Boolean = false;
 			isReleaseMode = fakeReleaseMode || CONFIG::release;
 			aboveSpaceshipsLayer = new Sprite();
 			spaceshipsLayer = new Sprite();
