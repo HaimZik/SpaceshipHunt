@@ -225,33 +225,36 @@ package starling.rendering
 				
 				var targetRawData:ByteArray = target._rawData;
 				targetRawData.position = targetVertexID * _vertexSize;
-				var pos:int = targetVertexID * _vertexSize + _posOffset;
-				var endPos:int = pos + (numVertices * _vertexSize);
 				targetRawData.writeBytes(_rawData, vertexID * _vertexSize, numVertices * _vertexSize);
 				if (matrix)
 				{
 					var x:Number, y:Number;
 					var orignalLength:uint = targetRawData.length;
+					var pos:int = targetVertexID * _vertexSize + _posOffset;
+					var endPos:int = pos + (numVertices * _vertexSize);
 					var growthRate:int = 2;
+					var domainMemMinLength:int = 1024;
 					if (currentDomainByteArray != targetRawData)
 					{
-						if (endPos > 1024)
+						if (endPos > domainMemMinLength)
 						{
-							targetRawData.length = Math.max(orignalLength,endPos * growthRate);
+							targetRawData.length = Math.max(orignalLength, endPos);
 							currentDomain.domainMemory = targetRawData;
 							currentDomainByteArray = targetRawData;
 						}
-					}
-					else if (endPos * growthRate > orignalLength)
+					} //Domain memory ByteArray length must be at least 2x of the actual data length
+					else if (endPos > orignalLength/2)
 					{
-						targetRawData.length = endPos * growthRate;
+						targetRawData.length = endPos+1;
 					}
 					if (currentDomainByteArray == targetRawData)
 					{
 						while (pos < endPos)
 						{
+							// reads float numbers from targetRawData
 							x = lf32(pos);
 							y = lf32(pos + 4);
+							// write float numbers to targetRawData
 							sf32(matrix.a * x + matrix.c * y + matrix.tx, pos);
 							sf32(matrix.d * y + matrix.b * x + matrix.ty, pos + 4);
 							pos += _vertexSize;
