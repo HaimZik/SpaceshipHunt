@@ -225,30 +225,51 @@ package starling.rendering
 				
 				var targetRawData:ByteArray = target._rawData;
 				targetRawData.position = targetVertexID * _vertexSize;
+				var pos:int = targetVertexID * _vertexSize + _posOffset;
+				var endPos:int = pos + (numVertices * _vertexSize);
 				targetRawData.writeBytes(_rawData, vertexID * _vertexSize, numVertices * _vertexSize);
 				if (matrix)
 				{
 					var x:Number, y:Number;
-					var pos:int = targetVertexID * _vertexSize + _posOffset;
-					var endPos:int = pos + (numVertices * _vertexSize);
-					var orignalLength:int = targetRawData.length;
-                    var growthRate:int = 16;
+					var orignalLength:uint = targetRawData.length;
+					var growthRate:int = 2;
 					if (currentDomainByteArray != targetRawData)
 					{
-					targetRawData.length = Math.max(orignalLength, Math.max(endPos*growthRate,2048));
-						currentDomainByteArray = targetRawData;
-						currentDomain.domainMemory = targetRawData;
-					}else if(endPos*growthRate> orignalLength)
-					{
-					targetRawData.length = endPos*growthRate;
+						if (endPos > 1024)
+						{
+							targetRawData.length = Math.max(orignalLength,endPos * growthRate);
+							currentDomain.domainMemory = targetRawData;
+							currentDomainByteArray = targetRawData;
+						}
 					}
-					while (pos < endPos)
-					{	
-						x = lf32(pos);
-						y = lf32(pos+4);
-						sf32(matrix.a * x + matrix.c * y + matrix.tx, pos);
-						sf32(matrix.d * y + matrix.b * x + matrix.ty, pos + 4);	
-						pos += _vertexSize;
+					else if (endPos * growthRate > orignalLength)
+					{
+						targetRawData.length = endPos * growthRate;
+					}
+					if (currentDomainByteArray == targetRawData)
+					{
+						while (pos < endPos)
+						{
+							x = lf32(pos);
+							y = lf32(pos + 4);
+							sf32(matrix.a * x + matrix.c * y + matrix.tx, pos);
+							sf32(matrix.d * y + matrix.b * x + matrix.ty, pos + 4);
+							pos += _vertexSize;
+						}
+					}
+					else
+					{
+						while (pos < endPos)
+						{
+							targetRawData.position = pos;
+							x = targetRawData.readFloat();
+							y = targetRawData.readFloat();
+							
+							targetRawData.position = pos;
+							targetRawData.writeFloat(matrix.a * x + matrix.c * y + matrix.tx);
+							targetRawData.writeFloat(matrix.d * y + matrix.b * x + matrix.ty);
+							pos += _vertexSize;
+						}
 					}
 				}
 			}
