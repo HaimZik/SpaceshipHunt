@@ -7,6 +7,7 @@ package
 	import flash.geom.Rectangle;
 	import flash.media.SoundChannel;
 	import flash.media.SoundTransform;
+	import flash.system.ApplicationDomain;
 	import flash.system.Capabilities;
 	import flash.ui.Keyboard;
 	import flash.utils.ByteArray;

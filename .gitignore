@@ -2,7 +2,7 @@
 bin-debug/
 bin-release/
 batMobile/
-dependencies/starling
+dist/
 # Other files and folders
 .settings/
 
@@ -67,5 +67,4 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
-dist/apk3227369696406178516.tmp
 *.tmp
