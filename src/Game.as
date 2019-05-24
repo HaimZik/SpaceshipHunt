@@ -125,7 +125,7 @@ package
 			background.tileGrid = new Rectangle();
 			underSpaceshipsLayer.addChildAt(background, 0);
 			var backgroundRatio:Number = Math.ceil(Math.sqrt(stage.stageHeight * stage.stageHeight + stage.stageWidth * stage.stageWidth) / 512) * 2;
-			background.scale = backgroundRatio * 2;
+			background.scale = backgroundRatio - 0.5; //* 2;
 			spaceshipsLayer.addChild(Environment.current.light);
 			crossTarget = new Image(Environment.current.assetsLoader.getTexture("crossTarget"));
 			underSpaceshipsLayer.addChild(crossTarget);

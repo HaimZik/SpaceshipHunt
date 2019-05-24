@@ -62,7 +62,7 @@ package starling.extensions
 		private static var sHelperPoint:Point = new Point();
 		private static var sSubset:MeshSubset = new MeshSubset();
 		
-		public function ParticleSystem(texture:Texture = null)
+		public function ParticleSystem(texture:Texture = null,initialcCapacity:int=128)
 		{
 			_vertexData = new VertexData();
 			_indexData = new IndexData();
@@ -79,7 +79,7 @@ package starling.extensions
 			_blendFactorDestination = Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA;
 			_batchable = false;
 			
-			this.capacity = 128;
+			this.capacity = initialcCapacity;
 			this.texture = texture;
 			
 			updateBlendMode();
@@ -303,7 +303,7 @@ package starling.extensions
 			var cosY:Number;
 			var sinX:Number;
 			var sinY:Number;
-			if (VertexData.starling_internal::trySetToDomainMemory(_vertexData.rawData,_numParticles * 4))
+			if (VertexData.starling_internal::trySetToDomainMemory(_vertexData.rawData,_numParticles * 4+3))
 			{
 				for (var p:int = 0; p < _numParticles; ++p)
 				{
@@ -463,13 +463,12 @@ package starling.extensions
 				_particles.length = newCapacity;
 				_indexData.numIndices = newCapacity * 6;
 				_vertexData.numVertices = newCapacity * 4;
-				
+				_indexData.trim();
+			    _vertexData.trim();
 				if (_numParticles > newCapacity)
 					_numParticles = newCapacity;
 			}
 			
-			_indexData.trim();
-			_vertexData.trim();
 			
 			setRequiresSync();
 		}

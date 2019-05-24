@@ -246,7 +246,9 @@ package starling.rendering
 					else if (endPos > targetRawData.length / 2)
 					{
 					//In case byteArray length got bigger this casue the domain memory to reallocate to the new length size. Not doing it will cause errors when trying to read a byte from position larger than length/2.  
-						targetRawData.length = targetRawData.length+128;
+					var rawDataLength:uint = targetRawData.length;
+						targetRawData.length = rawDataLength -1;
+						targetRawData.length = rawDataLength;
 					}
 					if (currentDomainByteArray == targetRawData)
 					{
@@ -344,7 +346,7 @@ package starling.rendering
 			var pos:int = targetVertexID * target._vertexSize + targetAttribute.offset;
 			if (matrix)
 			{
-				if (starling_internal::trySetToDomainMemory(targetData,pos+targetDelta*numVertices))
+				if (starling_internal::trySetToDomainMemory(targetData,(targetDelta+4)*numVertices))
 				{
 					for (i = 0; i < numVertices; ++i)
 					{
@@ -1049,21 +1051,22 @@ package starling.rendering
 		
 		starling_internal static function trySetToDomainMemory(byteArray:ByteArray,length:int):Boolean
 		{
-			var domainMemMinLength:int = 1024;
+			var byteArrayLength:uint = byteArray.length;
 			if (currentDomainByteArray != byteArray)
 			{
-				if (length < domainMemMinLength && byteArray.length < domainMemMinLength)
+				if (byteArrayLength < ApplicationDomain.MIN_DOMAIN_MEMORY_LENGTH)
 				{
 					return false;
 				}
-				byteArray.length = Math.max(byteArray.length, length);
+				byteArray.length = byteArrayLength;
 				currentDomain.domainMemory = byteArray;
 				currentDomainByteArray = byteArray;
 			} 
-			else if (length > byteArray.length / 2)
+			else if (length > byteArrayLength / 2)
 			{
 			//In case byteArray length got bigger this casue the domain memory to reallocate to the new length size. Not doing it will cause errors when trying to read a byte at position larger than length/2.  
-				byteArray.length = byteArray.length + 1;
+						byteArray.length = byteArrayLength-1;
+						byteArray.length = byteArrayLength;
 			}
 			return true;
 		}
