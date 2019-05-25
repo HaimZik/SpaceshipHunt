@@ -227,29 +227,27 @@ package starling.rendering
 				
 				var targetRawData:ByteArray = target._rawData;
 				targetRawData.position = targetVertexID * _vertexSize;
+				var pos:int = targetRawData.position + _posOffset;
+				var endPos:int = pos + (numVertices * _vertexSize);
+				var lastIndex:int = targetRawData.position + vertexID * _vertexSize + numVertices * _vertexSize;
+				if (currentDomainByteArray == targetRawData)
+				{
+					if (lastIndex > targetRawData.length)
+					{
+						targetRawData.length = lastIndex;
+					}
+				}
+				else if (endPos > ApplicationDomain.MIN_DOMAIN_MEMORY_LENGTH)
+				{
+					//Only set the ByteArray to domain memory if the length is bigger than 1024 byte.
+						targetRawData.length = Math.max(lastIndex,targetRawData.length);
+						currentDomain.domainMemory = targetRawData;
+						currentDomainByteArray = targetRawData;
+				}
 				targetRawData.writeBytes(_rawData, vertexID * _vertexSize, numVertices * _vertexSize);
 				if (matrix)
 				{
 					var x:Number, y:Number;
-					var pos:int = targetVertexID * _vertexSize + _posOffset;
-					var endPos:int = pos + (numVertices * _vertexSize);
-					if (currentDomainByteArray != targetRawData)
-					{
-						//Only set the ByteArray to domain memory if the length is bigger than 1024 byte.
-						if (endPos > ApplicationDomain.MIN_DOMAIN_MEMORY_LENGTH)
-						{
-							targetRawData.length = Math.max(targetRawData.length, endPos);
-							currentDomain.domainMemory = targetRawData;
-							currentDomainByteArray = targetRawData;
-						}
-					}    
-					else if (endPos > targetRawData.length / 2)
-					{
-					//In case byteArray length got bigger this casue the domain memory to reallocate to the new length size. Not doing it will cause errors when trying to read a byte from position larger than length/2.  
-					var rawDataLength:uint = targetRawData.length;
-						targetRawData.length = rawDataLength -1;
-						targetRawData.length = rawDataLength;
-					}
 					if (currentDomainByteArray == targetRawData)
 					{
 						while (pos < endPos)
@@ -346,16 +344,16 @@ package starling.rendering
 			var pos:int = targetVertexID * target._vertexSize + targetAttribute.offset;
 			if (matrix)
 			{
-				if (starling_internal::trySetToDomainMemory(targetData,(targetDelta+4)*numVertices))
+				if (starling_internal::trySetToDomainMemory(targetData, (targetDelta + 8) * numVertices))
 				{
 					for (i = 0; i < numVertices; ++i)
 					{
 						x = sourceData.readFloat();
 						y = sourceData.readFloat();
 						// Write float number into targetData.
-						sf32(matrix.a * x + matrix.c * y + matrix.tx,pos);
-						sf32(matrix.d * y + matrix.b * x + matrix.ty,pos+=4);
-						pos += 4+targetDelta;
+						sf32(matrix.a * x + matrix.c * y + matrix.tx, pos);
+						sf32(matrix.d * y + matrix.b * x + matrix.ty, pos += 4);
+						pos += 4 + targetDelta;
 						sourceData.position += sourceDelta;
 					}
 				}
@@ -381,7 +379,7 @@ package starling.rendering
 				for (i = 0; i < numVertices; ++i)
 				{
 					for (j = 0; j < attributeSizeIn32Bits; ++j)
-						targetData.writeUnsignedInt(sourceData.readUnsignedInt());			
+						targetData.writeUnsignedInt(sourceData.readUnsignedInt());
 					sourceData.position += sourceDelta;
 					targetData.position += targetDelta;
 				}
@@ -1049,7 +1047,7 @@ package starling.rendering
 			return null;
 		}
 		
-		starling_internal static function trySetToDomainMemory(byteArray:ByteArray,length:int):Boolean
+		starling_internal static function trySetToDomainMemory(byteArray:ByteArray, length:int):Boolean
 		{
 			var byteArrayLength:uint = byteArray.length;
 			if (currentDomainByteArray != byteArray)
@@ -1061,12 +1059,12 @@ package starling.rendering
 				byteArray.length = byteArrayLength;
 				currentDomain.domainMemory = byteArray;
 				currentDomainByteArray = byteArray;
-			} 
+			}
 			else if (length > byteArrayLength / 2)
 			{
-			//In case byteArray length got bigger this casue the domain memory to reallocate to the new length size. Not doing it will cause errors when trying to read a byte at position larger than length/2.  
-						byteArray.length = byteArrayLength-1;
-						byteArray.length = byteArrayLength;
+				//In case byteArray length got bigger this casue the domain memory to reallocate to the new length size. Not doing it will cause errors when trying to read a byte at position larger than length/2.  
+				byteArray.length = byteArrayLength - 1;
+				byteArray.length = byteArrayLength;
 			}
 			return true;
 		}

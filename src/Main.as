@@ -40,7 +40,7 @@ package
 					gameEngine.antiAliasing = 4;
 				}
 			}
-			gameEngine.start();
+			//gameEngine.start();
 			stage.addEventListener(Event.ACTIVATE, function(e:Event):void
 			{
 				trace("ACTIVATE");
