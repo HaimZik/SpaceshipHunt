@@ -32,7 +32,6 @@ package starling.rendering
 	import starling.utils.MathUtil;
 	import starling.utils.MatrixUtil;
 	import starling.utils.StringUtil;
-	
 	/** The VertexData class manages a raw list of vertex information, allowing direct upload
 	 *  to Stage3D vertex buffers. <em>You only have to work with this class if you're writing
 	 *  your own rendering code (e.g. if you create custom display objects).</em>
@@ -115,8 +114,8 @@ package starling.rendering
 		private var _numAttributes:int;
 		private var _premultipliedAlpha:Boolean;
 		private var _tinted:Boolean;
-		internal static var currentDomain:ApplicationDomain = ApplicationDomain.currentDomain;
-		internal static var currentDomainByteArray:ByteArray;
+		public static var currentDomain:ApplicationDomain = ApplicationDomain.currentDomain;
+		public static var currentDomainByteArray:ByteArray;
 		private static var domainMemoryLength:uint = 0;
 		private var _posOffset:int; // in bytes
 		private var _colOffset:int; // in bytes
@@ -232,11 +231,11 @@ package starling.rendering
 				var targetRawData:ByteArray = target._rawData;
 				var pos:int = targetVertexID * _vertexSize + _posOffset;
 				var endPos:int = pos + (numVertices * _vertexSize);
-				//if (currentDomainByteArray == targetRawData && endPos > domainMemoryLength)
-				//{
-						//currentDomainByteArray = null;
-						//currentDomain.domainMemory = null;
-				//}
+				if (currentDomainByteArray == targetRawData && endPos > domainMemoryLength)
+				{
+						currentDomainByteArray = null;
+						currentDomain.domainMemory = null;
+				}
 				targetRawData.position = targetVertexID * _vertexSize;
 				targetRawData.writeBytes(_rawData, vertexID * _vertexSize, numVertices * _vertexSize);
 				if (matrix)
@@ -269,8 +268,8 @@ package starling.rendering
 							sf32(matrix.d * y + matrix.b * x + matrix.ty, pos + 4);
 							pos += _vertexSize;
 						}
-									currentDomainByteArray = null;
-									currentDomain.domainMemory = null;
+							//		currentDomainByteArray = null;
+							//		currentDomain.domainMemory = null;
 					}
 					else
 					{
@@ -1060,7 +1059,7 @@ package starling.rendering
 		
 		starling_internal static function tryAssignToDomainMemory(byteArray:ByteArray, length:int):Boolean
 		{
-			return false;
+		//	return false;
 			var byteArrayLength:uint = byteArray.length;
 			if (currentDomainByteArray != byteArray)
 			{

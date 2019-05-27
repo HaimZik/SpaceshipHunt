@@ -34,6 +34,7 @@ package starling.core
     import flash.ui.MultitouchInputMode;
     import flash.utils.getTimer;
     import flash.utils.setTimeout;
+	import starling.rendering.VertexData;
 
     import starling.animation.Juggler;
     import starling.display.DisplayObject;
@@ -444,6 +445,8 @@ package starling.core
                     _painter.clear(stageColor, Color.getAlpha(stageColor));
 
                 _stage.render(_painter);
+				VertexData.currentDomainByteArray = null;
+				VertexData.currentDomain.domainMemory = null;
                 _painter.finishFrame();
                 _painter.frameID = ++_frameID;
 

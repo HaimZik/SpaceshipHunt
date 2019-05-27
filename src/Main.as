@@ -34,7 +34,7 @@ package
 			gameEngine = new Starling(Game, stage, null, null, "auto", "auto");//"baselineExtended");
 			if (SystemUtil.isDesktop)
 			{
-				gameEngine.showStats = true;
+		//		gameEngine.showStats = true;
 				if (!Capabilities.isDebugger)
 				{
 					gameEngine.antiAliasing = 4;
