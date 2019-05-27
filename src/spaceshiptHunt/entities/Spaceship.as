@@ -61,6 +61,8 @@ package spaceshiptHunt.entities
 		protected var dashCooldown:int;
 		protected var dashDuration:int;
 		protected var dashThreshold:Number;
+		protected var rightJetParticles:PDParticleSystem;
+		protected var leftJetParticles:PDParticleSystem;
 		
 		public function Spaceship(position:Vec2)
 		{
@@ -111,6 +113,8 @@ package spaceshiptHunt.entities
 			lifebarTransform.dispose();
 			attachedTransforms = null;
 			weaponRight = weaponLeft = null;
+			Starling.juggler.remove(rightJetParticles);
+			Starling.juggler.remove(leftJetParticles);
 			super.dispose();
 		}
 		
@@ -315,8 +319,8 @@ package spaceshiptHunt.entities
 			//{
 			//	}
 			var particleConfig:XML = XML(new JetFireConfig());
-			var rightJetParticles:PDParticleSystem = new PDParticleSystem(particleConfig, Environment.current.assetsLoader.getTexture("fireball"));
-			var leftJetParticles:PDParticleSystem = new PDParticleSystem(particleConfig, Environment.current.assetsLoader.getTexture("fireball"));
+			rightJetParticles = new PDParticleSystem(particleConfig, Environment.current.assetsLoader.getTexture("fireball"));
+			leftJetParticles = new PDParticleSystem(particleConfig, Environment.current.assetsLoader.getTexture("fireball"));
 			rightJetParticles.batchable = true;
 			leftJetParticles.batchable = true;
 			var leftJetTransform:TransformNode = attachDisplayObject(leftJetParticles, Game.aboveSpaceshipsLayer);

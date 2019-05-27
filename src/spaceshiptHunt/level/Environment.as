@@ -352,6 +352,7 @@ package spaceshiptHunt.level
 		
 		public function disposeLevel():void
 		{
+		//	Starling.juggler.purge();
 			navMesh.updateObjects();
 			for (var i:int = BodyInfo.list.length - 1; i >= 0; i--)
 			{

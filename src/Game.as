@@ -30,7 +30,9 @@ package
 	{
 		import spaceshiptHuntDevelopment.level.LevelEditor;
 	}
-	
+	import avm2.intrinsics.memory.sf32;
+	import avm2.intrinsics.memory.si32;
+	import avm2.intrinsics.memory.lf32;
 	/**
 	 * ...
 	 * @author Haim Shnitzer
@@ -41,7 +43,6 @@ package
 		public static var spaceshipsLayer:Sprite;
 		public static var underSpaceshipsLayer:Sprite;
 		public static var aboveSpaceshipsLayer:Sprite;
-		 private var BYTE_ARRAY_SIZE:Number = 10000000;
 	    private var buttonsDisplay:Sprite;
 		private var isReleaseMode:Boolean;
 		private var gameEnvironment:Environment;
@@ -63,8 +64,8 @@ package
 		//initialization functions		
 		public function init():void
 		{
-			//var ba:ByteArray = new ByteArray();
-			
+			var ba:ByteArray = new ByteArray();
+				ba.endian = Endian.LITTLE_ENDIAN;
 			
 			//for (var j:Number = 1; j <= 16; j++) 
 			//{
@@ -83,8 +84,6 @@ package
 	//ba.position = 0;
 	//var combo:Number = ba.readDouble();
 	//trace(combo);
-	
-	
 		var fakeReleaseMode:Boolean = false;
 			isReleaseMode = fakeReleaseMode || CONFIG::release;
 			aboveSpaceshipsLayer = new Sprite();

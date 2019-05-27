@@ -117,7 +117,7 @@ package starling.rendering
 		private var _tinted:Boolean;
 		internal static var currentDomain:ApplicationDomain = ApplicationDomain.currentDomain;
 		internal static var currentDomainByteArray:ByteArray;
-		
+		private static var domainMemoryLength:uint = 0;
 		private var _posOffset:int; // in bytes
 		private var _colOffset:int; // in bytes
 		private var _vertexSize:int; // in bytes
@@ -178,6 +178,10 @@ package starling.rendering
 		/** Explicitly frees up the memory used by the ByteArray. */
 		public function clear():void
 		{
+			if (currentDomainByteArray == _rawData)
+			{
+				starling_internal::unassignDomainMemory();
+			}
 			_rawData.clear();
 			_numVertices = 0;
 			_tinted = false;
@@ -226,30 +230,30 @@ package starling.rendering
 				// and then overwrite only the transformed positions.
 				
 				var targetRawData:ByteArray = target._rawData;
-				targetRawData.position = targetVertexID * _vertexSize;
-				var pos:int = targetRawData.position + _posOffset;
+				var pos:int = targetVertexID * _vertexSize + _posOffset;
 				var endPos:int = pos + (numVertices * _vertexSize);
-				var lastIndex:int = targetRawData.position + vertexID * _vertexSize + numVertices * _vertexSize;
-				if (currentDomainByteArray == targetRawData)
-				{
-					if (lastIndex > targetRawData.length)
-					{
-						targetRawData.length = lastIndex;
-					}
-				}
-				else if (endPos > ApplicationDomain.MIN_DOMAIN_MEMORY_LENGTH)
-				{
-					//Only set the ByteArray to domain memory if the length is bigger than 1024 byte.
-						targetRawData.length = Math.max(lastIndex,targetRawData.length);
-						currentDomain.domainMemory = targetRawData;
-						currentDomainByteArray = targetRawData;
-				}
+				//		var lastIndex:int = vertexID * _vertexSize + numVertices * _vertexSize;
+				targetRawData.position = targetVertexID * _vertexSize;
 				targetRawData.writeBytes(_rawData, vertexID * _vertexSize, numVertices * _vertexSize);
 				if (matrix)
 				{
 					var x:Number, y:Number;
-					if (currentDomainByteArray == targetRawData)
-					{
+					if (targetRawData.length > ApplicationDomain.MIN_DOMAIN_MEMORY_LENGTH)
+					{	
+						if (currentDomainByteArray != targetRawData)
+						{
+							domainMemoryLength = targetRawData.length;
+							//Only set the ByteArray to domain memory if the length is bigger than 1024 byte.
+							targetRawData.length = domainMemoryLength;
+							currentDomain.domainMemory = targetRawData;
+							currentDomainByteArray = targetRawData;
+						}
+						else if (endPos > domainMemoryLength)
+						{
+							currentDomain.domainMemory = null;
+							targetRawData.length = endPos;
+							currentDomain.domainMemory = targetRawData;
+						}
 						while (pos < endPos)
 						{
 							// Reads float numbers from targetRawData.
@@ -260,6 +264,8 @@ package starling.rendering
 							sf32(matrix.d * y + matrix.b * x + matrix.ty, pos + 4);
 							pos += _vertexSize;
 						}
+									currentDomainByteArray = null;
+									currentDomain.domainMemory = null;
 					}
 					else
 					{
@@ -344,7 +350,7 @@ package starling.rendering
 			var pos:int = targetVertexID * target._vertexSize + targetAttribute.offset;
 			if (matrix)
 			{
-				if (starling_internal::trySetToDomainMemory(targetData, (targetDelta + 8) * numVertices))
+				if (starling_internal::tryAssignToDomainMemory(targetData, (targetDelta + 8) * numVertices))
 				{
 					for (i = 0; i < numVertices; ++i)
 					{
@@ -1047,8 +1053,9 @@ package starling.rendering
 			return null;
 		}
 		
-		starling_internal static function trySetToDomainMemory(byteArray:ByteArray, length:int):Boolean
+		starling_internal static function tryAssignToDomainMemory(byteArray:ByteArray, length:int):Boolean
 		{
+			return false;
 			var byteArrayLength:uint = byteArray.length;
 			if (currentDomainByteArray != byteArray)
 			{
@@ -1067,6 +1074,12 @@ package starling.rendering
 				byteArray.length = byteArrayLength;
 			}
 			return true;
+		}
+		
+		starling_internal static function unassignDomainMemory():void
+		{
+			currentDomain.domainMemory = null;
+			currentDomainByteArray = null;
 		}
 		
 		[Inline]

@@ -303,7 +303,7 @@ package starling.extensions
 			var cosY:Number;
 			var sinX:Number;
 			var sinY:Number;
-			if (VertexData.starling_internal::trySetToDomainMemory(_vertexData.rawData,_numParticles * 4+3))
+			if (VertexData.starling_internal::tryAssignToDomainMemory(_vertexData.rawData,_numParticles * 4+3))
 			{
 				for (var p:int = 0; p < _numParticles; ++p)
 				{
