@@ -232,7 +232,11 @@ package starling.rendering
 				var targetRawData:ByteArray = target._rawData;
 				var pos:int = targetVertexID * _vertexSize + _posOffset;
 				var endPos:int = pos + (numVertices * _vertexSize);
-				//		var lastIndex:int = vertexID * _vertexSize + numVertices * _vertexSize;
+				//if (currentDomainByteArray == targetRawData && endPos > domainMemoryLength)
+				//{
+						//currentDomainByteArray = null;
+						//currentDomain.domainMemory = null;
+				//}
 				targetRawData.position = targetVertexID * _vertexSize;
 				targetRawData.writeBytes(_rawData, vertexID * _vertexSize, numVertices * _vertexSize);
 				if (matrix)
@@ -248,12 +252,13 @@ package starling.rendering
 							currentDomain.domainMemory = targetRawData;
 							currentDomainByteArray = targetRawData;
 						}
-						else if (endPos > domainMemoryLength)
-						{
-							currentDomain.domainMemory = null;
-							targetRawData.length = endPos;
-							currentDomain.domainMemory = targetRawData;
-						}
+						//else if (endPos > domainMemoryLength)
+						//{
+							//currentDomain.domainMemory = null;
+							//domainMemoryLength = endPos;
+							//targetRawData.length = domainMemoryLength;
+							//currentDomain.domainMemory = targetRawData;
+						//}
 						while (pos < endPos)
 						{
 							// Reads float numbers from targetRawData.
