@@ -31,10 +31,11 @@ package
 			Starling.multitouchEnabled = true;
 			this.stage.scaleMode = StageScaleMode.NO_SCALE;
 			this.stage.align = StageAlign.TOP_LEFT;
-			gameEngine = new Starling(Game, stage, null, null, "auto", "auto");//"baselineExtended");
+			gameEngine = new Starling(Game, stage, null, null, "auto", SystemUtil.isDesktop?"auto":"baselineExtended");
+			gameEngine.showStats = true;
 			if (SystemUtil.isDesktop)
 			{
-		//		gameEngine.showStats = true;
+				gameEngine.showStats = true;
 				if (!Capabilities.isDebugger)
 				{
 					gameEngine.antiAliasing = 4;

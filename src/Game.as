@@ -235,8 +235,8 @@ package
 		
 		public function onFocusReturn():void
 		{
-			Key.reset();
 			playerController.onFocusReturn();
+			Key.reset();
 		}
 		
 		private function onTouch(e:TouchEvent):void

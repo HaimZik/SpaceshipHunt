@@ -96,6 +96,7 @@ package spaceshiptHuntDevelopment.level
 			//Starling.current.nativeOverlay.addChild(napeDebug.display);
 			Key.addKeyUpCallback(Keyboard.N, switchNavMeshView);
 			Key.addKeyUpCallback(Keyboard.F12, toggleLevelEditorMode);
+			Key.addKeyUpCallback(Keyboard.L, loseContext);
 			Starling.current.nativeStage.addEventListener(MouseEvent.MOUSE_WHEEL, onZoom);
 			CONFIG::air
 			{
@@ -150,6 +151,11 @@ package spaceshiptHuntDevelopment.level
 		{
 			levelEditorMode = !levelEditorMode;
 			paused = levelEditorMode;
+		}
+		
+		private function loseContext():void
+		{
+			Starling.current.context.dispose();
 		}
 		
 		private static function meshToString(mesh:Vector.<Vector.<int>>):String

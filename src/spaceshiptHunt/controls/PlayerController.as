@@ -107,14 +107,11 @@ package spaceshiptHunt.controls
 		
 		public function onFocusReturn():void
 		{
-			if (xboxController)
+			if (!(SystemUtil.isDesktop && (Key.isDown(fireKey) || Key.isDown(alternativeFireKey))) &&!(xboxController && xboxController.rt.held))
 			{
-				if (!xboxController.rt.held)
+				if (player)
 				{
-					if (player)
-					{
-						player.stopShooting();
-					}
+					player.stopShooting();
 				}
 			}
 		}
