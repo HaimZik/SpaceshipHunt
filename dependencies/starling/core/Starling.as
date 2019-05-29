@@ -445,8 +445,7 @@ package starling.core
                     _painter.clear(stageColor, Color.getAlpha(stageColor));
 
                 _stage.render(_painter);
-				VertexData.currentDomainByteArray = null;
-				VertexData.currentDomain.domainMemory = null;
+				VertexData.starling_internal::unassignDomainMemory();
                 _painter.finishFrame();
                 _painter.frameID = ++_frameID;
 

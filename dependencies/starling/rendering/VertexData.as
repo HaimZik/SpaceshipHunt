@@ -107,6 +107,9 @@ package starling.rendering
 	 */
 	public class VertexData
 	{
+		private static var currentDomain:ApplicationDomain = ApplicationDomain.currentDomain;
+		private static var currentDomainByteArray:ByteArray;
+		private static var domainMemoryLength:uint = 0;
 		private var _rawData:ByteArray;
 		private var _numVertices:int;
 		private var _format:VertexDataFormat;
@@ -114,9 +117,6 @@ package starling.rendering
 		private var _numAttributes:int;
 		private var _premultipliedAlpha:Boolean;
 		private var _tinted:Boolean;
-		public static var currentDomain:ApplicationDomain = ApplicationDomain.currentDomain;
-		public static var currentDomainByteArray:ByteArray;
-		private static var domainMemoryLength:uint = 0;
 		private var _posOffset:int; // in bytes
 		private var _colOffset:int; // in bytes
 		private var _vertexSize:int; // in bytes

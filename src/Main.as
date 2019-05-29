@@ -32,7 +32,6 @@ package
 			this.stage.scaleMode = StageScaleMode.NO_SCALE;
 			this.stage.align = StageAlign.TOP_LEFT;
 			gameEngine = new Starling(Game, stage, null, null, "auto", SystemUtil.isDesktop?"auto":"baselineExtended");
-			gameEngine.showStats = true;
 			if (SystemUtil.isDesktop)
 			{
 				gameEngine.showStats = true;

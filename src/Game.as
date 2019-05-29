@@ -30,9 +30,9 @@ package
 	{
 		import spaceshiptHuntDevelopment.level.LevelEditor;
 	}
-	import avm2.intrinsics.memory.sf32;
-	import avm2.intrinsics.memory.si32;
-	import avm2.intrinsics.memory.lf32;
+	//import avm2.intrinsics.memory.sf32;
+	//import avm2.intrinsics.memory.si32;
+	//import avm2.intrinsics.memory.lf32;
 	/**
 	 * ...
 	 * @author Haim Shnitzer
@@ -64,8 +64,8 @@ package
 		//initialization functions		
 		public function init():void
 		{
-			var ba:ByteArray = new ByteArray();
-				ba.endian = Endian.LITTLE_ENDIAN;
+			//var ba:ByteArray = new ByteArray();
+				//ba.endian = Endian.LITTLE_ENDIAN;
 			
 			//for (var j:Number = 1; j <= 16; j++) 
 			//{
