@@ -15,6 +15,7 @@ package starling.extensions
     import flash.geom.Point;
     import flash.geom.Rectangle;
 
+	import starling.core.starling_internal;
     import starling.animation.IAnimatable;
     import starling.display.BlendMode;
     import starling.display.DisplayObject;
@@ -61,7 +62,7 @@ package starling.extensions
         private static var sHelperPoint:Point = new Point();
         private static var sSubset:MeshSubset = new MeshSubset();
 
-        public function ParticleSystem(texture:Texture=null)
+        public function ParticleSystem(texture:Texture = null,initialcCapacity:int=128)
         {
             _vertexData = new VertexData();
             _indexData = new IndexData();
@@ -78,7 +79,7 @@ package starling.extensions
             _blendFactorDestination = Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA;
             _batchable = false;
 
-            this.capacity = 128;
+            this.capacity = initialcCapacity;
             this.texture = texture;
 
             updateBlendMode();
@@ -297,7 +298,51 @@ package starling.extensions
             var offsetX:Number, offsetY:Number;
             var pivotX:Number = texture ? texture.width  / 2 : 5;
             var pivotY:Number = texture ? texture.height / 2 : 5;
+			var cos:Number;
+			var sin:Number;
+			var cosX:Number;
+			var cosY:Number;
+			var sinX:Number;
+			var sinY:Number;
+			if (VertexData.starling_internal::tryAssignToDomainMemory(_vertexData.rawData,_numParticles * 4+3))
+			{
+				for (var p:int = 0; p < _numParticles; ++p)
+				{
+					vertexID = p * 4;
+					particle = _particles[p] as Particle;
+					rotation = particle.rotation;
+					offsetX = pivotX * particle.scale;
+					offsetY = pivotY * particle.scale;
+					x = particle.x;
+					y = particle.y;
             
+					_vertexData.starling_internal::colorizeToDomainMemory("color", particle.color, particle.alpha, vertexID, 4);
+					if (rotation)
+					{
+						cos = Math.cos(rotation);
+						sin = Math.sin(rotation);
+						cosX = cos * offsetX;
+						cosY = cos * offsetY;
+						sinX = sin * offsetX;
+						sinY = sin * offsetY;
+						
+						_vertexData.starling_internal::setPointToDomainMemory(vertexID, "position", x - cosX + sinY, y - sinX - cosY);
+						_vertexData.starling_internal::setPointToDomainMemory(vertexID + 1, "position", x + cosX + sinY, y + sinX - cosY);
+						_vertexData.starling_internal::setPointToDomainMemory(vertexID + 2, "position", x - cosX - sinY, y - sinX + cosY);
+						_vertexData.starling_internal::setPointToDomainMemory(vertexID + 3, "position", x + cosX - sinY, y + sinX + cosY);
+					}
+					else
+					{
+						// optimization for rotation == 0
+						_vertexData.starling_internal::setPointToDomainMemory(vertexID, "position", x - offsetX, y - offsetY);
+						_vertexData.starling_internal::setPointToDomainMemory(vertexID + 1, "position", x + offsetX, y - offsetY);
+						_vertexData.starling_internal::setPointToDomainMemory(vertexID + 2, "position", x - offsetX, y + offsetY);
+						_vertexData.starling_internal::setPointToDomainMemory(vertexID + 3, "position", x + offsetX, y + offsetY);
+					}
+				}
+			}
+			else
+			{
             for (var i:int=0; i<_numParticles; ++i)
             {
                 vertexID = i * 4;
@@ -312,12 +357,12 @@ package starling.extensions
 
                 if (rotation)
                 {
-                    var cos:Number  = Math.cos(rotation);
-                    var sin:Number  = Math.sin(rotation);
-                    var cosX:Number = cos * offsetX;
-                    var cosY:Number = cos * offsetY;
-                    var sinX:Number = sin * offsetX;
-                    var sinY:Number = sin * offsetY;
+						cos = Math.cos(rotation);
+						sin = Math.sin(rotation);
+						cosX = cos * offsetX;
+						cosY = cos * offsetY;
+						sinX = sin * offsetX;
+						sinY = sin * offsetY;
                     
                     _vertexData.setPoint(vertexID,   "position", x - cosX + sinY, y - sinX - cosY);
                     _vertexData.setPoint(vertexID+1, "position", x + cosX + sinY, y + sinX - cosY);
@@ -334,6 +379,7 @@ package starling.extensions
                 }
             }
         }
+      }
 
         override public function render(painter:Painter):void
         {
@@ -413,13 +459,13 @@ package starling.extensions
                 _particles.length = newCapacity;
                 _indexData.numIndices = newCapacity * 6;
                 _vertexData.numVertices = newCapacity * 4;
-
+            _indexData.trim();
+            _vertexData.trim();
                 if (_numParticles > newCapacity)
                     _numParticles = newCapacity;
             }
 
-            _indexData.trim();
-            _vertexData.trim();
+
 
             setRequiresSync();
         }

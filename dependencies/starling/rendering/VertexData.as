@@ -261,8 +261,6 @@ package starling.rendering
 							sf32(matrix.d * y + matrix.b * x + matrix.ty, pos + 4);
 							pos += _vertexSize;
 						}
-							//		currentDomainByteArray = null;
-							//		currentDomain.domainMemory = null;
 					}
 					else
 					{
@@ -1039,22 +1037,22 @@ targetData.position = pos;
             return null;
         }
 
-		starling_internal static function tryAssignToDomainMemory(byteArray:ByteArray, length:int):Boolean
+		starling_internal static function tryAssignToDomainMemory(byteArray:ByteArray, endPos:int):Boolean
 		{
 			if (currentDomainByteArray != byteArray)
 			{
-				if (length < ApplicationDomain.MIN_DOMAIN_MEMORY_LENGTH)
+				if (byteArray.length < ApplicationDomain.MIN_DOMAIN_MEMORY_LENGTH)
 				{
 					return false;
 				}
-				byteArray.length = length;
+				byteArray.length = Math.max(byteArray.length,length);
 				currentDomain.domainMemory = byteArray;
 				currentDomainByteArray = byteArray;
 			}
-			else if (length > domainMemoryLength)
+			else if (endPos > domainMemoryLength)
 			{
 				//In case byteArray length got bigger this casue the domain memory to reallocate to the new length size.
-                domainMemoryLength = length;
+                domainMemoryLength = endPos;
 				currentDomain.domainMemory = null;
 				byteArray.length = domainMemoryLength;
 				currentDomain.domainMemory = byteArray;

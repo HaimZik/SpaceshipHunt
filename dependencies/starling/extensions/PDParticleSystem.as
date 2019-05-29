@@ -66,7 +66,7 @@ package starling.extensions
         
         public function PDParticleSystem(config:XML, texture:Texture)
         {
-            super(texture);
+            super(texture, getIntValue(config.maxParticles));
             parseConfig(config);
         }
         
@@ -253,7 +253,11 @@ package starling.extensions
             blendFactorSource = getBlendFunc(config.blendFuncSource);
             blendFactorDestination = getBlendFunc(config.blendFuncDestination);
             defaultDuration = getFloatValue(config.duration);
-            capacity = getIntValue(config.maxParticles);
+            var newCapacity :int = getIntValue(config.maxParticles);
+			if (capacity != newCapacity)
+			{
+			capacity = newCapacity;
+			}
 
             // compatibility with future Particle Designer versions
             // (might fix some of the uppercase/lowercase typos)
@@ -268,12 +272,7 @@ package starling.extensions
                 _minRadiusVariance = 0.0;
 
             updateEmissionRate();
-
-            function getIntValue(element:XMLList):int
-            {
-                return parseInt(element.attribute("value"));
-            }
-            
+         
             function getFloatValue(element:XMLList):Number
             {
                 return parseFloat(element.attribute("value"));
@@ -308,7 +307,11 @@ package starling.extensions
                 }
             }
         }
-        
+
+        private function getIntValue(element:XMLList):int
+		{
+			return parseInt(element.attribute("value"));
+		}
         public function get emitterType():int { return _emitterType; }
         public function set emitterType(value:int):void { _emitterType = value; }
 
