@@ -93,6 +93,7 @@ package starling.rendering
         private var _stencilReferenceValues:Dictionary;
         private var _clipRectStack:Vector.<Rectangle>;
         private var _batchCacheExclusions:Vector.<DisplayObject>;
+        private var _batchTrimInterval:int = 250;
 
         private var _batchProcessor:BatchProcessor;
         private var _batchProcessorCurr:BatchProcessor; // current  processor
@@ -172,7 +173,7 @@ package starling.rendering
 
             if (!_shareContext)
             {
-                _context.dispose(false);
+                if (_context) _context.dispose(false);
                 sSharedData = new Dictionary();
             }
         }
@@ -215,9 +216,12 @@ package starling.rendering
          *                                be enabled. Note that on AIR, you also have to enable
          *                                this setting in the app-xml (application descriptor);
          *                                otherwise, this setting will be silently ignored.
+         * @param supportBrowserZoom      if enabled, zooming a website will adapt the size of
+         *                                the back buffer.
          */
         public function configureBackBuffer(viewPort:Rectangle, contentScaleFactor:Number,
-                                            antiAlias:int, enableDepthAndStencil:Boolean):void
+                                            antiAlias:int, enableDepthAndStencil:Boolean,
+                                            supportBrowserZoom:Boolean=false):void
         {
             if (!_shareContext)
             {
@@ -241,8 +245,8 @@ package starling.rendering
                 _stage3D.x = viewPort.x;
                 _stage3D.y = viewPort.y;
 
-                _context.configureBackBuffer(viewPort.width, viewPort.height,
-                    antiAlias, enableDepthAndStencil, contentScaleFactor != 1.0);
+                _context.configureBackBuffer(viewPort.width, viewPort.height, antiAlias,
+                    enableDepthAndStencil, contentScaleFactor != 1.0, supportBrowserZoom);
             }
 
             _backBufferWidth  = viewPort.width;
@@ -388,23 +392,17 @@ package starling.rendering
             }
             else
             {
-                // In 'renderMask', we'll make sure the depth test always fails. Thus, the 3rd
-                // parameter of 'setStencilActions' will always be ignored; the 4th is the one
-                // that counts!
-
                 if (maskee && maskee.maskInverted)
                 {
                     _context.setStencilActions(Context3DTriangleFace.FRONT_AND_BACK,
-                        Context3DCompareMode.ALWAYS, Context3DStencilAction.KEEP,
-                        Context3DStencilAction.DECREMENT_SATURATE);
+                        Context3DCompareMode.ALWAYS, Context3DStencilAction.DECREMENT_SATURATE);
 
                     renderMask(mask);
                 }
                 else
                 {
                     _context.setStencilActions(Context3DTriangleFace.FRONT_AND_BACK,
-                        Context3DCompareMode.EQUAL, Context3DStencilAction.KEEP,
-                        Context3DStencilAction.INCREMENT_SATURATE);
+                        Context3DCompareMode.EQUAL, Context3DStencilAction.INCREMENT_SATURATE);
 
                     renderMask(mask);
                     stencilReferenceValue++;
@@ -440,23 +438,17 @@ package starling.rendering
             }
             else
             {
-                // In 'renderMask', we'll make sure the depth test always fails. Thus, the 3rd
-                // parameter of 'setStencilActions' will always be ignored; the 4th is the one
-                // that counts!
-
                 if (maskee && maskee.maskInverted)
                 {
                     _context.setStencilActions(Context3DTriangleFace.FRONT_AND_BACK,
-                        Context3DCompareMode.ALWAYS, Context3DStencilAction.KEEP,
-                        Context3DStencilAction.INCREMENT_SATURATE);
+                        Context3DCompareMode.ALWAYS, Context3DStencilAction.INCREMENT_SATURATE);
 
                     renderMask(mask);
                 }
                 else
                 {
                     _context.setStencilActions(Context3DTriangleFace.FRONT_AND_BACK,
-                        Context3DCompareMode.EQUAL, Context3DStencilAction.KEEP,
-                        Context3DStencilAction.DECREMENT_SATURATE);
+                        Context3DCompareMode.EQUAL, Context3DStencilAction.DECREMENT_SATURATE);
 
                     renderMask(mask);
                     stencilReferenceValue--;
@@ -477,8 +469,8 @@ package starling.rendering
 
             pushState();
             cacheEnabled = false;
-            _state.depthTest = Context3DCompareMode.NEVER; // depth test always fails ->
-                                                           // color buffer won't be modified
+            _state.alpha = 0.0;
+
             if (mask.stage)
             {
                 _state.setModelviewMatricesToIdentity();
@@ -576,11 +568,31 @@ package starling.rendering
             _batchProcessor.finishBatch();
         }
 
+        /** Indicate how often the internally used batches are being trimmed to save memory.
+         *
+         *  <p>While rendering, the internally used MeshBatches are used in a different way in each
+         *  frame. To save memory, they should be trimmed every once in a while. This method defines
+         *  how often that happens, if at all. (Default: enabled = true, interval = 250)</p>
+         *
+         *  @param enabled   If trimming happens at all. Only disable temporarily!
+         *  @param interval  The number of frames between each trim operation.
+         */
+        public function enableBatchTrimming(enabled:Boolean=true, interval:int=250):void
+        {
+            _batchTrimInterval = enabled ? interval : 0;
+        }
+
         /** Completes all unfinished batches, cleanup procedures. */
         public function finishFrame():void
         {
-            if (_frameID %  99 == 0) _batchProcessorCurr.trim(); // odd number -> alternating processors
-            if (_frameID % 150 == 0) _batchProcessorSpec.trim();
+            if (_batchTrimInterval > 0)
+            {
+                const baseInterval:int = _batchTrimInterval | 0x1; // odd number -> alternating processors
+                const specInterval:int = _batchTrimInterval * 1.5;
+
+                if (_frameID % baseInterval == 0) _batchProcessorCurr.trim();
+                if (_frameID % specInterval == 0) _batchProcessorSpec.trim();
+            }
 
             _batchProcessor.finishBatch();
             _batchProcessor = _batchProcessorSpec; // no cache between frames
@@ -836,6 +848,18 @@ package starling.rendering
             }
         }
 
+        /** Refreshes the values of "backBufferWidth" and "backBufferHeight" from the current
+         *  context dimensions and stores the given "backBufferScaleFactor". This method is
+         *  called by Starling when the browser zoom factor changes (in case "supportBrowserZoom"
+         *  is enabled).
+         */
+        public function refreshBackBufferSize(scaleFactor:Number):void
+        {
+            _backBufferWidth = _context.backBufferWidth;
+            _backBufferHeight = _context.backBufferHeight;
+            _backBufferScaleFactor = scaleFactor;
+        }
+
         // properties
         
         /** Indicates the number of stage3D draw calls. */
@@ -923,6 +947,8 @@ package starling.rendering
         {
             _enableErrorChecking = value;
             if (_context) _context.enableErrorChecking = value;
+            if (value) trace("[Starling] Warning: 'enableErrorChecking' has a " +
+                "negative impact on performance. Never activate for release builds!");
         }
 
         /** Returns the current width of the back buffer. In most cases, this value is in pixels;

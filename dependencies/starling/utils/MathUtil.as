@@ -76,6 +76,7 @@ package starling.utils
             // move to [-180 deg, +180 deg]
             if (angle < -Math.PI) angle += TWO_PI;
             if (angle >  Math.PI) angle -= TWO_PI;
+
             return angle;
         }
 

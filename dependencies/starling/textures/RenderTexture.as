@@ -16,6 +16,7 @@ package starling.textures
     import flash.errors.IllegalOperationError;
     import flash.geom.Matrix;
     import flash.geom.Rectangle;
+    import flash.geom.Vector3D;
     import flash.utils.Dictionary;
 
     import starling.core.Starling;
@@ -29,7 +30,7 @@ package starling.textures
 
     /** A RenderTexture is a dynamic texture onto which you can draw any display object.
      * 
-     *  <p>After creating a render texture, just call the <code>drawObject</code> method to render 
+     *  <p>After creating a render texture, just call the <code>draw</code> method to render
      *  an object directly onto the texture. The object will be drawn onto the texture at its current
      *  position, adhering its current rotation, scale and alpha properties.</p> 
      *  
@@ -142,20 +143,15 @@ package starling.textures
         /** @inheritDoc */
         public override function dispose():void
         {
-            _activeTexture.dispose();
-            
-            if (isDoubleBuffered)
-            {
-                _bufferTexture.dispose();
-                _helperImage.dispose();
-            }
-            
-            super.dispose();
+            if (_helperImage) _helperImage.dispose();
+            if (parent != _bufferTexture && _bufferTexture) _bufferTexture.dispose();
+            if (parent != _activeTexture) _activeTexture.dispose();
+
+            super.dispose(); // will take care of parent (either _bufferTexture or _activeTexture)
         }
         
-        /** Draws an object into the texture. Note that any filters on the object will currently
-         *  be ignored.
-         * 
+        /** Draws an object into the texture.
+         *
          *  @param object       The object to draw.
          *  @param matrix       If 'matrix' is null, the object will be drawn adhering its 
          *                      properties for position, scale, and rotation. If it is not null,
@@ -164,16 +160,19 @@ package starling.textures
          *  @param antiAliasing Values range from 0 (no antialiasing) to 4 (best quality).
          *                      Beginning with AIR 22, this feature is supported on all platforms
          *                      (except for software rendering mode).
+         *  @param cameraPos    When drawing a 3D object, you can optionally pass in a custom
+         *                      camera position. If left empty, the camera will be placed with
+         *                      its default settings (centered over the texture, fov = 1.0).
          */
         public function draw(object:DisplayObject, matrix:Matrix=null, alpha:Number=1.0,
-                             antiAliasing:int=0):void
+                             antiAliasing:int=0, cameraPos:Vector3D=null):void
         {
             if (object == null) return;
             
             if (_drawing)
                 render(object, matrix, alpha);
             else
-                renderBundled(render, object, matrix, alpha, antiAliasing);
+                renderBundled(render, object, matrix, alpha, antiAliasing, cameraPos);
         }
         
         /** Bundles several calls to <code>draw</code> together in a block. This avoids buffer 
@@ -185,10 +184,14 @@ package starling.textures
          *  @param antiAliasing  Values range from 0 (no antialiasing) to 4 (best quality).
          *                       Beginning with AIR 22, this feature is supported on all platforms
          *                       (except for software rendering mode).
+         *  @param cameraPos     When drawing a 3D object, you can optionally pass in a custom
+         *                       camera position. If left empty, the camera will be placed with
+         *                       its default settings (centered over the texture, fov = 1.0).
          */
-        public function drawBundled(drawingBlock:Function, antiAliasing:int=0):void
+        public function drawBundled(drawingBlock:Function, antiAliasing:int=0,
+                                    cameraPos:Vector3D=null):void
         {
-            renderBundled(drawingBlock, null, null, 1.0, antiAliasing);
+            renderBundled(drawingBlock, null, null, 1.0, antiAliasing, cameraPos);
         }
         
         private function render(object:DisplayObject, matrix:Matrix=null, alpha:Number=1.0):void
@@ -223,7 +226,7 @@ package starling.textures
         
         private function renderBundled(renderBlock:Function, object:DisplayObject=null,
                                        matrix:Matrix=null, alpha:Number=1.0,
-                                       antiAliasing:int=0):void
+                                       antiAliasing:int=0, cameraPos:Vector3D=null):void
         {
             var painter:Painter = Starling.painter;
             var state:RenderState = painter.state;
@@ -242,7 +245,8 @@ package starling.textures
             painter.pushState();
 
             var rootTexture:Texture = _activeTexture.root;
-            state.setProjectionMatrix(0, 0, rootTexture.width, rootTexture.height, width, height);
+            state.setProjectionMatrix(0, 0, rootTexture.width, rootTexture.height,
+                width, height, cameraPos);
 
             // limit drawing to relevant area
             sClipRect.setTo(0, 0, _activeTexture.width, _activeTexture.height);

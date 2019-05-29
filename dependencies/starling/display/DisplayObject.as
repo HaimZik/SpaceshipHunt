@@ -391,6 +391,10 @@ package starling.display
 
         /** Draws the object into a BitmapData object.
          *
+         *  <p>This is achieved by drawing the object into the back buffer and then copying the
+         *  pixels of the back buffer into a texture. This also means that the returned bitmap
+         *  data cannot be bigger than the current viewPort.</p>
+         *
          *  @param out   If you pass null, the object will be created for you.
          *               If you pass a BitmapData object, it should have the size of the
          *               object bounds, multiplied by the current contentScaleFactor.
@@ -441,7 +445,12 @@ package starling.display
                 painter.backBufferWidth / scaleX, painter.backBufferHeight / scaleY,
                 stageWidth, stageHeight, stage.cameraPosition);
 
-            render(painter);
+            if (_mask)   painter.drawMask(mask, this);
+
+            if (_filter) _filter.render(painter);
+            else         render(painter);
+
+            if (_mask)   painter.eraseMask(mask, this);
 
             painter.finishMeshBatch();
             painter.context.drawToBitmapData(out);
@@ -912,7 +921,7 @@ package starling.display
 
             var actualWidth:Number;
             var scaleIsNaN:Boolean = _scaleX != _scaleX; // avoid 'isNaN' call
-            var scaleIsZero:Boolean = _scaleX < 1e8 && _scaleX > -1e8;
+            var scaleIsZero:Boolean = _scaleX < 1e-8 && _scaleX > -1e-8;
 
             if (scaleIsZero || scaleIsNaN) { scaleX = 1.0; actualWidth = width; }
             else actualWidth = Math.abs(width / _scaleX);
@@ -928,7 +937,7 @@ package starling.display
         {
             var actualHeight:Number;
             var scaleIsNaN:Boolean  = _scaleY != _scaleY; // avoid 'isNaN' call
-            var scaleIsZero:Boolean = _scaleY < 1e8 && _scaleY > -1e8;
+            var scaleIsZero:Boolean = _scaleY < 1e-8 && _scaleY > -1e-8;
 
             if (scaleIsZero || scaleIsNaN) { scaleY = 1.0; actualHeight = height; }
             else actualHeight = Math.abs(height / _scaleY);

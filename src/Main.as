@@ -3,6 +3,7 @@ package
 	import flash.display.Sprite;
 	import flash.display.StageAlign;
 	import flash.display.StageScaleMode;
+	import flash.display3D.Context3DRenderMode;
 	import flash.events.Event;
 	import flash.system.Capabilities;
 	import input.Key;
@@ -31,7 +32,7 @@ package
 			Starling.multitouchEnabled = true;
 			this.stage.scaleMode = StageScaleMode.NO_SCALE;
 			this.stage.align = StageAlign.TOP_LEFT;
-			gameEngine = new Starling(Game, stage, null, null, "auto", SystemUtil.isDesktop?"auto":"baselineExtended");
+			gameEngine = new Starling(Game, stage, null, null, "auto", SystemUtil.isDesktop?"auto":"standardConstrained");
 			if (SystemUtil.isDesktop)
 			{
 				gameEngine.showStats = true;

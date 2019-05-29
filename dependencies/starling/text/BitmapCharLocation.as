@@ -2,19 +2,29 @@ package starling.text
 {
     /** A helper class referencing a BitmapChar and properties about its location and size.
      *
-     *  <p>This class is used and returned by <code>BitmapFont.arrangeChars()</code>. You only
-     *  need it when extending the "BitmapFont" class.</p>
+     *  <p>This class is used and returned by <code>BitmapFont.arrangeChars()</code>.
+     *  It's typically only needed for advanced changes to Starling's default text composition
+     *  mechanisms.</p>
      *
      *  <p>This class supports object pooling. All instances returned by the methods
      *  <code>instanceFromPool</code> and <code>vectorFromPool</code> are returned to the
-     *  respective pool when calling <code>rechargePool</code>.
+     *  respective pool when calling <code>rechargePool</code>.</p>
      */
     public class BitmapCharLocation
     {
+        /** The actual bitmap char to be drawn. */
         public var char:BitmapChar;
+
+        /** The scale with which the char must be placed. */
         public var scale:Number;
+
+        /** The x-coordinate of the char's location. */
         public var x:Number;
+
+        /** The y-coordinate of the char's location. */
         public var y:Number;
+
+        /** The index of this char in the processed String. */
         public var index:int;
 
         /** Create a new instance that references the given char. */
