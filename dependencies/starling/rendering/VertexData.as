@@ -24,7 +24,8 @@ package starling.rendering
 	import avm2.intrinsics.memory.sf32;
 	import avm2.intrinsics.memory.si32;
 	import avm2.intrinsics.memory.lf32;
-	
+
+	import starling.core.starling_internal;
     import starling.core.Starling;
     import starling.errors.MissingContextError;
     import starling.styles.MeshStyle;
