@@ -241,23 +241,16 @@ package starling.rendering
                 if (matrix)
                 {
                     var x:Number, y:Number;
+				//Only set the ByteArray to domain memory if the length is bigger than 1024 byte.
 					if (targetRawData.length > ApplicationDomain.MIN_DOMAIN_MEMORY_LENGTH)
 					{	
 						if (currentDomainByteArray != targetRawData)
 						{
 							domainMemoryLength = targetRawData.length;
-							//Only set the ByteArray to domain memory if the length is bigger than 1024 byte.
 							targetRawData.length = domainMemoryLength;
 							currentDomain.domainMemory = targetRawData;
 							currentDomainByteArray = targetRawData;
 						}
-						//else if (endPos > domainMemoryLength)
-						//{
-							//currentDomain.domainMemory = null;
-							//domainMemoryLength = endPos;
-							//targetRawData.length = domainMemoryLength;
-							//currentDomain.domainMemory = targetRawData;
-						//}
 						while (pos < endPos)
 						{
 							// Reads float numbers from targetRawData.
@@ -1048,23 +1041,23 @@ targetData.position = pos;
 
 		starling_internal static function tryAssignToDomainMemory(byteArray:ByteArray, length:int):Boolean
 		{
-		//	return false;
-			var byteArrayLength:uint = byteArray.length;
 			if (currentDomainByteArray != byteArray)
 			{
-				if (byteArrayLength < ApplicationDomain.MIN_DOMAIN_MEMORY_LENGTH)
+				if (length < ApplicationDomain.MIN_DOMAIN_MEMORY_LENGTH)
 				{
 					return false;
 				}
-				byteArray.length = byteArrayLength;
+				byteArray.length = length;
 				currentDomain.domainMemory = byteArray;
 				currentDomainByteArray = byteArray;
 			}
-			else if (length > byteArrayLength / 2)
+			else if (length > domainMemoryLength)
 			{
-				//In case byteArray length got bigger this casue the domain memory to reallocate to the new length size. Not doing it will cause errors when trying to read a byte at position larger than length/2.  
-				byteArray.length = byteArrayLength - 1;
-				byteArray.length = byteArrayLength;
+				//In case byteArray length got bigger this casue the domain memory to reallocate to the new length size.
+                domainMemoryLength = length;
+				currentDomain.domainMemory = null;
+				byteArray.length = domainMemoryLength;
+				currentDomain.domainMemory = byteArray;
 			}
 			return true;
 		}
