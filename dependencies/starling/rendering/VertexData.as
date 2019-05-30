@@ -910,9 +910,6 @@ targetData.position = pos;
 
             if (_premultipliedAlpha && alpha != 1.0) rgba = premultiplyAlpha(rgba);
 
-            _rawData.position = vertexID * _vertexSize + offset;
-            _rawData.writeUnsignedInt(switchEndian(rgba));
-
             while (pos < endPos)
             {
                 _rawData.position = pos;
@@ -946,9 +943,7 @@ targetData.position = pos;
 			
 			var pos:int = vertexID * _vertexSize + offset;
 			var endPos:int = pos + (numVertices * _vertexSize);
-			//Write rgba into _rawData, even due the instruction is writing singed int it has the same effect as to write unsinged int.  
-			si32(switchEndian(rgba), pos);
-			
+			//Write rgba into _rawData, even due the instruction is writing signed int it has the same effect as to write unsigned int.  
 			while (pos < endPos)
 			{
 				si32(switchEndian(rgba), pos);
