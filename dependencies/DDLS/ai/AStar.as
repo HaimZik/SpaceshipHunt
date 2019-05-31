@@ -519,8 +519,8 @@ package DDLS.ai
 			//__entryEdges[i] = undefined;
 			//}
 			//}
-			var length:int = openedFaces.length;
-			for (var j:int = 0; j < length; j++)
+			var openedLength:int = openedFaces.length;
+			for (var j:int = 0; j < openedLength; j++)
 			{
 				if (closedFaces[j])
 				{

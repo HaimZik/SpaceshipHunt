@@ -909,11 +909,11 @@ targetData.position = pos;
             else if (rgba != 0xffffffff) _tinted = true;
 
             if (_premultipliedAlpha && alpha != 1.0) rgba = premultiplyAlpha(rgba);
-
+			var rgbaSwitched:uint = switchEndian(rgba);
             while (pos < endPos)
             {
                 _rawData.position = pos;
-                _rawData.writeUnsignedInt(switchEndian(rgba));
+                _rawData.writeUnsignedInt(rgbaSwitched);
                 pos += _vertexSize;
             }
         }
@@ -943,10 +943,11 @@ targetData.position = pos;
 			
 			var pos:int = vertexID * _vertexSize + offset;
 			var endPos:int = pos + (numVertices * _vertexSize);
-			//Write rgba into _rawData, even due the instruction is writing signed int it has the same effect as to write unsigned int.  
+			var rgbaSwitched:uint = switchEndian(rgba);
 			while (pos < endPos)
 			{
-				si32(switchEndian(rgba), pos);
+		//Write rgba into _rawData, even due the instruction is writing signed int it has the same effect as to write unsigned int.
+				si32(rgbaSwitched, pos);
 				pos += _vertexSize;
 			}
 		}
@@ -1032,6 +1033,8 @@ targetData.position = pos;
             return null;
         }
 
+		
+		 /***/
 		starling_internal static function tryAssignToDomainMemory(byteArray:ByteArray, endPos:int):Boolean
 		{
 			if (currentDomainByteArray != byteArray)
@@ -1040,7 +1043,7 @@ targetData.position = pos;
 				{
 					return false;
 				}
-				byteArray.length = Math.max(byteArray.length,length);
+				byteArray.length = Math.max(byteArray.length,endPos);
 				currentDomain.domainMemory = byteArray;
 				currentDomainByteArray = byteArray;
 			}

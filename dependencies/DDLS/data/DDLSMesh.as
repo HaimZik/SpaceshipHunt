@@ -1081,7 +1081,7 @@ package DDLS.data
 			if (eLeft_Right.isConstrained)
 			{
 				var fromSegments:Vector.<DDLSConstraintSegment> = eLeft_Right.fromConstraintSegments;
-				var length:int = fromSegments.length;
+				var fromSegmentsLength:int = fromSegments.length;
 				var i:int = 0;
 				eLeft_Center.fromConstraintSegments.length = length;
 				eCenter_Right.fromConstraintSegments.length = length;
@@ -1115,8 +1115,8 @@ package DDLS.data
 						edges.insertAt(index + 1, eCenter_Left);
 					}
 				}
-				vCenter.fromConstraintSegments.length = length;
-				for (i = 0; i < length; i++)
+				vCenter.fromConstraintSegments.length = fromSegmentsLength;
+				for (i = 0; i < fromSegmentsLength; i++)
 				{
 					vCenter.fromConstraintSegments[i] = fromSegments[i];
 				}
