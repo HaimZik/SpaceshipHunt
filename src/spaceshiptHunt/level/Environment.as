@@ -336,8 +336,8 @@ package spaceshiptHunt.level
 			{
 				if (ratio == 1.0)
 				{
-					var length:int = commandQueue.length;
-					for (var i:int = 0; i < length; i++)
+					var commandCount:int = commandQueue.length;
+					for (var i:int = 0; i < commandCount; i++)
 					{
 						(commandQueue.shift())();
 					}

@@ -1034,7 +1034,9 @@ targetData.position = pos;
         }
 
 		
-		 /***/
+		 /** Assign <code>ByteArray</code> into domain Memory. 
+		   The <code>ByteArray</code> will be assigned only if its length is bigger than <code>ApplicationDomain.MIN_DOMAIN_MEMORY_LENGTH</code>
+		   At the end of the frame it will be automatically unassigned*/
 		starling_internal static function tryAssignToDomainMemory(byteArray:ByteArray, endPos:int):Boolean
 		{
 			if (currentDomainByteArray != byteArray)

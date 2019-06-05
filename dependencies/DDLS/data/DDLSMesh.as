@@ -1083,9 +1083,9 @@ package DDLS.data
 				var fromSegments:Vector.<DDLSConstraintSegment> = eLeft_Right.fromConstraintSegments;
 				var fromSegmentsLength:int = fromSegments.length;
 				var i:int = 0;
-				eLeft_Center.fromConstraintSegments.length = length;
-				eCenter_Right.fromConstraintSegments.length = length;
-				for (i = 0; i < length; i++)
+				eLeft_Center.fromConstraintSegments.length = fromSegmentsLength;
+				eCenter_Right.fromConstraintSegments.length = fromSegmentsLength;
+				for (i = 0; i < fromSegmentsLength; i++)
 				{
 					eLeft_Center.fromConstraintSegments[i] = fromSegments[i];
 					eCenter_Right.fromConstraintSegments[i] = fromSegments[i];
@@ -1095,7 +1095,7 @@ package DDLS.data
 				
 				var edges:Vector.<DDLSEdge>;
 				var index:int;
-				for (i = 0; i < eLeft_Right.fromConstraintSegments.length; i++)
+				for (i = 0; i < fromSegmentsLength; i++)
 				{
 					edges = eLeft_Right.fromConstraintSegments[i].edges;
 					index = edges.indexOf(eLeft_Right);
