@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <application xmlns="http://ns.adobe.com/air/application/32.0">
   <id>air.spaceshipHuntDev</id>
-  <versionNumber>0.21</versionNumber>
+  <versionNumber>0.31</versionNumber>
   <supportedProfiles>extendedDesktop mobileDevice</supportedProfiles>
   <filename>spaceshipHunt</filename>
   <name>

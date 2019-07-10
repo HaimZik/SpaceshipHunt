@@ -204,6 +204,7 @@ package starling.core
         
         // members
         
+		private const MIN_DELAY_BETWEEN_RENDERS:Number = 0.010;
         private var _stage:Stage; // starling.display.stage!
         private var _rootClass:Class;
         private var _root:DisplayObject;
@@ -224,7 +225,7 @@ package starling.core
         private var _showStats:Boolean;
         private var _supportsCursor:Boolean;
         private var _multitouchEnabled:Boolean;
-
+		private var _lastRenderTime:Number;
         private var _viewPort:Rectangle;
         private var _previousViewPort:Rectangle;
         private var _clippedViewPort:Rectangle;
@@ -290,6 +291,7 @@ package starling.core
             _supportHighResolutions = false;
             _painter = new Painter(stage3D);
             _frameTimestamp = getTimer() / 1000.0;
+			_lastRenderTime = _frameTimestamp - 0.010;
             _frameID = 1;
             _supportsCursor = Mouse.supportsCursor || Capabilities.os.indexOf("Windows") == 0;
             _statsDisplayAlign = {};
@@ -405,7 +407,12 @@ package starling.core
             if (passedTime < 0.0) passedTime = 1.0 / _nativeStage.frameRate;
 
             advanceTime(passedTime);
-            render();
+			//On some mobile devices rendering too soon trigger a performance bug where Context3d.clear is taking a lot of time 
+			if (passedTime > MIN_DELAY_BETWEEN_RENDERS)
+			{
+			_lastRenderTime = now;	
+              render();
+			}
         }
         
         /** Dispatches ENTER_FRAME events on the display list, advances the Juggler 
