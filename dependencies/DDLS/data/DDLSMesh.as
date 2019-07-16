@@ -1602,12 +1602,14 @@ package DDLS.data
 				var boundA:Vector.<DDLSEdge>;
 				var boundM:Vector.<DDLSEdge>;
 				var boundB:Vector.<DDLSEdge>;
-				
+				var edgesLength:int;
 				if (index < (bound.length - 1))
 				{
 					edgeA = DDLSPool.getDDLSEdge();
 					edgeAopp = DDLSPool.getDDLSEdge();
-					_edges.push(edgeA, edgeAopp);
+					edgesLength = _edges.length;
+					_edges[edgesLength++] = edgeA;
+					_edges[edgesLength++] = edgeAopp;
 					edgeA.setDatas(vertexA, edgeAopp, null, null, isReal, false);
 					edgeAopp.setDatas(bound[index].originVertex, edgeA, null, null, isReal, false);
 					boundA = DDLSPool.sliceDDLSEdgeVector(bound, index);
@@ -1620,7 +1622,9 @@ package DDLS.data
 				{
 					edgeB = DDLSPool.getDDLSEdge();
 					edgeBopp = DDLSPool.getDDLSEdge();
-					_edges.push(edgeB, edgeBopp);
+					edgesLength = _edges.length;
+					_edges[edgesLength++] = edgeB;
+					_edges[edgesLength++] = edgeBopp;
 					edgeB.setDatas(bound[1].originVertex, edgeBopp, null, null, isReal, false);
 					edgeBopp.setDatas(bound[index].originVertex, edgeB, null, null, isReal, false);
 					boundB = DDLSPool.sliceDDLSEdgeVector(bound, 1, index);

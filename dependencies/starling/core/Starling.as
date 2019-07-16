@@ -407,8 +407,8 @@ package starling.core
             if (passedTime < 0.0) passedTime = 1.0 / _nativeStage.frameRate;
 
             advanceTime(passedTime);
-			//On some mobile devices rendering too soon trigger a performance bug where Context3d.clear is taking a lot of time 
-			if (passedTime > MIN_DELAY_BETWEEN_RENDERS)
+			//On some mobile devices rendering too soon trigger a performance bug where Context3d.clear is taking a lot of time. 
+			if (now-_lastRenderTime > MIN_DELAY_BETWEEN_RENDERS)
 			{
 			_lastRenderTime = now;	
               render();

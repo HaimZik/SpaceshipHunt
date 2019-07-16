@@ -86,10 +86,11 @@ package spaceshiptHuntDevelopment.level
 			navShape = new Dictionary();
 			verticesDisplay = new Canvas();
 			var stage:Stage = Starling.current.stage;
-			var flashView:DDLSSimpleView;
-			navMeshDebugView = flashView = new DDLSSimpleView();
-			;
+			var flashView:DDLSSimpleView = new DDLSSimpleView();
 			Starling.current.nativeOverlay.addChild(flashView.surface);
+		//	var starlingView:DDLSStarlingView = new DDLSStarlingView();
+			navMeshDebugView =  flashView //starlingView
+			;
 //			navMeshDebugView.surface.mouseEnabled = false;
 			//mainDisplay.addChild(navMeshDebugView.canvas);
 			//napeDebug = new ShapeDebug(stage.stageWidth, stage.stageHeight, 0x33333333);
@@ -199,14 +200,17 @@ package spaceshiptHuntDevelopment.level
 						(BodyInfo.list[i] as Entity).drawDebug(navMeshDebugView);
 					}
 				}
-				(navMeshDebugView as DDLSSimpleView).surface.transform.matrix = mainDisplay.transformationMatrix;
+				if (!(navMeshDebugView is DDLSStarlingView))
+				{
+					(navMeshDebugView as DDLSSimpleView).surface.transform.matrix = mainDisplay.transformationMatrix;
+				}
 			}
 		}
 		
 		override protected function syncTransforms():void
 		{
 			super.syncTransforms();
-			if (displayNavMesh)
+			if (displayNavMesh && !(navMeshDebugView is DDLSStarlingView))
 			{
 				(navMeshDebugView as DDLSSimpleView).surface.transform.matrix = mainDisplay.transformationMatrix;
 			}
