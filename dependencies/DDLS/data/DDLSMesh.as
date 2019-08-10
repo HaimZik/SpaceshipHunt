@@ -960,14 +960,22 @@ package DDLS.data
 			// remove the old TOP-BOTTOM and BOTTOM-TOP edges
 			DDLSPool.putDDLSEdge(eBot_Top);
 			DDLSPool.putDDLSEdge(eTop_Bot);
-			_edges.removeAt(_edges.lastIndexOf(eBot_Top));
-			_edges.removeAt(_edges.lastIndexOf(eTop_Bot));
+			var i:int = _edges.length;
+			while (_edges[--i] != eBot_Top);
+			_edges.removeAt(i);
+			i= _edges.length;
+			while (_edges[--i] != eTop_Bot);
+			_edges.removeAt(i);
 			
 			// remove the old LEFT and RIGHT faces
 			DDLSPool.putDDLSFace(fLeft);
 			DDLSPool.putDDLSFace(fRight);
-			_faces.removeAt(_faces.lastIndexOf(fLeft));
-			_faces.removeAt(_faces.lastIndexOf(fRight));
+			i = _faces.length;
+			while (_faces[--i] != fLeft);
+			_faces.removeAt(i);
+			i = _faces.length;
+			while (_faces[--i] != fRight);
+			_faces.removeAt(i);
 			
 			return eRight_Left;
 		}
@@ -1019,16 +1027,17 @@ package DDLS.data
 			
 			// add the new vertex
 			_vertices.push(vCenter);
-			
+			var edgesLength:int = _edges.length+8;
+			_edges.length = edgesLength;
 			// add the new edges
-			_edges.push(eCenter_Top);
-			_edges.push(eTop_Center);
-			_edges.push(eCenter_Left);
-			_edges.push(eLeft_Center);
-			_edges.push(eCenter_Bot);
-			_edges.push(eBot_Center);
-			_edges.push(eCenter_Right);
-			_edges.push(eRight_Center);
+			_edges[--edgesLength]=eCenter_Top;
+			_edges[--edgesLength]=eTop_Center;
+			_edges[--edgesLength]=eCenter_Left;
+			_edges[--edgesLength]=eLeft_Center;
+			_edges[--edgesLength] = eCenter_Bot;
+			_edges[--edgesLength]=eBot_Center;
+			_edges[--edgesLength] = eCenter_Right;
+			_edges[--edgesLength] = eRight_Center;
 			
 			// add the new faces
 			_faces.push(fTopRight);
@@ -1125,7 +1134,13 @@ package DDLS.data
 			// remove the old LEFT-RIGHT and RIGHT-LEFT edges
 			DDLSPool.putDDLSEdge(eLeft_Right);
 			DDLSPool.putDDLSEdge(eRight_Left);
-			_edges.removeAt(_edges.indexOf(eLeft_Right));
+			//edge more likly to be found at the start or end of the array
+			var j:int = _edges.lastIndexOf(eLeft_Right, _edges.length * 0.2);
+			if (j ==-1)
+			{
+				j = _edges.lastIndexOf(eLeft_Right);
+			}
+			_edges.removeAt(j);
 			_edges.removeAt(_edges.indexOf(eRight_Left));
 			
 			// remove the old TOP and BOTTOM faces
@@ -1216,7 +1231,7 @@ package DDLS.data
 			
 			// we remove the old face
 			DDLSPool.putDDLSFace(face);
-			_faces.removeAt(_faces.indexOf(face));
+			_faces.removeAt(_faces.lastIndexOf(face));
 			
 			// add new bounds references for Delaunay restoring
 			__centerVertex = vCenter;
