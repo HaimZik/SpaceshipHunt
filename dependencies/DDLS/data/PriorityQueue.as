@@ -31,7 +31,8 @@ package DDLS.data
 		public function insert(itemID:int):void
 		{
 			_queue[_length] = itemID;
-			bubbleUp(_length++);
+			bubbleUp(_length);
+			_length += 1;
 		}
 		
 		/**

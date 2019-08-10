@@ -95,7 +95,7 @@ package DDLSDebug.view
 				{
 					if (!dictVerticesDone[incomingEdge.originVertex])
 					{
-						if (viewRadius == -1 || isLineInView(incomingEdge.originVertex.pos, incomingEdge.destinationVertex.pos, viewCenterX, viewCenterY, viewRadius))
+					//	if (viewRadius == -1 || isLineInView(incomingEdge.originVertex.pos, incomingEdge.destinationVertex.pos, viewCenterX, viewCenterY, viewRadius))
 						{
 							if (incomingEdge.isConstrained)
 							{

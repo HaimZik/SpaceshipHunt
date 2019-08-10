@@ -766,13 +766,9 @@ package DDLS.data.math
 			return squaredDistance >= squaredRadius;
 		}
 		
-		public static function getCircumcenter(x1:Number, y1:Number, x2:Number, y2:Number, x3:Number, y3:Number, result:Point = null):Point
+		[Inline]
+		public static function getCircumcenter(x1:Number, y1:Number, x2:Number, y2:Number, x3:Number, y3:Number, result:Point):void
 		{
-			if (!result)
-			{
-				result = new Point();
-			}
-			
 			// middle points
 			var m1:Number = (x1 + x2) / 2;
 			var m2:Number = (y1 + y2) / 2;
@@ -801,8 +797,6 @@ package DDLS.data.math
 			
 			result.x = m1 + t1 * (y2 - y1);
 			result.y = m2 - t1 * (x2 - x1);
-			
-			return result;
 		}
 		
 		static public function intersections2segments(s1p1x:Number, s1p1y:Number, s1p2x:Number, s1p2y:Number, s2p1x:Number, s2p1y:Number, s2p2x:Number, s2p2y:Number, posIntersection:DDLSPoint2D = null, paramIntersection:Vector.<Number> = null, infiniteLineMode:Boolean = false):Boolean

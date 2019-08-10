@@ -296,8 +296,8 @@ package starling.extensions
             var rotation:Number;
             var x:Number, y:Number;
             var offsetX:Number, offsetY:Number;
-            var pivotX:Number = texture ? texture.width  / 2 : 5;
-            var pivotY:Number = texture ? texture.height / 2 : 5;
+            var pivotX:Number = texture ? texture.width*0.5 : 5.0;
+            var pivotY:Number = texture ? texture.height*0.5 : 5.0;
 			var cos:Number;
 			var sin:Number;
 			var cosX:Number;
@@ -309,7 +309,7 @@ package starling.extensions
 				for (var p:int = 0; p < _numParticles; ++p)
 				{
 					vertexID = p * 4;
-					particle = _particles[p] as Particle;
+					particle = _particles[p];
 					rotation = particle.rotation;
 					offsetX = pivotX * particle.scale;
 					offsetY = pivotY * particle.scale;
@@ -346,7 +346,7 @@ package starling.extensions
             for (var i:int=0; i<_numParticles; ++i)
             {
                 vertexID = i * 4;
-                particle = _particles[i] as Particle;
+                particle = _particles[i];
                 rotation = particle.rotation;
                 offsetX = pivotX * particle.scale;
                 offsetY = pivotY * particle.scale;

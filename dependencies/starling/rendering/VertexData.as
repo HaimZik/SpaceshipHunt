@@ -363,7 +363,8 @@ package starling.rendering
 						y = sourceData.readFloat();
 						// Write float number into targetData.
 						sf32(matrix.a * x + matrix.c * y + matrix.tx, pos);
-						sf32(matrix.d * y + matrix.b * x + matrix.ty, pos += 4);
+						pos += 4;
+						sf32(matrix.d * y + matrix.b * x + matrix.ty, pos);
 						pos += 4 + targetDelta;
 						sourceData.position += sourceDelta;
 					}

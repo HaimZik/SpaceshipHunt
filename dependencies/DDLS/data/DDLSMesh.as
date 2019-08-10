@@ -1404,22 +1404,22 @@ package DDLS.data
 				DDLSPool.putDDLSFace(faceToDelete);
 				
 				edge.destinationVertex.edge = edge.nextLeftEdge;
-				var j:int = -1;
-				while (_edges[++j] != edge && _edges[j] != edge.oppositeEdge)
+				var j:int = _edges.length;
+				while (_edges[--j] != edge && _edges[j] != edge.oppositeEdge)
 					;
 				if (_edges[j] == edge)
 				{
 					_edges.removeAt(j);
-					while (_edges[j++] != edge.oppositeEdge)
+					while (_edges[--j] != edge.oppositeEdge)
 						;
 				}
 				else
 				{
 					_edges.removeAt(j);
-					while (_edges[j++] != edge)
+					while (_edges[--j] != edge)
 						;
 				}
-				_edges.removeAt(j - 1);
+				_edges.removeAt(j);
 				DDLSPool.putDDLSEdge(edge.oppositeEdge);
 				DDLSPool.putDDLSEdge(edge);
 			}

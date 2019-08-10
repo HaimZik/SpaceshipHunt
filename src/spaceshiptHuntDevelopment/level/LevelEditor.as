@@ -88,8 +88,8 @@ package spaceshiptHuntDevelopment.level
 			var stage:Stage = Starling.current.stage;
 			var flashView:DDLSSimpleView = new DDLSSimpleView();
 			Starling.current.nativeOverlay.addChild(flashView.surface);
-		//	var starlingView:DDLSStarlingView = new DDLSStarlingView();
-			navMeshDebugView =  flashView //starlingView
+			var starlingView:DDLSStarlingView = new DDLSStarlingView();
+			navMeshDebugView =   starlingView //flashView
 			;
 //			navMeshDebugView.surface.mouseEnabled = false;
 			//mainDisplay.addChild(navMeshDebugView.canvas);
