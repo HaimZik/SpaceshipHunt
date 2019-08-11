@@ -73,6 +73,7 @@ package spaceshiptHunt.level
 		protected var asteroidField:Sprite;
 		protected var camTargetVelocity:Vec2 = new Vec2();
 		protected var camAngularVelocity:Number;
+		protected var isLevelLoaded:Boolean = false;
 		private var rayHelper:Ray;
 		
 		public function Environment()
@@ -256,7 +257,7 @@ package spaceshiptHunt.level
 				return;
 			}
 			var offset:int = -2;
-		//	if(
+
 			var fromX:Number = path[blockedPart + offset];
 			var fromY:Number = path[blockedPart + 1 + offset];
 			var toX:Number = path[path.length - 2];
@@ -269,7 +270,7 @@ package spaceshiptHunt.level
 			//agent.findPathTo(path[path.length - 2], path[path.length - 1], path);
 			pathfinder.findPathFrom(fromX, fromY, toX, toY, badPath);
 			fixPath(badPath, maxFix);
-			path.length = blockedPart + badPath.length+offset;
+			path.length = blockedPart + badPath.length + offset;
 			for (var i:int = blockedPart + offset; i < path.length; i++)
 			{
 				path[i] = badPath[i - (blockedPart + offset)];
@@ -315,7 +316,11 @@ package spaceshiptHunt.level
 		
 		public function loadLevel(levelName:String, onFinish:Function = null):void
 		{
-			disposeLevel();
+			if (isLevelLoaded)
+			{
+				disposeLevel();
+			}
+			isLevelLoaded = true;
 			var level:Object = JSON.parse(new LevelInfo[levelName](), function(k, v):Object
 			{
 				if (isNaN(Number(k)) && !(v is Array))
@@ -352,7 +357,7 @@ package spaceshiptHunt.level
 		
 		public function disposeLevel():void
 		{
-		//	Starling.juggler.purge();
+			//	Starling.juggler.purge();
 			navMesh.updateObjects();
 			for (var i:int = BodyInfo.list.length - 1; i >= 0; i--)
 			{

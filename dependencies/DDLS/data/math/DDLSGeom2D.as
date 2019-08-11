@@ -75,6 +75,7 @@ package DDLS.data.math
 			var objectContainer:Object;
 			var relativPos:int;
 			var numIter:int = 0;
+
 			while ((objectContainer = isInFace(x, y, currFace)) == null)
 			{			
 				numIter++;

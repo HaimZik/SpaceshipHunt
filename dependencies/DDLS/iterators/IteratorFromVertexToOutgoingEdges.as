@@ -2,32 +2,53 @@ package DDLS.iterators
 {
 	import DDLS.data.DDLSEdge;
 	import DDLS.data.DDLSVertex;
-
+	
 	public class IteratorFromVertexToOutgoingEdges
 	{
 		
 		private var _fromVertex:DDLSVertex;
 		private var _nextEdge:DDLSEdge;
-		
-		public var realEdgesOnly:Boolean = true;
+		private var _resultEdge:DDLSEdge;
 		
 		public function IteratorFromVertexToOutgoingEdges()
 		{
-			
+		
 		}
 		
-		public function set fromVertex( value:DDLSVertex ):void
+		public function set fromVertex(value:DDLSVertex):void
 		{
 			_fromVertex = value;
 			_nextEdge = _fromVertex.edge;
-			while ( realEdgesOnly && ! _nextEdge.isReal )
+			while (!_nextEdge.isReal)
 			{
 				_nextEdge = _nextEdge.rotLeftEdge;
 			}
 		}
 		
-		private var _resultEdge:DDLSEdge;
-		public function next():DDLSEdge
+		public function set fromAnyEdge(value:DDLSVertex):void
+		{
+			_fromVertex = value;
+			_nextEdge = _fromVertex.edge;
+		}
+		
+		[inline]
+		public final function next():DDLSEdge
+		{
+			_resultEdge = _nextEdge;
+			if (_nextEdge)
+			{
+				_nextEdge = _nextEdge.rotLeftEdge;
+				if (_nextEdge == _fromVertex.edge)
+				{
+					_nextEdge = null;
+				}
+			}
+			
+			return _resultEdge;
+		}
+		
+		[inline]
+		public final function nextRealEdge():DDLSEdge
 		{
 			if (_nextEdge)
 			{
@@ -35,13 +56,12 @@ package DDLS.iterators
 				do
 				{
 					_nextEdge = _nextEdge.rotLeftEdge;
-					if ( _nextEdge == _fromVertex.edge )
+					if (_nextEdge == _fromVertex.edge)
 					{
 						_nextEdge = null;
 						break;
 					}
-				}
-				while ( realEdgesOnly && ! _nextEdge.isReal )
+				} while (!_nextEdge.isReal)
 			}
 			else
 			{
@@ -50,6 +70,6 @@ package DDLS.iterators
 			
 			return _resultEdge;
 		}
-		
+	
 	}
 }

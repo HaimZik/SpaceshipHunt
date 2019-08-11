@@ -543,7 +543,7 @@ package DDLS.data
 						return null;
 					}
 					iterEdges.fromVertex = currVertex;
-					currEdge = iterEdges.next();
+					currEdge = iterEdges.nextRealEdge();
 					while (currEdge)
 					{
 						// if we meet directly the end vertex
@@ -589,14 +589,14 @@ package DDLS.data
 							done = true;
 							break;
 						}
-						currEdge = iterEdges.next();
+						currEdge = iterEdges.nextRealEdge();
 					}
 					
 					if (done)
 						continue;
 					
 					iterEdges.fromVertex = currVertex;
-					currEdge = iterEdges.next()
+					currEdge = iterEdges.nextRealEdge();
 					while (currEdge)
 					{
 						currEdge = currEdge.nextLeftEdge;
@@ -608,7 +608,7 @@ package DDLS.data
 								//trace("edge is constrained");
 								vertexDown = splitEdge(currEdge, pIntersect.x, pIntersect.y);
 								iterEdges.fromVertex = currVertex;
-								currEdge = iterEdges.next()
+								currEdge = iterEdges.nextRealEdge();
 								while (currEdge)
 								{
 									if (currEdge.destinationVertex == vertexDown)
@@ -620,7 +620,7 @@ package DDLS.data
 										segment.addEdge(currEdge);
 										break;
 									}
-									currEdge = iterEdges.next();
+									currEdge = iterEdges.nextRealEdge();
 								}
 								currVertex.addFromConstraintSegment(segment);
 								tempEdgeDownUp.originVertex = vertexDown;
@@ -637,7 +637,7 @@ package DDLS.data
 							}
 							break;
 						}
-						currEdge = iterEdges.next()
+						currEdge = iterEdges.nextRealEdge()
 					}
 				}
 				else if ((currEdge = currObjet as DDLSEdge))
@@ -698,7 +698,7 @@ package DDLS.data
 								currVertex = splitEdge(edgeLeft, pIntersect.x, pIntersect.y);
 								
 								iterEdges.fromVertex = currVertex;
-								currEdge = iterEdges.next()
+								currEdge = iterEdges.nextRealEdge()
 								while (currEdge)
 								{
 									if (currEdge.destinationVertex == leftBoundingEdges[0].originVertex)
@@ -709,7 +709,7 @@ package DDLS.data
 									{
 										rightBoundingEdges.push(currEdge.oppositeEdge);
 									}
-									currEdge = iterEdges.next()
+									currEdge = iterEdges.nextRealEdge()
 								}
 								
 								newEdgeDownUp = DDLSPool.getDDLSEdge();
@@ -747,7 +747,7 @@ package DDLS.data
 								currVertex = splitEdge(edgeLeft, pIntersect.x, pIntersect.y);
 								
 								iterEdges.fromVertex = currVertex;
-								currEdge = iterEdges.next();
+								currEdge = iterEdges.nextRealEdge();
 								while (currEdge)
 								{
 									if (currEdge.destinationVertex == leftBoundingEdges[0].originVertex)
@@ -758,7 +758,7 @@ package DDLS.data
 									{
 										rightBoundingEdges.push(currEdge.oppositeEdge);
 									}
-									currEdge = iterEdges.next();
+									currEdge = iterEdges.nextRealEdge();
 								}
 								
 								newEdgeDownUp = DDLSPool.getDDLSEdge();
@@ -1274,8 +1274,7 @@ package DDLS.data
 			//trace("tryToDeleteVertex id", vertex.id);
 			var i:int;
 			var freeOfConstraint:Boolean;
-			iterEdges.fromVertex = vertex;
-			iterEdges.realEdgesOnly = false;
+			iterEdges.fromAnyEdge = vertex;
 			var edge:DDLSEdge;
 			
 			freeOfConstraint = vertex.fromConstraintSegments.length == 0;

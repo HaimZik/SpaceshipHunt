@@ -53,7 +53,7 @@ package DDLS.data.math
 				//reset();
 				
 			//fix for bad performance
-			return rangeMin+int(Math.random()*rangeMax);
+			return rangeMin+int(Math.random()*(rangeMax-rangeMin));
 		}
 
 	}
