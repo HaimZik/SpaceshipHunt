@@ -7,8 +7,6 @@ package DDLS.data.math
 	import DDLS.data.DDLSVertex;
 	import DDLS.iterators.IteratorFromFaceToInnerEdges;
 	import DDLS.iterators.IteratorFromVertexToHoldingFaces;
-	
-	import flash.geom.Point;
 	import flash.utils.Dictionary;
 	
 	public class DDLSGeom2D
@@ -26,7 +24,7 @@ package DDLS.data.math
 		// - null if outside mesh
 		// YOU SHOULD USE THIS FUNCTION ONLY FOR COORDINATES INSIDE SAFE AREA
 		static private var __samples:Vector.<DDLSVertex> = new Vector.<DDLSVertex>();
-		static private var __circumcenter:Point = new Point();
+		static private var __circumcenter:DDLSPoint2D = new DDLSPoint2D();
 		static private var iterFace:IteratorFromVertexToHoldingFaces = new IteratorFromVertexToHoldingFaces();
 		static private var iterEdge:IteratorFromFaceToInnerEdges = new IteratorFromFaceToInnerEdges();
 		static private var edgesToCheckHelper:Vector.<DDLSEdge>=new Vector.<DDLSEdge>();
@@ -40,7 +38,7 @@ package DDLS.data.math
 			
 			if (!_randGen)
 				_randGen = new DDLSRandGenerator();
-			//_randGen.seed = x * 10 + 4 * y;
+			_randGen.seed = x * 10 + 4 * y;
 			
 			var i:int;
 			var numSamples:int = Math.pow(mesh.__vertices.length, 1 / 3);
@@ -79,7 +77,7 @@ package DDLS.data.math
 			while ((objectContainer = isInFace(x, y, currFace)) == null)
 			{			
 				numIter++;
-				if (numIter == 50)
+				if (numIter == 500)
 				{
 					trace("WALK TAKE MORE THAN 50 LOOP");
 					//	objectContainer = null;
@@ -768,7 +766,7 @@ package DDLS.data.math
 		}
 		
 		[Inline]
-		public static function getCircumcenter(x1:Number, y1:Number, x2:Number, y2:Number, x3:Number, y3:Number, result:Point):void
+		public static function getCircumcenter(x1:Number, y1:Number, x2:Number, y2:Number, x3:Number, y3:Number, result:DDLSPoint2D):void
 		{
 			// middle points
 			var m1:Number = (x1 + x2) / 2;

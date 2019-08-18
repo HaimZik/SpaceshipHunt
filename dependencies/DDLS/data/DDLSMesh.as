@@ -4,10 +4,8 @@ package DDLS.data
 	import DDLS.data.math.DDLSMatrix2D;
 	import DDLS.data.math.DDLSPoint2D;
 	import DDLS.iterators.IteratorFromVertexToOutgoingEdges;
-	import flash.geom.Point;
-	import flash.utils.Dictionary;
-	import starling.utils.Pool;
 	import DDLS.factories.DDLSPool;
+    import flash.utils.Dictionary;
 	
 	public class DDLSMesh
 	{
@@ -1555,7 +1553,7 @@ package DDLS.data
 				var vertexB:DDLSVertex = baseEdge.destinationVertex;
 				var vertexC:DDLSVertex;
 				var vertexCheck:DDLSVertex;
-				var circumcenter:Point = Pool.getPoint();
+				var circumcenter:DDLSPoint2D = DDLSPool.getPoint();
 				var radiusSquared:Number;
 				var distanceSquared:Number;
 				var isDelaunay:Boolean;
@@ -1590,7 +1588,7 @@ package DDLS.data
 							break;
 					}
 				}
-				Pool.putPoint(circumcenter);
+				DDLSPool.putPoint(circumcenter);
 				if (!isDelaunay)
 				{
 					// for perfect regular n-sides polygons, checking delaunay circumcircle condition is not possible
