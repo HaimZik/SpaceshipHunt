@@ -561,7 +561,6 @@ package DDLS.data
 							DDLSPool.putDDLSEdge(tempEdgeDownUp);
 							DDLSPool.putDDLSEdge(tempSdgeUpDown);
 							DDLSPool.putPoint(pIntersect);
-							DDLSPool.putPoint(pIntersect);
 	                        DDLSPool.putDDLSEdgeVector(intersectedEdges);
 	                        DDLSPool.putDDLSEdgeVector(leftBoundingEdges);
 	                        DDLSPool.putDDLSEdgeVector(rightBoundingEdges);

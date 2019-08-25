@@ -12,6 +12,7 @@ package
 	import flash.ui.Keyboard;
 	import flash.utils.ByteArray;
 	import flash.utils.Endian;
+	import flash.utils.getTimer;
 	import input.Key;
 	import io.arkeus.ouya.ControllerInput;
 	import nape.geom.Vec2;
