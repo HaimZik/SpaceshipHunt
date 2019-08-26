@@ -33,7 +33,7 @@ package starling.extensions.lighting
 	public class LightStyle extends MeshStyle
 	{
 		public static const VERTEX_FORMAT:VertexDataFormat = LightEffect.VERTEX_FORMAT;
-		private static const xAxisAttributeSize:int = VERTEX_FORMAT.getSize("xAxis");
+		private static const axisAttributeSize:int = VERTEX_FORMAT.getSize("xAxis");
 		private static const xAxisAttributeOffset:int = VERTEX_FORMAT.getOffset("xAxis");
 		
 		private var _light:LightSource;
@@ -96,14 +96,13 @@ package starling.extensions.lighting
 				var targetLightStyle:LightStyle = targetStyle as LightStyle;
 				var targetVertexData:VertexData = targetLightStyle.vertexData;
 				sMatrix.setTo(matrix.a, matrix.b, matrix.c, matrix.d, 0, 0);
-				copyAttributeTo_internal(targetVertexData, targetVertexID, sMatrix, vertexID, numVertices);
-				vertexData.copyAttributeTo(targetVertexData, targetVertexID, "yAxis", sMatrix, vertexID, numVertices);
+				copyAxisAttributesTo(targetVertexData, targetVertexID, sMatrix, vertexID, numVertices);
 			}
 		}
 		
 		
-		[inline]
-		private final function copyAttributeTo_internal(target:VertexData, targetVertexID:int, matrix:Matrix, vertexID:int, numVertices:int):void
+		
+		private final function copyAxisAttributesTo(target:VertexData, targetVertexID:int, matrix:Matrix, vertexID:int, numVertices:int):void
 		{
 			var _numVertices:int = vertexData.numVertices;
 			if (numVertices < 0 || vertexID + numVertices > _numVertices)
@@ -113,10 +112,10 @@ package starling.extensions.lighting
 				target.numVertices = targetVertexID + numVertices;
 			
 			var targetData:ByteArray = target.rawData;
-			var targetDelta:int = target.vertexSize - xAxisAttributeSize;
+			var targetDelta:int = target.vertexSize -axisAttributeSize*2;
 			var pos:int = targetVertexID * target.vertexSize + xAxisAttributeOffset;
 			var i:int;
-			if (VertexData.starling_internal::tryAssignToDomainMemory(targetData, (targetDelta + 8) * numVertices))
+			if (VertexData.starling_internal::tryAssignToDomainMemory(targetData, (targetDelta + 16) * numVertices))
 			{
 				for (i = 0; i < numVertices; ++i)
 				{
@@ -124,6 +123,10 @@ package starling.extensions.lighting
 					sf32(matrix.a, pos);
 					pos += 4;
 					sf32(matrix.b, pos);
+					pos += 4;
+					sf32(matrix.c, pos);
+					pos += 4;
+					sf32(matrix.d, pos);
 					pos += 4 + targetDelta;
 				}
 			}
@@ -134,10 +137,12 @@ package starling.extensions.lighting
 				{	
 					targetData.writeFloat(matrix.a);
 					targetData.writeFloat(matrix.b);
+					targetData.writeFloat(matrix.c);
+					targetData.writeFloat(matrix.d);
 					targetData.position += targetDelta;
 				}
-		//	}
-		}
+			}
+		}	
 		
 		override public function canBatchWith(meshStyle:MeshStyle):Boolean
 		{

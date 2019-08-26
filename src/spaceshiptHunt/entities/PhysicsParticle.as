@@ -5,6 +5,7 @@ package spaceshiptHunt.entities
 	import nape.geom.*;
 	import nape.shape.*;
 	import nape.phys.BodyType;
+	import spaceshiptHunt.Game;
 	import spaceshiptHunt.level.*;
 	import starling.core.*;
 	import starling.display.*;

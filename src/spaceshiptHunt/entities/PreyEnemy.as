@@ -2,6 +2,7 @@ package spaceshiptHunt.entities
 {
 	import nape.geom.RayResult;
 	import nape.geom.Vec2;
+	import spaceshiptHunt.Game;
 	import spaceshiptHunt.entities.Enemy;
 	import spaceshiptHunt.level.Environment;
 	import starling.display.Image;

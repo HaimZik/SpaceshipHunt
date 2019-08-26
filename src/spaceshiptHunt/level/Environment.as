@@ -31,6 +31,7 @@ package spaceshiptHunt.level
 	import nape.phys.BodyType;
 	import nape.shape.Polygon;
 	import nape.space.Space;
+	import spaceshiptHunt.Game;
 	import spaceshiptHunt.entities.*;
 	import starling.core.Starling;
 	import starling.display.DisplayObject;

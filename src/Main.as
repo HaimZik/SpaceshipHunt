@@ -7,6 +7,7 @@ package
 	import flash.events.Event;
 	import flash.system.Capabilities;
 	import input.Key;
+	import spaceshiptHunt.Game;
 	import starling.core.Starling;
 	import starling.utils.SystemUtil;
 	

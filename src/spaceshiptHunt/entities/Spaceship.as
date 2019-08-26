@@ -8,6 +8,7 @@ package spaceshiptHunt.entities
 	import DDLS.ai.DDLSEntityAI;
 	import flash.utils.Dictionary;
 	import nape.geom.Vec2;
+	import spaceshiptHunt.Game;
 	import spaceshiptHunt.entities.Entity;
 	import spaceshiptHunt.level.Environment;
 	import spaceshiptHunt.utils.BillboardNode;

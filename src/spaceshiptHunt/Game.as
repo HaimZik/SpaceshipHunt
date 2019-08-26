@@ -1,4 +1,4 @@
-package
+package spaceshiptHunt
 {
 	import flash.display.Stage;
 	import flash.display.StageDisplayState;
