@@ -15,7 +15,7 @@ package DDLSDebug.view
 	import starling.display.Sprite;
 	import starling.display.graphics.Stroke;
 	import starling.filters.FragmentFilter;
-	import starling.textures.TextureSmoothing;
+	//import starling.textures.TextureSmoothing;
 	import starling.utils.Color;
 	
 	/**
@@ -34,11 +34,12 @@ package DDLSDebug.view
 			canvas = new Sprite();
 			canvas.touchable = false;
 			graphics = new Stroke();
+			graphics.alpha = 0.3;
 			paths = new Stroke();
 			canvas.addChild(graphics);
 			canvas.addChild(paths);
 			//var filter:FragmentFilter = new FragmentFilter();
-		//	filter.textureSmoothing = TextureSmoothing.NONE;
+			//	filter.textureSmoothing = TextureSmoothing.NONE;
 			//filter.resolution = 0.5;
 			//canvas.filter = filter;
 		}
@@ -58,7 +59,6 @@ package DDLSDebug.view
 			var dictVerticesDone:Dictionary;
 			dictVerticesDone = new Dictionary();
 			var commandCount:int = -1;
-//			graphics.lineStyle(2, 0xFF0000);
 			if (viewRadius == -1 || isMeshEndVisable(mesh, viewCenterX, viewCenterY, viewRadius))
 			{
 //				graphics.drawRect(0, 0, mesh.width, mesh.height);
@@ -66,8 +66,8 @@ package DDLSDebug.view
 			while ((vertex = iterVertices.next()) != null)
 			{
 				dictVerticesDone[vertex] = true;
-		//		if (!vertexIsInsideAABB(vertex, mesh))
-			//		continue;
+				//		if (!vertexIsInsideAABB(vertex, mesh))
+				//		continue;
 				
 				//_vertices.graphics.lineStyle(0, 0);
 				//_vertices.graphics.beginFill(0x0000FF, 1);
@@ -91,28 +91,26 @@ package DDLSDebug.view
 				var destinationY:Number = 0;
 				var thickness:Number = 4;
 				var color:uint = 0xFF0000;
+				var lineAlpha:Number = 0.5;
 				while (incomingEdge)
 				{
 					if (!dictVerticesDone[incomingEdge.originVertex])
 					{
-					//	if (viewRadius == -1 || isLineInView(incomingEdge.originVertex.pos, incomingEdge.destinationVertex.pos, viewCenterX, viewCenterY, viewRadius))
+						//	if (viewRadius == -1 || isLineInView(incomingEdge.originVertex.pos, incomingEdge.destinationVertex.pos, viewCenterX, viewCenterY, viewRadius))
 						{
 							if (incomingEdge.isConstrained)
 							{
-								//_constraints.graphics.lineStyle(2, 0xFF0000, 1, false, LineScaleMode.NONE);
-							var lineAlpha:Number = 0.5;
-								graphics.moveTo(incomingEdge.originVertex.pos.x, incomingEdge.originVertex.pos.y);
-								destinationX = incomingEdge.destinationVertex.pos.x;
-								destinationY = incomingEdge.destinationVertex.pos.y;
-								graphics.lineTo(incomingEdge.originVertex.pos.x, incomingEdge.originVertex.pos.y, thickness, color);
-								graphics.lineTo(destinationX, destinationY, thickness);
+								color = 0xFF0000;
 							}
 							else
 							{
-								//_edges.graphics.lineStyle(1, 0x999999, 1, false, LineScaleMode.NONE);
-								//_edges.graphics.moveTo(incomingEdge.originVertex.pos.x, incomingEdge.originVertex.pos.y);
-								//_edges.graphics.lineTo(incomingEdge.destinationVertex.pos.x, incomingEdge.destinationVertex.pos.y);
+								color = 0x999999;
 							}
+							graphics.moveTo(incomingEdge.originVertex.pos.x, incomingEdge.originVertex.pos.y);
+							destinationX = incomingEdge.destinationVertex.pos.x;
+							destinationY = incomingEdge.destinationVertex.pos.y;
+							graphics.lineTo(incomingEdge.originVertex.pos.x, incomingEdge.originVertex.pos.y, thickness, color, lineAlpha);
+							graphics.lineTo(destinationX, destinationY, thickness, color, lineAlpha);
 						}
 					}
 					incomingEdge = iterEdges.next();

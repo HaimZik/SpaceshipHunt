@@ -106,6 +106,7 @@ package spaceshiptHuntDevelopment.level
 				Key.addKeyUpCallback(Keyboard.F1, saveLevel);
 				levelEditorMode = false;
 			}
+			switchNavMeshView();
 		}
 		
 		protected function onZoom(e:MouseEvent):void

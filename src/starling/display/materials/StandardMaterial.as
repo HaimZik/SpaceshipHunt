@@ -136,6 +136,9 @@ package starling.display.materials
 			
 			context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, matrix, true);
 			_vertexShader.setConstants(context, 4);
+			colorVector[0] = alpha*(_color >> 16) / 255;
+			colorVector[1] = alpha*((_color & 0x00FF00) >> 8) / 255;
+			colorVector[2] = alpha*(_color & 0x0000FF) / 255;
 			colorVector[3] = _alpha*alpha;	// Multiply display obect's alpha by material alpha.
 			context.setProgramConstantsFromVector( Context3DProgramType.FRAGMENT, 0, colorVector );
 			_fragmentShader.setConstants(context, 1);
