@@ -89,7 +89,7 @@ package DDLSDebug.view
 				incomingEdge = iterEdges.next();
 				var destinationX:Number = 0;
 				var destinationY:Number = 0;
-				var thickness:Number = 4;
+				var thickness:Number = 8;
 				var color:uint = 0xFF0000;
 				var lineAlpha:Number = 0.5;
 				while (incomingEdge)
