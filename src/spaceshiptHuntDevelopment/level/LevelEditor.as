@@ -1,6 +1,7 @@
 package spaceshiptHuntDevelopment.level
 {
 	import DDLS.data.DDLSObject;
+	import DDLSDebug.view.DDLSSimpleView;
 	import DDLSDebug.view.DDLSStarlingView;
 	import DDLSDebug.view.DDLSView;
 	import flash.display.Bitmap;
@@ -85,6 +86,8 @@ package spaceshiptHuntDevelopment.level
 			navShape = new Dictionary();
 			verticesDisplay = new Canvas();
 			var stage:Stage = Starling.current.stage;
+			var flashView:DDLSSimpleView = new DDLSSimpleView();
+			Starling.current.nativeOverlay.addChild(flashView.surface);
 			var starlingView:DDLSStarlingView = new DDLSStarlingView();
 			navMeshDebugView =   starlingView //flashView
 			;
@@ -198,20 +201,20 @@ package spaceshiptHuntDevelopment.level
 						(BodyInfo.list[i] as Entity).drawDebug(navMeshDebugView);
 					}
 				}
-				//if (!(navMeshDebugView is DDLSStarlingView))
-				//{
-					//(navMeshDebugView as DDLSSimpleView).surface.transform.matrix = mainDisplay.transformationMatrix;
-				//}
+				if (!(navMeshDebugView is DDLSStarlingView))
+				{
+					(navMeshDebugView as DDLSSimpleView).surface.transform.matrix = mainDisplay.transformationMatrix;
+				}
 			}
 		}
 		
 		override protected function syncTransforms():void
 		{
 			super.syncTransforms();
-			//if (displayNavMesh && !(navMeshDebugView is DDLSStarlingView))
-			//{
-				//(navMeshDebugView as DDLSSimpleView).surface.transform.matrix = mainDisplay.transformationMatrix;
-			//}
+			if (displayNavMesh && !(navMeshDebugView is DDLSStarlingView))
+			{
+				(navMeshDebugView as DDLSSimpleView).surface.transform.matrix = mainDisplay.transformationMatrix;
+			}
 		}
 		
 		protected function switchNavMeshView():void
