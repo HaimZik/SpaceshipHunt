@@ -246,6 +246,8 @@ package spaceshiptHunt.level
 			var blockedPart:int = findBlockedWay(path);
 			if (blockedPart != -1)
 			{
+				togglePaused();
+				return;
 				maxFix--;
 				if (maxFix == 0 || blockedPart <= 2)
 				{
