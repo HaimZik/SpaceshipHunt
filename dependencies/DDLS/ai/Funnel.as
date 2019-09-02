@@ -25,7 +25,6 @@ package DDLS.ai
 		// useful to keep track of done vertices and compare the sides
 		private var verticesDoneSide:Dictionary = new Dictionary(true);
 		private var pointSidesDic:Dictionary = new Dictionary(true);
-		private var pathSides:Dictionary = new Dictionary(true);
 		// we keep the successor relation in a dictionnary
 		private var pointSuccessorDic:Dictionary = new Dictionary(true);
 		
@@ -315,7 +314,6 @@ package DDLS.ai
 			// we will keep the points and funnel sides of the optimized path
 			var pathPoints:Vector.<DDLSPoint2D> = new Vector.<DDLSPoint2D>();
 			pathPoints.push(startPoint);
-			pathSides[startPoint] = 0;
 			
 			// now we process the points by order
 			var currPos:DDLSPoint2D;
@@ -339,11 +337,9 @@ package DDLS.ai
 							for (k = 0; k <= j - 1; k++)
 							{
 								pathPoints.push(funnelLeft[0]);
-								pathSides[funnelLeft[0]] = 1;
 								funnelLeft.shift();
 							}
 							pathPoints.push(funnelLeft[0]);
-							pathSides[funnelLeft[0]] = 1;
 							funnelRight.length = 2;
 							funnelRight[0] = funnelLeft[0];
 							funnelRight[1] = currPos;
@@ -376,11 +372,9 @@ package DDLS.ai
 							for (k = 0; k <= j - 1; k++)
 							{
 								pathPoints.push(funnelRight[0]);
-								pathSides[funnelRight[0]] = -1;
 								funnelRight.shift();
 							}
 							pathPoints.push(funnelRight[0]);
-							pathSides[funnelRight[0]] = -1;
 							funnelLeft.length = 2;
 							funnelLeft[0] = funnelRight[0];
 							funnelLeft[1] = currPos;
@@ -418,11 +412,9 @@ package DDLS.ai
 					for (k = 0; k <= j; k++)
 					{
 						pathPoints.push(funnelRight[0]);
-						pathSides[funnelRight[0]] = -1;
 						funnelRight.shift();
 					}
 					pathPoints.push(endPoint);
-					pathSides[endPoint] = 0;
 					blocked = true;
 					break;
 				}
@@ -444,12 +436,10 @@ package DDLS.ai
 						for (k = 0; k <= j; k++)
 						{
 							pathPoints.push(funnelLeft[0]);
-							pathSides[funnelLeft[0]] = 1;
 							funnelLeft.shift();
 						}
 						
 						pathPoints.push(endPoint);
-						pathSides[endPoint] = 0;
 						blocked = true;
 						break;
 					}
@@ -460,7 +450,6 @@ package DDLS.ai
 			if (!blocked)
 			{
 				pathPoints.push(endPoint);
-				pathSides[endPoint] = 0;
 				blocked = true;
 			}
 			
@@ -520,10 +509,6 @@ package DDLS.ai
 			for (dicKey in pointSuccessorDic)
 			{
 				delete pointSuccessorDic[dicKey];
-			}
-			for (dicKey in pathSides)
-			{
-				delete pathSides[dicKey];
 			}
 			
 			// extract coordinates
