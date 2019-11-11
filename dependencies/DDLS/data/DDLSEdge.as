@@ -58,8 +58,7 @@ package DDLS.data
 		public function DDLSEdge()
 		{
 			_id = INC;
-			INC++;
-			
+			INC++;	
 			_fromConstraintSegments = new <DDLSConstraintSegment>[];
 		}
 		

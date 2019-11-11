@@ -59,10 +59,10 @@ package DDLSDebug.view
 			var dictVerticesDone:Dictionary;
 			dictVerticesDone = new Dictionary();
 			var commandCount:int = -1;
-			if (viewRadius == -1 || isMeshEndVisable(mesh, viewCenterX, viewCenterY, viewRadius))
-			{
+			//if (viewRadius == -1 || isMeshEndVisable(mesh, viewCenterX, viewCenterY, viewRadius))
+			//{
 //				graphics.drawRect(0, 0, mesh.width, mesh.height);
-			}
+		//	}
 			while ((vertex = iterVertices.next()) != null)
 			{
 				dictVerticesDone[vertex] = true;
@@ -139,9 +139,9 @@ package DDLSDebug.view
 				return;
 			var thickness:Number = 1;
 			paths.moveTo(path[0], path[1]);
-			for (var i:int = 2; i < path.length; i += 2)
+			for (var i:int = 0; i < path.length-1; i += 2)
 			{
-				paths.lineTo(path[i], path[i + 1], thickness, color, 0.5);
+				paths.lineTo(path[i], path[i + 1], thickness+((i/2)%2)*2, color, 0.5);
 			}
 		}
 	

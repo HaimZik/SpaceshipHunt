@@ -540,7 +540,7 @@ package DDLS.data
 						trace("currVertex.edge was null");
 						return null;
 					}
-					iterEdges.fromVertex = currVertex;
+					iterEdges.fromRealVertex = currVertex;
 					currEdge = iterEdges.nextRealEdge();
 					while (currEdge)
 					{
@@ -592,7 +592,7 @@ package DDLS.data
 					if (done)
 						continue;
 					
-					iterEdges.fromVertex = currVertex;
+					iterEdges.fromRealVertex = currVertex;
 					currEdge = iterEdges.nextRealEdge();
 					while (currEdge)
 					{
@@ -604,7 +604,7 @@ package DDLS.data
 							{
 								//trace("edge is constrained");
 								vertexDown = splitEdge(currEdge, pIntersect.x, pIntersect.y);
-								iterEdges.fromVertex = currVertex;
+								iterEdges.fromRealVertex = currVertex;
 								currEdge = iterEdges.nextRealEdge();
 								while (currEdge)
 								{
@@ -694,7 +694,7 @@ package DDLS.data
 								//trace("edge is constrained");
 								currVertex = splitEdge(edgeLeft, pIntersect.x, pIntersect.y);
 								
-								iterEdges.fromVertex = currVertex;
+								iterEdges.fromRealVertex = currVertex;
 								currEdge = iterEdges.nextRealEdge()
 								while (currEdge)
 								{
@@ -743,7 +743,7 @@ package DDLS.data
 								//trace("edge is constrained");
 								currVertex = splitEdge(edgeLeft, pIntersect.x, pIntersect.y);
 								
-								iterEdges.fromVertex = currVertex;
+								iterEdges.fromRealVertex = currVertex;
 								currEdge = iterEdges.nextRealEdge();
 								while (currEdge)
 								{
@@ -1271,7 +1271,7 @@ package DDLS.data
 			//trace("tryToDeleteVertex id", vertex.id);
 			var i:int;
 			var freeOfConstraint:Boolean;
-			iterEdges.fromAnyEdge = vertex;
+			iterEdges.fromAnyVertex = vertex;
 			var edge:DDLSEdge;
 			
 			freeOfConstraint = vertex.fromConstraintSegments.length == 0;

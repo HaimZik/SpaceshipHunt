@@ -15,7 +15,7 @@ package DDLS.iterators
 		
 		}
 		
-		public function set fromVertex(value:DDLSVertex):void
+		public function set fromRealVertex(value:DDLSVertex):void
 		{
 			_fromVertex = value;
 			_nextEdge = _fromVertex.edge;
@@ -25,7 +25,7 @@ package DDLS.iterators
 			}
 		}
 		
-		public function set fromAnyEdge(value:DDLSVertex):void
+		public function set fromAnyVertex(value:DDLSVertex):void
 		{
 			_fromVertex = value;
 			_nextEdge = _fromVertex.edge;

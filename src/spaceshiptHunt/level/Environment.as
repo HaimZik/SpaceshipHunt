@@ -149,7 +149,10 @@ package spaceshiptHunt.level
 				cameraPosition.x = Player.current.graphics.x;
 				cameraPosition.y = Player.current.graphics.y;
 				var player:Player = Player.current;
-				camAngularVelocity = MathUtil.normalizeAngle(mainDisplay.rotation) - MathUtil.normalizeAngle(player.body.angularVel / 17 - player.body.rotation);
+				if (!paused)
+				{
+					camAngularVelocity = MathUtil.normalizeAngle(mainDisplay.rotation) - MathUtil.normalizeAngle(player.body.angularVel / 17 - player.body.rotation);
+				}
 				camTargetVelocity.set(player.body.velocity).rotate(mainDisplay.rotation).muleq(0.2);
 				cullAsteroidField();
 			}
@@ -237,20 +240,34 @@ package spaceshiptHunt.level
 			pathfinder.findPath(x, y, outPath);
 			if (outPath.length > 2)
 			{
+			//	if (findBlockedWay(outPath) != -1)
+				{
+					if (!paused)
+					{
+						//togglePaused();
+					}
+						//pathfinder.findPath(x, y, outPath);
+				}
 				fixPath(outPath);
 			}
 		}
 		
 		protected function fixPath(path:Vector.<Number>, maxFix:int = 4):void
 		{
-			var blockedPart:int = findBlockedWay(path);
-			if (blockedPart != -1)
+			//var blockedPart:int = findBlockedWay(path);
+			//trace(blockedPart, findBlockedWay2(path));
+			var i:int = path.length;
+				var fromX:Number = path[i-4];
+				var fromY:Number = path[i - 3];
+				var toX:Number = path[path.length - 2];
+		    	var toY:Number = path[path.length - 1];
+				var ray:RayResult=rayCast(fromX, fromY, toX - fromX, toY - fromY)
+			if (ray)
 			{
-				togglePaused();
-				return;
 				maxFix--;
-				if (maxFix == 0 || blockedPart <= 2)
+				if (maxFix == 0)
 				{
+					ray.dispose();
 					path.length = 0;
 					return;
 				}
@@ -260,25 +277,15 @@ package spaceshiptHunt.level
 				return;
 			}
 			var offset:int = -2;
-
-			var fromX:Number = path[blockedPart + offset];
-			var fromY:Number = path[blockedPart + 1 + offset];
-			var toX:Number = path[path.length - 2];
-			var toY:Number = path[path.length - 1];
 			var badPath:Vector.<Number> = new Vector.<Number>();
-			if (maxFix == 1)
-			{
-				pathfinder.findPathFrom(fromX, fromY, toX, toY, badPath);
-			}
 			//agent.findPathTo(path[path.length - 2], path[path.length - 1], path);
 			pathfinder.findPathFrom(fromX, fromY, toX, toY, badPath);
-			fixPath(badPath, maxFix);
-			path.length = blockedPart + badPath.length + offset;
-			for (var i:int = blockedPart + offset; i < path.length; i++)
+			ray.dispose();
+			for (i = 2; i < badPath.length-2; i++)
 			{
-				path[i] = badPath[i - (blockedPart + offset)];
+				path.insertAt(path.length-2,badPath[i]);
 			}
-			
+			fixPath(path, maxFix);
 			//	var refind:int = findBlockedWay(badPath);
 			//	if (refind != -1)
 			{
@@ -315,6 +322,17 @@ package spaceshiptHunt.level
 				return true;
 			}
 			return false;
+		}
+		
+		public function rayCast(fromX:Number, fromY:Number, directionX:Number, directionY:Number):RayResult
+		{
+			rayHelper.origin.x = fromX;
+			rayHelper.origin.y = fromY;
+			rayHelper.direction.x = directionX;
+			rayHelper.direction.y = directionY;
+			rayHelper.maxDistance = rayHelper.direction.length;
+			var rayResult:RayResult = physicsSpace.rayCast(rayHelper, false, STATIC_OBSTACLES_FILTER);
+			return rayResult;
 		}
 		
 		public function loadLevel(levelName:String, onFinish:Function = null):void

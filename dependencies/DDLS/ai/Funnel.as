@@ -6,7 +6,6 @@ package DDLS.ai
 	import DDLS.data.math.DDLSGeom2D;
 	import DDLS.data.DDLSVertex;
 	import DDLS.data.math.DDLSPoint2D;
-	import nape.geom.Vec2;
 	
 	import flash.display.Sprite;
 	import flash.utils.Dictionary;
@@ -18,7 +17,7 @@ package DDLS.ai
 		private var _radius:Number = 0;
 		private var _radiusSquared:Number = 0;
 		private var _numSamplesCircle:int = 16;
-		private var _sampleCircle:Vector.<Vec2>;
+		private var _sampleCircle:Vector.<DDLSPoint2D>;
 		private var _sampleCircleDistanceSquared:Number;
 		
 		//.....reuse helpers....
@@ -31,7 +30,7 @@ package DDLS.ai
 		public function Funnel()
 		{
 			_poolPoints = new Vector.<DDLSPoint2D>();
-			_sampleCircle = new Vector.<Vec2>();
+			_sampleCircle = new Vector.<DDLSPoint2D>();
 			for (var i:int = 0; i < _poolPointsSize; i++)
 			{
 				_poolPoints.push(new DDLSPoint2D());
@@ -40,10 +39,7 @@ package DDLS.ai
 		
 		public function dispose():void
 		{
-			while (_sampleCircle.length > 0)
-			{
-				_sampleCircle.pop().dispose();
-			}
+			_sampleCircle.length = 0;
 		}
 		
 		private var _poolPointsSize:int = 3000;
@@ -78,20 +74,29 @@ package DDLS.ai
 		
 		public function set radius(value:Number):void
 		{
-			if (_sampleCircle.length > 0)
-			{
-				dispose();
-			}
 			_radius = Math.max(0, value);
 			_radiusSquared = _radius * _radius;
-			if (radius == 0)
-				return;
-			
-			for (var i:int = 0; i < _numSamplesCircle; i++)
+			if (_radius == 0)
 			{
-				_sampleCircle.push(Vec2.get(_radius * Math.cos(-2 * Math.PI * i / _numSamplesCircle), _radius * Math.sin(-2 * Math.PI * i / _numSamplesCircle)));
+				_sampleCircle.length = 0;
+				return;
 			}
-			
+			var i:int = 0;
+			if (_sampleCircle.length == 0)
+			{
+				for (; i < _numSamplesCircle; i++)
+				{
+					_sampleCircle.push(new DDLSPoint2D(_radius * Math.cos(-2 * Math.PI * i / _numSamplesCircle), _radius * Math.sin(-2 * Math.PI * i / _numSamplesCircle)));
+				}
+			}
+			else
+			{
+				for (; i < _numSamplesCircle; i++)
+				{
+					_sampleCircle[i].x = _radius * Math.cos(-2 * Math.PI * i / _numSamplesCircle);
+					_sampleCircle[i].y = _radius * Math.sin(-2 * Math.PI * i / _numSamplesCircle);
+				}
+			}
 			_sampleCircleDistanceSquared = (_sampleCircle[0].x - _sampleCircle[1].x) * (_sampleCircle[0].x - _sampleCircle[1].x) + (_sampleCircle[0].y - _sampleCircle[1].y) * (_sampleCircle[0].y - _sampleCircle[1].y);
 		}
 		
@@ -353,7 +358,9 @@ package DDLS.ai
 					{
 						direction = DDLSGeom2D.getDirection(funnelRight[j].x, funnelRight[j].y, funnelRight[j + 1].x, funnelRight[j + 1].y, currPos.x, currPos.y);
 						if (direction == -1)
+						{
 							break;
+						}
 						else
 						{
 							funnelRight.removeAt(j + 1);
@@ -396,7 +403,6 @@ package DDLS.ai
 					}
 				}
 			}
-			
 			// check if the goal is blocked by one funnel's right vertex
 			var blocked:Boolean = false;
 			//trace("check if the goal is blocked by one funnel right vertex");
@@ -453,40 +459,45 @@ package DDLS.ai
 				blocked = true;
 			}
 			
+			var smoothPointsActive:Boolean = true;
+			var adjustedPoints:Vector.<DDLSPoint2D>;
+			
 			// if radius is non zero
-			if (radius > 0)
+			if (radius > 0 && smoothPointsActive)
 			{
-				var adjustedPoints:Vector.<DDLSPoint2D> = new Vector.<DDLSPoint2D>();
+				var pathLength:int = pathPoints.length;
+				adjustedPoints = new Vector.<DDLSPoint2D>();
 				var newPath:Vector.<DDLSPoint2D> = new Vector.<DDLSPoint2D>();
-				
-				if (pathPoints.length == 2)
+				if (pathLength == 2)
 				{
 					adjustWithTangents(pathPoints[0], false, pathPoints[1], false, pointSidesDic, pointSuccessorDic, newPath, adjustedPoints);
 				}
-				else if (pathPoints.length > 2)
+				else if (pathLength > 2)
 				{
 					// tangent from start point to 2nd point
 					adjustWithTangents(pathPoints[0], false, pathPoints[1], true, pointSidesDic, pointSuccessorDic, newPath, adjustedPoints);
 					
 					// tangents for intermediate points
-					if (pathPoints.length > 3)
+					if (pathLength > 3)
 					{
-						for (i = 1; i <= pathPoints.length - 3; i++)
+						for (i = 1; i <= pathLength - 3; i++)
 						{
 							adjustWithTangents(pathPoints[i], true, pathPoints[i + 1], true, pointSidesDic, pointSuccessorDic, newPath, adjustedPoints);
 						}
 					}
 					
 					// tangent from last-1 point to end point
-					var pathLength:int = pathPoints.length;
+					// pointSidesDic[pathPoints[pathLength - 2]] *=-1;
+					if (!blocked)
+					{
 					adjustWithTangents(pathPoints[pathLength - 2], true, pathPoints[pathLength - 1], false, pointSidesDic, pointSuccessorDic, newPath, adjustedPoints);
+					}
 				}
 				
 				newPath.push(endPoint);
 				
 				// adjusted path can have useless tangents, we check it
 				checkAdjustedPath(newPath, adjustedPoints, pointSidesDic);
-				
 				var smoothPoints:Vector.<DDLSPoint2D> = new Vector.<DDLSPoint2D>();
 				for (i = newPath.length - 2; i >= 1; i--)
 				{
@@ -517,6 +528,11 @@ package DDLS.ai
 				resultPath.push(adjustedPoints[i].x);
 				resultPath.push(adjustedPoints[i].y);
 			}
+			if (blocked)
+			{
+				resultPath.push(endPoint.x);
+				resultPath.push(endPoint.y);
+			}
 		}
 		
 		private function adjustWithTangents(p1:DDLSPoint2D, applyRadiusToP1:Boolean, p2:DDLSPoint2D, applyRadiusToP2:Boolean, pointSides:Dictionary, pointSuccessor:Dictionary, newPath:Vector.<DDLSPoint2D>, adjustedPoints:Vector.<DDLSPoint2D>):void
@@ -531,6 +547,11 @@ package DDLS.ai
 			
 			var side1:int = pointSides[p1];
 			var side2:int = pointSides[p2];
+			
+			//if (side2 == 0)
+			//{
+			//side1 =-side1;
+			//}
 			
 			var pTangent1:DDLSPoint2D;
 			var pTangent2:DDLSPoint2D;
@@ -547,33 +568,22 @@ package DDLS.ai
 			{
 				//trace("! applyRadiusToP1");
 				DDLSGeom2D.tangentsPointToCircle(p1.x, p1.y, p2.x, p2.y, _radius, tangentsResult);
+				//bug fix
+				if (tangentsResult.length == 0)
+				{
+					return;
+				}
 				// p2 lies on the left funnel
 				if (side2 == 1)
 				{
 					pTangent1 = p1;
-					//bug fix
-					if (tangentsResult.length > 0)
-					{
-						pTangent2 = getPoint(tangentsResult[2], tangentsResult[3]);
-					}
-					else
-					{
-						return;
-					}
+					pTangent2 = getPoint(tangentsResult[2], tangentsResult[3]);
 				}
 				// p2 lies on the right funnel
 				else
 				{
 					pTangent1 = p1;
-					//bug fix
-					if (tangentsResult.length > 0)
-					{
-						pTangent2 = getPoint(tangentsResult[0], tangentsResult[1]);
-					}
-					else
-					{
-						return;
-					}
+					pTangent2 = getPoint(tangentsResult[0], tangentsResult[1]);
 				}
 			}
 			// we apply radius to p1 only
@@ -581,32 +591,21 @@ package DDLS.ai
 			{
 				//trace("! applyRadiusToP2");
 				DDLSGeom2D.tangentsPointToCircle(p2.x, p2.y, p1.x, p1.y, _radius, tangentsResult);
+				//bug fix
+				if (tangentsResult.length == 0)
+				{
+					return;
+				}
 				// p1 lies on the left funnel
 				if (side1 == 1)
 				{
-					//bug fix
-					if (tangentsResult.length > 0)
-					{
-						pTangent1 = getPoint(tangentsResult[0], tangentsResult[1]);
-					}
-					else
-					{
-						return;
-					}
+					pTangent1 = getPoint(tangentsResult[0], tangentsResult[1]);
 					pTangent2 = p2;
 				}
 				// p1 lies on the right funnel
 				else
 				{
-					//bug fix
-					if (tangentsResult.length > 0)
-					{
-						pTangent1 = getPoint(tangentsResult[2], tangentsResult[3]);
-					}
-					else
-					{
-						return;
-					}
+					pTangent1 = getPoint(tangentsResult[2], tangentsResult[3]);
 					pTangent2 = p2;
 				}
 			}
@@ -748,31 +747,21 @@ package DDLS.ai
 							{
 								// tangent from start point
 								DDLSGeom2D.tangentsPointToCircle(point0.x, point0.y, point2.x, point2.y, _radius, tangentsResult);
+								//bug fix
+								if (tangentsResult.length == 0)
+								{
+									return;
+								}
 								// p2 lies on the left funnel
 								if (point2Side == 1)
 								{
 									pTangent1 = point0;
-									if (tangentsResult.length > 0)
-									{
-										pTangent2 = getPoint(tangentsResult[2], tangentsResult[3]);
-									}
-									else
-									{
-										return;
-									}
+									pTangent2 = getPoint(tangentsResult[2], tangentsResult[3]);
 								}
 								else
 								{
 									pTangent1 = point0;
-									//bug fix
-									if (tangentsResult.length > 0)
-									{
-										pTangent2 = getPoint(tangentsResult[0], tangentsResult[1]);
-									}
-									else
-									{
-										return;
-									}
+									pTangent2 = getPoint(tangentsResult[0], tangentsResult[1]);
 								}
 							}
 							else if (i == newPath.length - 1)

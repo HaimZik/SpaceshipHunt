@@ -143,7 +143,9 @@ package spaceshiptHunt.entities
 				rayEnter.dispose();
 			}
 			while (!rayList.empty())
-				rayList.pop().dispose();
+			{
+			  rayList.pop().dispose();
+			}
 			if (nextPoint == -1)
 			{
 				if (rayAngle == 0)
