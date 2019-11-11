@@ -49,7 +49,7 @@ package spaceshiptHunt.entities
 			}
 			pathfindingAgent.radius = pathfindingAgentSafeDistance + Math.sqrt(body.bounds.width * body.bounds.width + body.bounds.height * body.bounds.height) / 2;
 			pathfindingAgent.buildApproximation();
-			pathfindingAgent.radius -= pathfindingAgentSafeDistance*0.5;
+			//pathfindingAgent.radius -= pathfindingAgentSafeDistance*0.5;
 			Environment.current.navMesh.insertObject(pathfindingAgent.approximateObject);
 		}
 		

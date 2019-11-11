@@ -240,57 +240,61 @@ package spaceshiptHunt.level
 			pathfinder.findPath(x, y, outPath);
 			if (outPath.length > 2)
 			{
-			//	if (findBlockedWay(outPath) != -1)
+				//	if (findBlockedWay(outPath) != -1)
 				{
 					if (!paused)
 					{
 						//togglePaused();
 					}
-						//pathfinder.findPath(x, y, outPath);
+					//pathfinder.findPath(x, y, outPath);
 				}
 				fixPath(outPath);
 			}
 		}
 		
-		protected function fixPath(path:Vector.<Number>, maxFix:int = 4):void
+		protected function fixPath(path:Vector.<Number>, maxFix:int = 8):void
 		{
-			//var blockedPart:int = findBlockedWay(path);
-			//trace(blockedPart, findBlockedWay2(path));
-			var i:int = path.length;
-				var fromX:Number = path[i-4];
-				var fromY:Number = path[i - 3];
-				var toX:Number = path[path.length - 2];
-		    	var toY:Number = path[path.length - 1];
-				var ray:RayResult=rayCast(fromX, fromY, toX - fromX, toY - fromY)
-			if (ray)
+			var badPath:Vector.<Number> = new Vector.<Number>();
+			var pathLength:int = path.length;
+			var fromX:Number;
+			var fromY:Number;
+			var toX:Number = path[pathLength - 2];
+			var toY:Number = path[pathLength - 1];
+			var ray:RayResult;
+			while (--maxFix)
 			{
-				maxFix--;
-				if (maxFix == 0)
+				pathLength=path.length;
+				fromX= path[pathLength - 4];
+			    fromY= path[pathLength - 3];
+				ray= rayCast(fromX, fromY, toX - fromX, toY - fromY);
+				if (!ray)
 				{
-					ray.dispose();
-					path.length = 0;
 					return;
 				}
+				if (ray.distance > pathfinder.entity.radius*3)
+				{
+					var distance:Number = Math.sqrt((toX - fromX) * (toX - fromX) + (toY - fromY) * (toY - fromY));
+					var distanceRatio:Number = (ray.distance-pathfinder.entity.radius*2) / distance;
+					fromX += 0.25*(toX - fromX)*distanceRatio;
+					fromY += 0.25*(toY - fromY)*distanceRatio;
+					path.insertAt(path.length - 2, fromX);
+					path.insertAt(path.length - 2, fromY);
+				}
+				pathfinder.findPathFrom(fromX, fromY, toX, toY, badPath);
+				ray.dispose();
+				for (var i:int = 2; i < badPath.length - 2; i++)
+				{
+					path.insertAt(path.length - 2, badPath[i]);
+				}
 			}
-			else
+			fromX= path[path.length - 4];
+			fromY= path[path.length - 3];
+			ray= rayCast(fromX, fromY, toX - fromX, toY - fromY);
+			if (ray)
 			{
-				return;
-			}
-			var offset:int = -2;
-			var badPath:Vector.<Number> = new Vector.<Number>();
-			//agent.findPathTo(path[path.length - 2], path[path.length - 1], path);
-			pathfinder.findPathFrom(fromX, fromY, toX, toY, badPath);
-			ray.dispose();
-			for (i = 2; i < badPath.length-2; i++)
-			{
-				path.insertAt(path.length-2,badPath[i]);
-			}
-			fixPath(path, maxFix);
-			//	var refind:int = findBlockedWay(badPath);
-			//	if (refind != -1)
-			{
-				//trace(blockedPart + " fromX:" + fromX + " fromY:" + fromY + " toX:" + toX + " toY:" + toY + " invaild " + agent.body.id);
-				//	pathfinder.findPathDebug(fromX, fromY, toX, toY, badPath);
+				ray.dispose();
+				  //fail to fix
+			      path.length = 0;
 			}
 		}
 		
