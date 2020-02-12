@@ -159,6 +159,10 @@ package spaceshiptHunt.controls
 					{
 						player.stopShooting();
 					}
+					if(xboxController.a.pressed)
+					{
+						player.startDashing();
+					}
 				}
 			}
 			else if (ControllerInput.hasReadyController())

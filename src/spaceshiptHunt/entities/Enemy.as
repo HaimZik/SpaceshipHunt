@@ -91,11 +91,27 @@ package spaceshiptHunt.entities
 		override public function update():void
 		{
 			super.update();
-			if (timeStamp % 61 == 0 && Player.current.lifePoints!=0)
+			if (timeStamp % 61 == 0 && Player.current.lifePoints != 0)
 			{
 				checkPlayerVisible();
 			}
-			currentAction();
+			doCurrentAction();
+		}
+		
+		public function doCurrentAction():void
+		{
+			//if (currentAction == decideNextAction)
+			//{
+				//decideNextAction();
+			//}
+			//else if (currentAction == followPath)
+			//{
+				//followPath();
+			//}
+			//else
+			//{
+				currentAction();
+			//}
 		}
 		
 		public function isPathBlocked():Boolean

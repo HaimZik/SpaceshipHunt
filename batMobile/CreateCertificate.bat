@@ -15,7 +15,7 @@ if errorlevel 1 goto failed
 
 :succeed
 echo.
-echo Certificate created: %AND_CERT_FILE% with password "%AND_CERT_PASS%"
+echo Certificate created: %AND_CERT_FILE% with name %AND_CERT_NAME% with password "%AND_CERT_PASS%"
 echo.
 if "%AND_CERT_PASS%" == "fd" echo Note: you did not change the default password
 echo.

@@ -11,8 +11,10 @@ cd %~dp0 & cd ..
 
 :: Your certificate information
 set CERT_NAME="spaceShipStudent"
-set CERT_PASS=timetoSpaceHunt
-set CERT_FILE="cert\spaceShipStudent.p12"
+::set CERT_PASS=timetoSpaceHunt
+::set CERT_FILE="cert\spaceShipStudent.p12"
+set AND_CERT_PASS=indieDevHunt56
+set AND_CERT_FILE=cert\spaceshipHunt.p12
 set SIGNING_OPTIONS=-storetype pkcs12 -keystore %CERT_FILE% -storepass %CERT_PASS%
 
 :: Application descriptor

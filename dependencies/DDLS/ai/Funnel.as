@@ -177,10 +177,8 @@ package DDLS.ai
 			}
 			
 			// we build starting and ending points
-			var startPoint:DDLSPoint2D;
-			var endPoint:DDLSPoint2D;
-			startPoint = new DDLSPoint2D(fromX, fromY);
-			endPoint = new DDLSPoint2D(toX, toY);
+			var startPoint:DDLSPoint2D= new DDLSPoint2D(fromX, fromY);
+			var endPoint:DDLSPoint2D= new DDLSPoint2D(toX, toY);
 			
 			// first we skip the first face and first edge if the starting point lies on the first interior edge:
 			
@@ -908,10 +906,12 @@ package DDLS.ai
 					index++;
 				}
 				else
+				{
 					index = 0;
-					// points in sample circle are CCW
-					// so we inverse the order for right funnel
+				}
 			}
+			// points in sample circle are CCW
+			// so we inverse the order for right funnel
 			if (side == -1)
 				encirclePoints.reverse();
 		}

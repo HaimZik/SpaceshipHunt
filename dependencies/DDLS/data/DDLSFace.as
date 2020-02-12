@@ -4,9 +4,9 @@ package DDLS.data
 	{
 	
 		public var edge:DDLSEdge;
+		public var id:int;
 		private static var face:Vector.<DDLSFace> = new <DDLSFace>[];
 		private static var INC:int = 0;
-		private var _id:int;
 		
 		private var _isReal:Boolean;
 		
@@ -22,14 +22,8 @@ package DDLS.data
 		
 		public function DDLSFace()
 		{
-			_id = INC;
+			id = INC;
 			face[INC++] = this;
-		}
-		
-		[Inline]
-		public final function get id():int
-		{
-			return _id;
 		}
 		
 		public function get isReal():Boolean

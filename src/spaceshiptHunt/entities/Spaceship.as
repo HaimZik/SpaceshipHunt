@@ -60,7 +60,9 @@ package spaceshiptHunt.entities
 		protected var skewSpeed:Number;
 		protected var lastDash:Number;
 		protected var dashCooldown:int;
+		protected var afterDashMovementStopDuration:int;
 		protected var dashDuration:int;
+		protected var dashBoost:Number;
 		protected var dashThreshold:Number;
 		protected var rightJetParticles:PDParticleSystem;
 		protected var leftJetParticles:PDParticleSystem;
@@ -88,14 +90,16 @@ package spaceshiptHunt.entities
 			lifebarTransform.x = -filledLife.width * 0.5;
 			lifebarTransform.y = -Math.max(body.bounds.width, body.bounds.height) * 0.5 - lifebarOffset;
 			engineLocation = Vec2.get(bodyDescription.engineLocation.x, bodyDescription.engineLocation.y);
-			lastDash = timeStamp;
-			lastShoot = timeStamp;
 			maxAcceleration = body.mass * 8;
 			maxAngularAcceleration = body.mass * 180;
 			skewSpeed = 0.2;
-			dashCooldown = 20;
-			dashDuration = 12;
+			dashDuration = 15;
+			dashCooldown = 80;
+			afterDashMovementStopDuration = 60;
+			dashBoost = 11.0;
 			dashThreshold = 0.2;
+			lastDash = timeStamp-dashCooldown-dashDuration;
+			lastShoot = timeStamp;
 			//	if (SystemUtil.isDesktop)
 			{
 				addFireParticle();
@@ -128,27 +132,30 @@ package spaceshiptHunt.entities
 				currentSkew = 0;
 			}
 			var maxSkew:Number = 0.4;
-			graphics.skewY = currentSkew * (1.0 - skewSpeed) + (impulse.x * maxSkew) * skewSpeed;
+			if (isAfterDash())
+			{
+				impulse.x *= 0.5;
+				impulse.y *=0.6;
+			}
+			var newSkew:Number = currentSkew * (1.0 - skewSpeed);
 			if (impulse.length != 0)
 			{
 				var currentSkewAbs:Number = Math.abs(currentSkew);
-				if (Math.abs(impulse.x) > dashThreshold && !isDashing() && currentSkewAbs < 0.1 && skewSpeed != 0)
+				if (Math.abs(impulse.x) > dashThreshold && currentSkewAbs < 0.1 && skewSpeed != 0)
 				{
-					var timeSinceLastDash:int = timeStamp - lastDash;
-					if (timeSinceLastDash > dashCooldown)
-					{
-						lastDash = timeStamp;
-					}
+					//startDashing();
 				}
 				if (isDashing() && currentSkewAbs > 0.1)
 				{
-					impulse.x /= Math.abs(currentSkewAbs);
+					impulse.x *= dashBoost*Math.abs(currentSkewAbs);
 						//impulse.x*=maxSkew
 				}
+				newSkew += (MathUtil.clamp(impulse.x,-1.5,1.5) * maxSkew) * skewSpeed;
 				body.applyImpulse(impulse.muleq(maxAcceleration).rotate(body.rotation));
-				impulse.setxy(0.0, 0.0);
 			}
-			if (isShooting && timeStamp - lastShoot > firingRate * frameRate/60)
+			graphics.skewY = newSkew;
+			impulse.setxy(0.0, 0.0);
+			if (isShooting && timeStamp - lastShoot > firingRate * frameRate / 60)
 			{
 				lastShoot = timeStamp;
 				shootParticle();
@@ -343,15 +350,30 @@ package spaceshiptHunt.entities
 			//		}
 		}
 		
-		protected function get frameRate():Number 
+		protected function get frameRate():Number
 		{
 			return Starling.current.nativeStage.frameRate;
+		}
+		
+		public function startDashing():void 
+		{
+			var timeSinceLastDash:int = timeStamp - lastDash;
+			if (!isDashing() && timeSinceLastDash > dashCooldown)
+			{
+				lastDash = timeStamp;
+			}
 		}
 		
 		public function isDashing():Boolean
 		{
 			var timeSinceLastDash:int = timeStamp - lastDash;
 			return timeSinceLastDash < dashDuration;
+		}
+		
+		public function isAfterDash():Boolean
+		{
+			var timeSinceLastDash:int = timeStamp - lastDash;
+			return timeSinceLastDash > dashDuration && timeSinceLastDash < dashDuration + afterDashMovementStopDuration;
 		}
 	
 		//public function jetParticlePositioning(particles:Vector.<PDParticle>, numActive:int):void

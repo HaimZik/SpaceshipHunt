@@ -120,7 +120,7 @@ package spaceshiptHunt.entities
 				if (bulletsLeft > 0 && angleToPlayer < aimAccuracy)
 				{
 					startShooting();
-					if (angleToPlayer > aimAccuracy*0.6)
+					if (angleToPlayer > aimAccuracy * 0.6)
 					{
 						aimToPlayer();
 					}
@@ -167,6 +167,26 @@ package spaceshiptHunt.entities
 			}
 			return _isBackwardBlocked;
 		}
+		
+		//override public function doCurrentAction():void
+		//{
+			//if (currentAction === goToPlayerPath)
+			//{
+				//goToPlayerPath();
+			//}
+			//else if (currentAction === aimToPlayer)
+			//{
+				//aimToPlayer();
+			//}
+			//else if (currentAction === attackPlayer)
+			//{
+				//attackPlayer();
+			//}
+			//else
+			//{
+				//super.doCurrentAction();
+			//}
+		//}
 		
 		protected function goToPlayerPath():void
 		{

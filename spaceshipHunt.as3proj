@@ -25,7 +25,7 @@
     <option allowSourcePathOverlap="False" />
     <option benchmark="False" />
     <option es="False" />
-    <option inline="False" />
+    <option inline="True" />
     <option locale="" />
     <option loadConfig="" />
     <option optimize="True" />

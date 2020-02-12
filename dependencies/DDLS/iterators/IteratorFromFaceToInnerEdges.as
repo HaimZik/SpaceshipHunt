@@ -21,22 +21,16 @@ package DDLS.iterators
 			_nextEdge = _fromFace.edge;
 		}
 		
-		private var _resultEdge:DDLSEdge;
-		public function next():DDLSEdge
+		[inline]
+		public final function next():DDLSEdge
 		{
+			var _resultEdge:DDLSEdge = _nextEdge;
 			if (_nextEdge)
 			{
-				_resultEdge = _nextEdge;
-				_nextEdge = _nextEdge.nextLeftEdge;
-				
+				_nextEdge = _nextEdge.nextLeftEdge;				
 				if ( _nextEdge == _fromFace.edge )
 					_nextEdge = null;
-			}
-			else
-			{
-				_resultEdge = null;
-			}
-			
+			}			
 			return _resultEdge;
 		}
 		
