@@ -3,6 +3,7 @@ package spaceshiptHunt.controls
 	import flash.geom.Point;
 	import flash.system.Capabilities;
 	import starling.core.Starling;
+	import starling.display.DisplayObject;
 	import starling.display.Mesh;
 	import starling.display.Sprite;
 	import starling.events.Touch;
@@ -23,7 +24,9 @@ package spaceshiptHunt.controls
 	{
 		public var isHorizontal:Boolean;
 		public var isDoubleTaping:Boolean;
-		protected var _radios:Number;
+		protected var _radius:Number;
+		protected var extraTouchRadius:Number = 40;
+		protected var touchRadiusSqr:Number;
 		protected var xAxis:Number;
 		protected var yAxis:Number;
 		protected var analogStick:Sprite;
@@ -54,9 +57,9 @@ package spaceshiptHunt.controls
 				{
 					var position:Point = Pool.getPoint();
 					touch.getLocation(this, position);
-					if (position.length > radios * 1.2)
+					if (position.length > radios)
 					{
-						position.normalize(radios * 1.2);
+						position.normalize(radios);
 					}
 					analogStick.x = position.x;
 					if (!isHorizontal)
@@ -112,16 +115,28 @@ package spaceshiptHunt.controls
 		
 		public function get radios():Number
 		{
-			return _radios;
+			return _radius;
+		}
+		
+		
+		override public function hitTest(localPoint:Point):DisplayObject 
+		{
+			if (!visible || !touchable || !hitTestMask(localPoint)) return null;
+			if ((localPoint.x - analogStick.x) * (localPoint.x - analogStick.x) + (localPoint.y - analogStick.y) * (localPoint.y - analogStick.y) < touchRadiusSqr)
+			{
+				return this;
+			}
+			return null;
 		}
 		
 		public function set radios(value:Number):void
 		{
-			_radios = value;
-			width = (width / height) * _radios * 2;
-			height = _radios * 2;
-			pivotX = pivotY = _radios;
-			var circle:Polygon = Polygon.createCircle(0, 0, radios, 13);
+			_radius = value;
+			touchRadiusSqr = Math.pow(_radius + extraTouchRadius, 2);
+			width = (width / height) * _radius * 2;
+			height = _radius * 2;
+			pivotX = pivotY = _radius;
+			var circle:Polygon = Polygon.createCircle(0, 0, _radius, 13);
 			circleVertices = new VertexData(null, circle.numVertices);
 			circle.copyToVertexData(circleVertices);
 		}

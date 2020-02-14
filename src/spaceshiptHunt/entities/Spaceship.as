@@ -96,9 +96,9 @@ package spaceshiptHunt.entities
 			maxAngularAcceleration = body.mass * 180;
 			skewSpeed = 0.2;
 			dashDuration = 15;
-			dashCooldown = 80;
 			afterDashMovementStopDuration = 60;
-			dashBoost = 11.0;
+			dashCooldown = afterDashMovementStopDuration+0;
+			dashBoost = 6.0;
 			dashThreshold = 0.2;
 			lastDash = timeStamp - dashCooldown - dashDuration;
 			lastShoot = timeStamp;
@@ -154,8 +154,8 @@ package spaceshiptHunt.entities
 						dashDir.set(impulse);
 					}
 					impulse.set(dashDir);
-					impulse.x *= dashBoost * (0.01 + currentSkewAbs);
-					impulse.length = dashBoost * (0.01 + currentSkewAbs);
+					impulse.x *= dashBoost * (0.3 + currentSkewAbs);
+					impulse.length = dashBoost * (0.3 + currentSkewAbs);
 						//impulse.x*=maxSkew
 				}
 				newSkew += (MathUtil.clamp(impulse.x, -1.5, 1.5) * maxSkew) * skewSpeed;
