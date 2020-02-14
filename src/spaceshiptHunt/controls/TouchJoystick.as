@@ -22,6 +22,7 @@ package spaceshiptHunt.controls
 	public class TouchJoystick extends Sprite
 	{
 		public var isHorizontal:Boolean;
+		public var isDoubleTaping:Boolean;
 		protected var _radios:Number;
 		protected var xAxis:Number;
 		protected var yAxis:Number;
@@ -45,6 +46,10 @@ package spaceshiptHunt.controls
 			var touch:Touch = e.getTouch(this);
 			if (touch)
 			{
+				if (touch.phase == TouchPhase.BEGAN)
+				{
+					isDoubleTaping = touch.tapCount > 1;
+				}
 				if (touch.phase == TouchPhase.MOVED || touch.phase == TouchPhase.BEGAN)
 				{
 					var position:Point = Pool.getPoint();
@@ -85,7 +90,7 @@ package spaceshiptHunt.controls
 				joystickBase.scaleY = 0.8;
 			}
 			analogStick = new Sprite();
-			var analogStickMesh:Mesh = new Mesh(circleVertices.clone(),circleIndices.clone());
+			var analogStickMesh:Mesh = new Mesh(circleVertices.clone(), circleIndices.clone());
 			analogStickMesh.color = joystickBase.color = Color.WHITE;
 			analogStickMesh.alpha = joystickBase.alpha = 0.3;
 			analogStick.addChild(analogStickMesh);
