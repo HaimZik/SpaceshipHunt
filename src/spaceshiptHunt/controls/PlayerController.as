@@ -37,7 +37,7 @@ package spaceshiptHunt.controls
 		protected static var alternativeFireKey:uint = Keyboard.Z;
 		
 		protected var _player:Player;
-		protected var leftAnalogStick:TouchJoystick;
+		protected var leftAnalogStick:DashJoystick;
 		protected var rightJoystick:TouchJoystick;
 		protected var crossTarget:Image;
 		protected var minCrossTargetDistance:Number;
@@ -55,7 +55,7 @@ package spaceshiptHunt.controls
 		protected var lockDirectionDelay:Number = 1.5;
 		protected var xboxController:Xbox360Controller;
 		
-		public function PlayerController(playerToControl:Player, leftJoystick:TouchJoystick, rightJoystick:TouchJoystick, crossTarget:Image)
+		public function PlayerController(playerToControl:Player, leftJoystick:DashJoystick, rightJoystick:TouchJoystick, crossTarget:Image)
 		{
 			this.crossTarget = crossTarget;
 			this.leftAnalogStick = leftJoystick;
@@ -133,6 +133,10 @@ package spaceshiptHunt.controls
 			if (leftAnalogStick.isDoubleTaping)
 			{
 				player.startDashing();
+				if (player.isDashing)
+				{
+					leftAnalogStick.onDash();
+				}
 				leftAnalogStick.isDoubleTaping = false;
 			}
 			if (xboxController)

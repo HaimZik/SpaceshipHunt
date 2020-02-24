@@ -16,6 +16,7 @@ package spaceshiptHunt
 	import input.Key;
 	import io.arkeus.ouya.ControllerInput;
 	import nape.geom.Vec2;
+	import spaceshiptHunt.controls.DashJoystick;
 	import spaceshiptHunt.controls.Flightstick;
 	import spaceshiptHunt.controls.PlayerController;
 	import spaceshiptHunt.controls.TouchJoystick;
@@ -48,9 +49,9 @@ package spaceshiptHunt
 		private var isReleaseMode:Boolean;
 		private var gameEnvironment:Environment;
 		private var playerController:PlayerController;
-		private var joystick:TouchJoystick;
+		private var joystick:DashJoystick;
 		private var crossTarget:Image;
-		private var shootButton:TouchJoystick;
+		private var shootButton:Flightstick;
 		private var background:Image;
 		private var touches:Vector.<Touch> = new Vector.<Touch>();
 		private var backgroundMusic:SoundChannel;
@@ -173,7 +174,7 @@ package spaceshiptHunt
 		{
 			HUD = new Sprite();
 			buttonsDisplay = new Sprite();
-			joystick = new TouchJoystick();
+			joystick = new DashJoystick();
 			HUD.touchable = false;
 			addChild(HUD);
 			addChild(buttonsDisplay);

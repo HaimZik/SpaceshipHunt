@@ -24,11 +24,10 @@ package spaceshiptHunt.controls
 	{
 		public var isHorizontal:Boolean;
 		public var isDoubleTaping:Boolean;
+		protected var joystickAlpha:Number = 0.3;
 		protected var _radius:Number;
-		protected var extraTouchRadius:Number = 40;
+		protected var extraTouchRadius:Number;
 		protected var touchRadiusSqr:Number;
-		protected var xAxis:Number;
-		protected var yAxis:Number;
 		protected var analogStick:Sprite;
 		protected var circleVertices:VertexData;
 		protected var circleIndices:IndexData;
@@ -95,7 +94,7 @@ package spaceshiptHunt.controls
 			analogStick = new Sprite();
 			var analogStickMesh:Mesh = new Mesh(circleVertices.clone(), circleIndices.clone());
 			analogStickMesh.color = joystickBase.color = Color.WHITE;
-			analogStickMesh.alpha = joystickBase.alpha = 0.3;
+			analogStickMesh.alpha = joystickBase.alpha = joystickAlpha;
 			analogStick.addChild(analogStickMesh);
 			addChild(joystickBase);
 			analogStick.scale = 0.6;
@@ -105,12 +104,12 @@ package spaceshiptHunt.controls
 		
 		public function get xAxis():Number
 		{
-			return Math.min(1, analogStick.x / 160.0);
+			return Math.min(1,analogStick.x/160.0);
 		}
 		
 		public function get yAxis():Number
 		{
-			return Math.min(1, analogStick.y / 160.0);
+			return Math.min(1,analogStick.y/160.0);
 		}
 		
 		public function get radios():Number
@@ -122,7 +121,7 @@ package spaceshiptHunt.controls
 		override public function hitTest(localPoint:Point):DisplayObject 
 		{
 			if (!visible || !touchable || !hitTestMask(localPoint)) return null;
-			if ((localPoint.x - analogStick.x) * (localPoint.x - analogStick.x) + (localPoint.y - analogStick.y) * (localPoint.y - analogStick.y) < touchRadiusSqr)
+			if (localPoint.x*localPoint.x+localPoint.y*localPoint.y< touchRadiusSqr)
 			{
 				return this;
 			}
@@ -132,6 +131,7 @@ package spaceshiptHunt.controls
 		public function set radios(value:Number):void
 		{
 			_radius = value;
+			extraTouchRadius = _radius*0.5;
 			touchRadiusSqr = Math.pow(_radius + extraTouchRadius, 2);
 			width = (width / height) * _radius * 2;
 			height = _radius * 2;
@@ -140,16 +140,6 @@ package spaceshiptHunt.controls
 			circleVertices = new VertexData(null, circle.numVertices);
 			circle.copyToVertexData(circleVertices);
 		}
-	
-		//public function set yAxis(value:):void 
-		//{
-		//yAxis = value;
-		//}
-	
-		//public function set xAxis(value:):void 
-		//{
-		//xAxis = value;
-		//}
 	
 	}
 
