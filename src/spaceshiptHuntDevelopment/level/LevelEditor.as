@@ -1,5 +1,6 @@
 package spaceshiptHuntDevelopment.level
 {
+	include "CompilerConfig.as";
 	import DDLS.data.DDLSObject;
 	import DDLSDebug.view.DDLSStarlingView;
 	import DDLSDebug.view.DDLSView;
@@ -160,7 +161,6 @@ package spaceshiptHuntDevelopment.level
 		{
 			return "[[" + mesh.join("],[") + "]]";
 		}
-		
 		private function drawDebugGrp():void
 		{
 			if (napeDebug)
@@ -194,7 +194,7 @@ package spaceshiptHuntDevelopment.level
 				{
 					if (BodyInfo.list[i] is Entity)
 					{
-						(BodyInfo.list[i] as Entity).drawDebug(navMeshDebugView);
+					(BodyInfo.list[i] as Entity).drawDebug(navMeshDebugView);
 					}
 				}
 			}

@@ -1,5 +1,6 @@
 package spaceshiptHunt.entities
 {
+	include "CompilerConfig.as";
 	import DDLS.ai.DDLSEntityAI;
 	import nape.dynamics.InteractionFilter;
 	import nape.geom.Ray;
@@ -313,7 +314,7 @@ package spaceshiptHunt.entities
 			}
 		}
 		
-		CONFIG::debug
+		CONFIG::isDebugMode
 		{
 			import DDLSDebug.view.DDLSView;
 			

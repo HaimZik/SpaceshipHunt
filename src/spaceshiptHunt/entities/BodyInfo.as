@@ -1,10 +1,11 @@
+
 package spaceshiptHunt.entities
 {
-	
 	/**
 	 * ...
 	 * @author Haim Shnitzer
 	 */
+	include "CompilerConfig.as";
 	import nape.geom.Vec2;
 	import nape.phys.Body;
 	import nape.phys.BodyType;

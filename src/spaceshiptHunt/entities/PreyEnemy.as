@@ -1,5 +1,6 @@
 package spaceshiptHunt.entities
 {
+	include "CompilerConfig.as";
 	import nape.geom.RayResult;
 	import nape.geom.Vec2;
 	import spaceshiptHunt.Game;
@@ -188,7 +189,7 @@ package spaceshiptHunt.entities
 			distanceVec.dispose();
 		}
 		
-		CONFIG::debug
+		CONFIG::isDebugMode
 		{
 			import DDLSDebug.view.DDLSView;
 			

@@ -241,7 +241,6 @@ package starling.rendering
 				}
 				targetRawData.position = targetVertexID * _vertexSize;
 				targetRawData.writeBytes(_rawData, vertexID * _vertexSize, numVertices * _vertexSize);
-				
 				if (matrix)
 				{
 					var x:Number, y:Number;
@@ -393,8 +392,7 @@ package starling.rendering
 							y = lf32(pos + 4);
 							// Write float number into targetData.
 							sf32(matrixA * x + matrixC * y + matrixTx, pos);
-							pos += 4;
-							sf32(matrixD * y + matrixB * x + matrixTy, pos);
+							sf32(matrixD * y + matrixB * x + matrixTy, pos+=4);
 							pos += 4 + targetDelta;
 							sourcePos += sourceDelta + 1;
 						}

@@ -7,11 +7,13 @@
   <name>
     <text xml:lang="en">Spaceship Hunt Dev</text>
   </name>
-  <copyright>© 2019 by Haim Shnitzer.All rights reserved.</copyright>
+  <copyright>© 2022 by Haim Shnitzer.All rights reserved.</copyright>
   <android>
     <!-- <containsVideo>true</containsVideo>-->
     <manifestAdditions><![CDATA[<manifest android:installLocation="auto">
-	<uses-sdk android:minSdkVersion="8" />
+	<uses-sdk android:minSdkVersion="14" />
+	<application android:hardwareAccelerated="true" android:resizeableActivity="true"/> 
+/>
 	<uses-permission android:name="android.permission.INTERNET" />
 	<uses-feature android:required="true" android:name="android.hardware.touchscreen.multitouch" />
 </manifest>]]></manifestAdditions>

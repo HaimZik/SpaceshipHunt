@@ -39,13 +39,14 @@ package starling.extensions
             this.alpha = alpha;
         }
         
-        public function toRgb():uint
+		[inline]
+        public final function toRgb():uint
         {
             var r:Number = red;   if (r < 0.0) r = 0.0; else if (r > 1.0) r = 1.0;
             var g:Number = green; if (g < 0.0) g = 0.0; else if (g > 1.0) g = 1.0;
             var b:Number = blue;  if (b < 0.0) b = 0.0; else if (b > 1.0) b = 1.0;
-            
-            return int(r * 255) << 16 | int(g * 255) << 8 | int(b * 255);
+			 return int(r * 255) << 16 | int(g * 255) << 8 | int(b * 255); 
+		//  return 255*(red * int((red<1.0) && (red > 0.0))+(red > 1.0)) << 16 | 255*(green * int(green<1.0 && green > 0.0)+(green > 1.0)) << 8 | 255*(blue * int(blue<1.0 && blue > 0.0)+(blue > 1.0));
         }
         
         public function toArgb():uint

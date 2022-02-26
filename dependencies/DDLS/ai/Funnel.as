@@ -50,8 +50,8 @@ package DDLS.ai
 		private function getPoint(x:Number = 0, y:Number = 0):DDLSPoint2D
 		{
 			__point = _poolPoints[_currPoolPointsIndex];
-			__point.set(x, y);
-			
+			__point.x = x;
+			__point.y = y;
 			_currPoolPointsIndex++;
 			if (_currPoolPointsIndex == _poolPointsSize)
 			{

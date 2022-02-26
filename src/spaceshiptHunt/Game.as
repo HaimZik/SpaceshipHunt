@@ -1,5 +1,6 @@
 package spaceshiptHunt
 {
+	include "CompilerConfig.as";
 	import flash.display.Stage;
 	import flash.display.StageDisplayState;
 	import flash.events.FullScreenEvent;
@@ -28,10 +29,11 @@ package spaceshiptHunt
 	import starling.events.*;
 	import starling.utils.SystemUtil;
 	
-	CONFIG::debug
+	CONFIG::isDebugMode
 	{
 		import spaceshiptHuntDevelopment.level.LevelEditor;
 	}
+	
 	//import avm2.intrinsics.memory.sf32;
 	//import avm2.intrinsics.memory.si32;
 	//import avm2.intrinsics.memory.lf32;
@@ -45,8 +47,7 @@ package spaceshiptHunt
 		public static var spaceshipsLayer:Sprite;
 		public static var underSpaceshipsLayer:Sprite;
 		public static var aboveSpaceshipsLayer:Sprite;
-	    private var buttonsDisplay:Sprite;
-		private var isReleaseMode:Boolean;
+		private var buttonsDisplay:Sprite;
 		private var gameEnvironment:Environment;
 		private var playerController:PlayerController;
 		private var joystick:DashJoystick;
@@ -67,46 +68,38 @@ package spaceshiptHunt
 		public function init():void
 		{
 			//var ba:ByteArray = new ByteArray();
-				//ba.endian = Endian.LITTLE_ENDIAN;
+			//ba.endian = Endian.LITTLE_ENDIAN;
 			
 			//for (var j:Number = 1; j <= 16; j++) 
 			//{
 			//ba.position = 0;
 			//ba.writeFloat(j);
 			//ba.position = 0;
-				//trace("    ");
+			//trace("    ");
 			//trace(ba.readFloat());
 			//trace(ba[0], ba[1], ba[2],ba[3]);
-	//var kill:int = 9 ;
-		//	trace( (ba[3] << kill) >> (kill+5));
+			//var kill:int = 9 ;
+			//	trace( (ba[3] << kill) >> (kill+5));
 //trace(ba[0] | ba[1] | ba[3]<<5 | ba[2]);	
-	//		}
+			//		}
 //ba.writeFloat(0);
 //ba.writeFloat(1);			
-	//ba.position = 0;
-	//var combo:Number = ba.readDouble();
-	//trace(combo);
-		var fakeReleaseMode:Boolean = false;
-			isReleaseMode = fakeReleaseMode || CONFIG::release;
 			aboveSpaceshipsLayer = new Sprite();
 			spaceshipsLayer = new Sprite();
-			underSpaceshipsLayer= new Sprite();
+			underSpaceshipsLayer = new Sprite();
 			addChild(underSpaceshipsLayer);
 			addChild(spaceshipsLayer);
 			addChild(aboveSpaceshipsLayer);
 			aboveSpaceshipsLayer.touchable = false;
 			setupHUD();
-			if (isReleaseMode)
+			CONFIG::isReleaseMode
 			{
 				gameEnvironment = new Environment();
-			//	spaceshipsLayer.touchable = false;
+				//	spaceshipsLayer.touchable = false;
 			}
-			CONFIG::debug
+			CONFIG::isDebugMode
 			{
-				if (!isReleaseMode)
-				{
-					gameEnvironment = new LevelEditor();
-				}
+				gameEnvironment = new LevelEditor();
 			}
 			var atlaseNum:int = 1;
 			for (var i:int = 0; i < atlaseNum; i++)
@@ -131,12 +124,15 @@ package spaceshiptHunt
 			crossTarget = new Image(Environment.current.assetsLoader.getTexture("crossTarget"));
 			underSpaceshipsLayer.addChild(crossTarget);
 			Key.init(stage);
-			ControllerInput.initialize(Starling.current.nativeStage);
+			if (SystemUtil.isDesktop)
+			{
+				ControllerInput.initialize(Starling.current.nativeStage);
+			}
 			shootButton = new Flightstick(true);
 			buttonsDisplay.addChild(shootButton);
 			playerController = new PlayerController(Player.current, joystick, shootButton, crossTarget);
 			Starling.current.nativeStage.addEventListener(FullScreenEvent.FULL_SCREEN, onFullscreen);
-			if (SystemUtil.isDesktop && isReleaseMode)
+			if (SystemUtil.isDesktop && CONFIG::isReleaseMode)
 			{
 				toggleFullscreen();
 			}
@@ -150,9 +146,9 @@ package spaceshiptHunt
 			Key.addKeyUpCallback(Keyboard.ESCAPE, toggleFullscreen);
 			gameEnvironment.assetsLoader.enqueueWithName("audio/Nihilore.mp3", "music");
 			underSpaceshipsLayer.addEventListener(TouchEvent.TOUCH, onTouch);
-			if (!isReleaseMode)
+			CONFIG::isDebugMode
 			{
-			//	gameEnvironment.paused = true;
+				//	gameEnvironment.paused = true;
 				spaceshipsLayer.addEventListener(TouchEvent.TOUCH, onTouch);
 				if (gameEnvironment.paused)
 				{
@@ -180,6 +176,7 @@ package spaceshiptHunt
 			addChild(buttonsDisplay);
 			buttonsDisplay.addChild(joystick);
 		}
+		
 		//-----------------------------------------------------------------------------------------------------------------------------------------
 		//runtime functions
 		
@@ -282,7 +279,7 @@ package spaceshiptHunt
 			stage.stageHeight = e.height;
 			Starling.current.viewPort.width = e.width;
 			Starling.current.viewPort.height = e.height;
-			var jotstickRadios:Number=Capabilities.screenDPI;
+			var jotstickRadios:Number = Capabilities.screenDPI;
 			if (SystemUtil.isDesktop)
 			{
 				jotstickRadios *= 1;

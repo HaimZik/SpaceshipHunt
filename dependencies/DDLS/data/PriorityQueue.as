@@ -31,8 +31,8 @@ package DDLS.data
 		public function insert(itemID:int):void
 		{
 			_queue[_length] = itemID;
-			bubbleUp(_length);
 			_length += 1;
+			bubbleUp(_length - 1);
 		}
 		
 		/**
@@ -121,6 +121,16 @@ package DDLS.data
 			{
 				swapUntilQueueIsCorrect(0);
 			}
+		}
+		
+		public function toString():String
+		{
+			var valueOfQueue:String = "queue:";
+			for (var i:int = 0; i < _queue.length; i++)
+			{
+				valueOfQueue += heuristics[_queue[i]] + ", ";
+			}
+			return valueOfQueue;
 		}
 		
 		private function swap(self:int, target:int):void

@@ -4,6 +4,7 @@ package spaceshiptHunt.entities
 	 * ...
 	 * @author Haim Shnitzer
 	 */
+	include "CompilerConfig.as";
 	import spaceshiptHunt.entities.BodyInfo;
 	import DDLS.ai.DDLSEntityAI;
 	import spaceshiptHunt.level.Environment;
@@ -76,8 +77,7 @@ package spaceshiptHunt.entities
 			(graphics as DisplayObjectContainer).removeChildren(0, -1, true);
 			super.dispose();
 		}
-		
-		CONFIG::debug
+		CONFIG::isDebugMode
 		{
 			import DDLSDebug.view.DDLSView;		
 			public function drawDebug(canvas:DDLSView):void
