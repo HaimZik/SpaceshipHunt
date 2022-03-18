@@ -10,6 +10,7 @@ package spaceshiptHunt.entities
 	import spaceshiptHunt.entities.Player;
 	import spaceshiptHunt.entities.Spaceship;
 	import spaceshiptHunt.level.Environment;
+	import starling.utils.Color;
 	
 	/**
 	 * ...
@@ -141,14 +142,14 @@ package spaceshiptHunt.entities
 		
 		public function goTo(x:Number, y:Number):void
 		{
-			findPathTo(x, y, path);
+			findPathTo(x, y, path,unsmoothedPath);
 			startFollowingPath();
 		}
 		
 		public function goToEntity(entity:DDLSEntityAI):void
 		{
 			chasingTarget = entity;
-			findPathToEntity(entity, path);
+			findPathToEntity(entity,path,unsmoothedPath);
 			startFollowingPath();
 		}
 		
@@ -272,7 +273,7 @@ package spaceshiptHunt.entities
 		protected function reFindPath():void
 		{
 			pathCheckTime = timeStamp;
-			findPathTo(path[path.length - 2], path.pop(), path);
+			findPathTo(path[path.length - 2], path.pop(), path,unsmoothedPath);
 			if (path.length > 1)
 			{
 				nextPoint = 1;
@@ -317,11 +318,12 @@ package spaceshiptHunt.entities
 		CONFIG::isDebugMode
 		{
 			import DDLSDebug.view.DDLSView;
-			
+			var DEBUG_COLOR:uint = Color.interpolate(Color.OLIVE,Color.RED,Math.random());
 			override public function drawDebug(canvas:DDLSView):void
 			{
 				super.drawDebug(canvas);
 				canvas.drawPath(path, false);
+				canvas.drawPath(unsmoothedPath, false,DEBUG_COLOR);
 			}
 		}
 	

@@ -4,7 +4,7 @@ package spaceshiptHunt.level
 	 * ...
 	 * @author Haim Shnitzer
 	 */
-	
+	include "CompilerConfig.as";
 	import DDLS.ai.DDLSEntityAI;
 	import DDLS.ai.PathFinder;
 	import DDLS.data.DDLSMesh;
@@ -233,22 +233,27 @@ package spaceshiptHunt.level
 			}
 		}
 		
-		public function findPath(pathfindingAgent:DDLSEntityAI, x:Number, y:Number, outPath:Vector.<Number>):void
+		public function findPath(pathfindingAgent:DDLSEntityAI, x:Number, y:Number, outPath:Vector.<Number>,unsmoothedPath:Vector.<Number> = null):void
 		{
 			pathfinder.entity = pathfindingAgent;
 			//	trace(pathfindingAgent.approximateObject.id);
-			pathfinder.findPath(x, y, outPath);
+			pathfinder.findPath(x, y, outPath,unsmoothedPath);
 			if (outPath.length > 2)
-			{
-				//	if (findBlockedWay(outPath) != -1)
+			{	
+				if (CONFIG::isDebugMode && findBlockedWay(outPath) != -1)
 				{
+					pathfinder.findPath(x, y, outPath, unsmoothedPath);
+					trace(findBlockedWay(outPath) != -1);
+					pathfinder.findPath(x, y, outPath, unsmoothedPath);
+					trace(findBlockedWay(outPath) != -1);
 					if (!paused)
 					{
-						//togglePaused();
+					  togglePaused();
 					}
-					//pathfinder.findPath(x, y, outPath);
+				}else 
+				{
+				  fixPath(outPath);	
 				}
-				fixPath(outPath);
 			}
 		}
 		

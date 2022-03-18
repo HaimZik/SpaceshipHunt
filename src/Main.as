@@ -40,6 +40,9 @@ package
 				if (!Capabilities.isDebugger)
 				{
 					gameEngine.antiAliasing = 4;
+				}else 
+				{
+					gameEngine.antiAliasing = 2;	
 				}
 			}
 			//gameEngine.start();

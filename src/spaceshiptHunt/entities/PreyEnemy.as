@@ -6,6 +6,7 @@ package spaceshiptHunt.entities
 	import spaceshiptHunt.Game;
 	import spaceshiptHunt.entities.Enemy;
 	import spaceshiptHunt.level.Environment;
+	import starling.core.Starling;
 	import starling.display.Image;
 	import starling.display.Sprite;
 	import starling.utils.Color;
@@ -19,6 +20,7 @@ package spaceshiptHunt.entities
 	{
 		protected var pointingArrow:Image;
 		protected var _playerPredictedPath:Vector.<Number>;
+		protected var unsmoothedPlayerPredictedPath:Vector.<Number>;
 		protected var playerPathCheckTime:int;
 		private static var _current:PreyEnemy;
 		
@@ -28,6 +30,7 @@ package spaceshiptHunt.entities
 			super(position);
 			playerPathCheckTime = -90;
 			_playerPredictedPath = new Vector.<Number>();
+			unsmoothedPlayerPredictedPath= new Vector.<Number>();
 		}
 		
 		override public function init(bodyDescription:Object):void
@@ -58,7 +61,7 @@ package spaceshiptHunt.entities
 				}
 				if (timeStamp - playerPathCheckTime > pathUpdateInterval)
 				{
-					Player.current.findPathToEntity(pathfindingAgent, _playerPredictedPath);
+					Player.current.findPathToEntity(pathfindingAgent, _playerPredictedPath,unsmoothedPlayerPredictedPath);
 					playerPathCheckTime = timeStamp;
 				}
 			}
@@ -74,7 +77,7 @@ package spaceshiptHunt.entities
 					var playerPosY:Number = Player.current.pathfindingAgent.y;
 					Player.current.pathfindingAgent.x = lastSeenPlayerPos.x;
 					Player.current.pathfindingAgent.y = lastSeenPlayerPos.y;
-					Player.current.findPathToEntity(pathfindingAgent, _playerPredictedPath);
+					Player.current.findPathToEntity(pathfindingAgent, _playerPredictedPath,unsmoothedPlayerPredictedPath);
 					Player.current.pathfindingAgent.x = playerPosX;
 					Player.current.pathfindingAgent.y = playerPosY;
 					playerPathCheckTime = timeStamp;
@@ -197,6 +200,7 @@ package spaceshiptHunt.entities
 			{
 				super.drawDebug(canvas);
 				canvas.drawPath(playerPredictedPath, false, Color.BLUE);
+				canvas.drawPath(unsmoothedPlayerPredictedPath, false, Color.WHITE);	
 			}
 		}
 	

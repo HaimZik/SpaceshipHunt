@@ -451,10 +451,7 @@ package starling.core
 				return;
 			
 			makeCurrent();
-		//	if (frameID < 600)
-		//	{
 			updateViewPort();
-		//	}
 			var doRedraw:Boolean = _stage.requiresRedraw || mustAlwaysRender;
 			if (doRedraw)
 			{

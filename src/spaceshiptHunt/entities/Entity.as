@@ -18,6 +18,7 @@ package spaceshiptHunt.entities
 	public class Entity extends BodyInfo
 	{
 		public var pathfindingAgent:DDLSEntityAI;
+		public var unsmoothedPath:Vector.<Number> = new Vector.<Number>();
 		static protected var pathfindingAgentSafeDistance:Number = 30;
 		protected var pathUpdateInterval:int = 48;
 		

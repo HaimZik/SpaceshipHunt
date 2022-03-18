@@ -240,24 +240,24 @@ package spaceshiptHunt.entities
 			}
 		}
 		
-		public function findPathTo(x:Number, y:Number, outPath:Vector.<Number>):void
+		public function findPathTo(x:Number, y:Number, outPath:Vector.<Number>,unsmoothedPath:Vector.<Number>=null):void
 		{
-			Environment.current.findPath(pathfindingAgent, x, y, outPath);
+			Environment.current.findPath(pathfindingAgent, x, y, outPath,unsmoothedPath);
 		}
 		
-		public function findPathToEntity(entity:DDLSEntityAI, outPath:Vector.<Number>):void
+		public function findPathToEntity(entity:DDLSEntityAI, outPath:Vector.<Number>,unsmoothedPath:Vector.<Number>=null):void
 		{
 			//	trace("findPathTo Entity " + entity.approximateObject.id + " from entity " + pathfindingAgent.approximateObject.id);
 			var diraction:Vec2 = Vec2.weak(entity.x - pathfindingAgent.x, entity.y - pathfindingAgent.y);
 			diraction.length = pathfindingAgent.radius + entity.radius + pathfindingAgentSafeDistance * 2 + 2;
-			findPathTo(entity.x - diraction.x, entity.y - diraction.y, outPath);
+			findPathTo(entity.x - diraction.x, entity.y - diraction.y, outPath,unsmoothedPath);
 			for (var i:int = 0; i < 3; i++)
 			{
 				if (outPath.length == 0)
 				{
 					diraction.set(diraction.perp(true));
 					//		trace("findPathToEntity " + i);
-					findPathTo(entity.x - diraction.x, entity.y - diraction.y, outPath);
+					findPathTo(entity.x - diraction.x, entity.y - diraction.y, outPath,unsmoothedPath);
 				}
 				else
 				{

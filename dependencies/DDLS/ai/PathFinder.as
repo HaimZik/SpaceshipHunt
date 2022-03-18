@@ -59,7 +59,7 @@ package DDLS.ai
 			_astar.mesh = _mesh;
 		}
 		
-		public function findPath(toX:Number, toY:Number, resultPath:Vector.<Number>):void
+		public function findPath(toX:Number, toY:Number, resultPath:Vector.<Number>,unsmoothedPath:Vector.<Number>=null):void
 		{
 			if (!_mesh)
 				throw new Error("Mesh missing");
@@ -83,48 +83,48 @@ package DDLS.ai
 			var forwardDirectionY:Number = _entity.dirNormY * offsetLength;
 			if (_entity.approximateObject && hitTester)
 			{
-				if (!tryFindPathOrthogonal(forwardDirectionX, forwardDirectionY, toX, toY, resultPath))
+				if (!tryFindPathOrthogonal(forwardDirectionX, forwardDirectionY, toX, toY, resultPath,unsmoothedPath))
 				{
-					tryFindPathDiagonal(offsetLength, toX, toY, resultPath);
+					tryFindPathDiagonal(offsetLength, toX, toY, resultPath,unsmoothedPath);
 				}
 			}
 			else
 			{
-				tryFindPath(0, 0, toX, toY, resultPath)
+				tryFindPath(0, 0, toX, toY, resultPath,unsmoothedPath)
 			}
 		}
 		
-		protected function tryFindPathDiagonal(offsetLength:Number, toX:Number, toY:Number, resultPath:Vector.<Number>):void
+		protected function tryFindPathDiagonal(offsetLength:Number, toX:Number, toY:Number, resultPath:Vector.<Number>,unsmoothedPath:Vector.<Number>=null):void
 		{
 			var angle:Number = Math.atan2(_entity.dirNormY, _entity.dirNormX) + Math.PI / 4;
 			var directionX:Number = Math.cos(angle);
 			var directionY:Number = Math.sin(angle);
-			tryFindPathOrthogonal(directionX * offsetLength, directionY * offsetLength, toX, toY, resultPath)
+			tryFindPathOrthogonal(directionX * offsetLength, directionY * offsetLength, toX, toY, resultPath,unsmoothedPath)
 		}
 		
-		protected function tryFindPathOrthogonal(forwardDirectionX:Number, forwardDirectionY:Number, toX:Number, toY:Number, resultPath:Vector.<Number>):Boolean
+		protected function tryFindPathOrthogonal(forwardDirectionX:Number, forwardDirectionY:Number, toX:Number, toY:Number, resultPath:Vector.<Number>,unsmoothedPath:Vector.<Number>=null):Boolean
 		{
-			if (!tryFindPath(forwardDirectionX, forwardDirectionY, toX, toY, resultPath)) //forward
+			if (!tryFindPath(forwardDirectionX, forwardDirectionY, toX, toY, resultPath,unsmoothedPath)) //forward
 			{
-				if (!tryFindPath(forwardDirectionY, -forwardDirectionX, toX, toY, resultPath)) //right
+				if (!tryFindPath(forwardDirectionY, -forwardDirectionX, toX, toY, resultPath,unsmoothedPath)) //right
 				{
-					if (!tryFindPath(-forwardDirectionY, forwardDirectionX, toX, toY, resultPath)) //left
+					if (!tryFindPath(-forwardDirectionY, forwardDirectionX, toX, toY, resultPath,unsmoothedPath)) //left
 					{
-						return tryFindPath(-forwardDirectionX, -forwardDirectionY, toX, toY, resultPath); //behind
+						return tryFindPath(-forwardDirectionX, -forwardDirectionY, toX, toY, resultPath,unsmoothedPath); //behind
 					}
 				}
 			}
 			return true;
 		}
 		
-		protected function tryFindPath(directionX:Number, directionY:Number, toX:Number, toY:Number, resultPath:Vector.<Number>):Boolean
+		protected function tryFindPath(directionX:Number, directionY:Number, toX:Number, toY:Number, resultPath:Vector.<Number>,unsmoothedPath:Vector.<Number> = null):Boolean
 		{
 			if (!isPathBlocked(directionX, directionY))
 			{
 				_astar.findPath(_entity.x + directionX, _entity.y + directionY, toX, toY, __listFaces, __listEdges);
 				if (__listFaces.length != 0)
 				{
-					_funnel.findPath(_entity.x + directionX, _entity.y + directionY, toX, toY, __listFaces, __listEdges, resultPath);
+					_funnel.findPath(_entity.x + directionX, _entity.y + directionY, toX, toY, __listFaces, __listEdges, resultPath,unsmoothedPath);
 					return true;
 				}
 			}
@@ -140,7 +140,7 @@ package DDLS.ai
 			return DDLSGeom2D.isCircleIntersectingAnyConstraint(_entity.x + directionX, _entity.y + directionY, _entity.radius, _mesh);
 		}
 		
-		public function findPathFrom(fromX:Number, fromY:Number, toX:Number, toY:Number, resultPath:Vector.<Number>):void
+		public function findPathFrom(fromX:Number, fromY:Number, toX:Number, toY:Number, resultPath:Vector.<Number>,unsmoothedPath:Vector.<Number>=null):void
 		{
 			resultPath.length = 0;
 			__listFaces.length = 0;

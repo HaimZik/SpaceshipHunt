@@ -100,7 +100,9 @@ package DDLS.ai
 			_sampleCircleDistanceSquared = (_sampleCircle[0].x - _sampleCircle[1].x) * (_sampleCircle[0].x - _sampleCircle[1].x) + (_sampleCircle[0].y - _sampleCircle[1].y) * (_sampleCircle[0].y - _sampleCircle[1].y);
 		}
 		
-		public function findPath(fromX:Number, fromY:Number, toX:Number, toY:Number, listFaces:Vector.<DDLSFace>, listEdges:Vector.<DDLSEdge>, resultPath:Vector.<Number>):void
+		//var lastDir:int = 1;
+		
+		public function findPath(fromX:Number, fromY:Number, toX:Number, toY:Number, listFaces:Vector.<DDLSFace>, listEdges:Vector.<DDLSEdge>, resultPath:Vector.<Number>, unsmoothedPath:Vector.<Number> = null):void
 		{
 			_currPoolPointsIndex = 0;
 			
@@ -177,8 +179,8 @@ package DDLS.ai
 			}
 			
 			// we build starting and ending points
-			var startPoint:DDLSPoint2D= new DDLSPoint2D(fromX, fromY);
-			var endPoint:DDLSPoint2D= new DDLSPoint2D(toX, toY);
+			var startPoint:DDLSPoint2D = new DDLSPoint2D(fromX, fromY);
+			var endPoint:DDLSPoint2D = new DDLSPoint2D(toX, toY);
 			
 			// first we skip the first face and first edge if the starting point lies on the first interior edge:
 			
@@ -214,7 +216,18 @@ package DDLS.ai
 			// we extract the vertices positions and sides from the edges list
 			var pointsList:Vector.<DDLSPoint2D> = new Vector.<DDLSPoint2D>();
 			//
-			pointSidesDic[startPoint] = 0;
+			//if (lastDir == 0)
+			//{
+				//lastDir = 1;
+			//}else if(lastDir == 1)
+			//{
+				//lastDir = -1;	
+			//}else 
+			//{
+				//lastDir = 0;	
+			//}
+			//pointSidesDic[startPoint] = lastDir;
+		    pointSidesDic[startPoint] = 0;
 			// we begin with the vertices in first edge
 			currEdge = listEdges[0];
 			var relativPos:int = DDLSGeom2D.getRelativePosition2(fromX, fromY, currEdge);
@@ -291,7 +304,7 @@ package DDLS.ai
 			// we then we add the end point
 			pointSuccessorDic[prevPoint] = endPoint;
 			pointSidesDic[endPoint] = 0;
-			
+
 			/*
 			   debugSurface.graphics.clear();
 			   debugSurface.graphics.lineStyle(1, 0x0000FF);
@@ -463,6 +476,15 @@ package DDLS.ai
 			// if radius is non zero
 			if (radius > 0 && smoothPointsActive)
 			{
+				if (unsmoothedPath)
+				{
+					unsmoothedPath.length = 0;
+					for (i = 0; i < pathPoints.length; i++)
+					{
+						unsmoothedPath.push(pathPoints[i].x);
+						unsmoothedPath.push(pathPoints[i].y);
+					}
+				}
 				var pathLength:int = pathPoints.length;
 				adjustedPoints = new Vector.<DDLSPoint2D>();
 				var newPath:Vector.<DDLSPoint2D> = new Vector.<DDLSPoint2D>();
@@ -486,9 +508,9 @@ package DDLS.ai
 					
 					// tangent from last-1 point to end point
 					// pointSidesDic[pathPoints[pathLength - 2]] *=-1;
-					if (!blocked)
+			//		if (!blocked)
 					{
-					adjustWithTangents(pathPoints[pathLength - 2], true, pathPoints[pathLength - 1], false, pointSidesDic, pointSuccessorDic, newPath, adjustedPoints);
+						adjustWithTangents(pathPoints[pathLength - 2], true, pathPoints[pathLength - 1], false, pointSidesDic, pointSuccessorDic, newPath, adjustedPoints);
 					}
 				}
 				

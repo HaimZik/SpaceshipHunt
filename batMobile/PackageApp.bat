@@ -79,8 +79,10 @@ adb devices
 echo.
 echo Installing %OUTPUT% on the device...
 echo.
-adb -d install -r "%OUTPUT%"
+::adb -d install -r "%OUTPUT%"
+adb install -r "%OUTPUT%"
 if errorlevel 1 goto installfail
+adb shell am start -n air.%APP_ID%/.AppEntry
 goto end
 
 :installfail

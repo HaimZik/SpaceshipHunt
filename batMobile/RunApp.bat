@@ -7,28 +7,7 @@ set PAUSE_ERRORS=1
 call batMobile\SetupSDK.bat
 call batMobile\SetupApp.bat
 
-:target
-goto desktop
-::goto android-debug
-::goto android-test
-set INTERPRETER=-interpreter
-::goto ios-debug
-::goto ios-test
 
-:desktop
-:: http://help.adobe.com/en_US/air/build/WSfffb011ac560372f-6fa6d7e0128cca93d31-8000.html
-set SCREEN_SIZE=720
-::set SCREEN_SIZE=iPhoneRetina
-
-:desktop-run
-echo.
-echo Starting AIR Debug Launcher with screen size '%SCREEN_SIZE%'
-echo.
-echo (hint: edit 'Run.bat' to test on device or change screen size)
-echo.
-adl -screensize %SCREEN_SIZE% "%APP_XML%" "%APP_DIR%"
-if errorlevel 1 goto end
-goto endNoPause
 
 :ios-debug
 echo.
